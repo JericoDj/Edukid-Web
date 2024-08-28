@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Save Card with Square - Sandbox</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <!-- Square Web Payments SDK -->
+  <script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+  <script defer src="main.dart.js"></script>
+</head>
+<body>
+<div id="flutter_container"></div> <!-- Flutter app container -->
+
+<!-- Square Payment Form -->
+<form id="payment-form">
+  <div id="card-container"></div>
+  <button type="submit" id="save-card-button">Save Card</button>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async function () {
+    // Replace with your Sandbox Application ID and Location ID
+    const applicationId = 'sandbox-sq0idb-a-JbuDtx-cqSBty0e5d2kA';
+    const locationId = 'L9H98R67G9F2Y';
+
+    // Initialize the Square Payments object
+    const payments = Square.payments(applicationId, locationId);
+
+    // Initialize the Card payment method
+    const card = await payments.card();
+    await card.attach('#card-container');
+
+    // Add event listener for the "Save Card" button
+    document.getElementById('payment-form').addEventListener('submit', async function (event) {
+      event.preventDefault(); // Prevent default form submission
+
+      // Validate the card fields before tokenizing
+      const validationResults = await card.validate();
+
+      if (!validationResults.isValid) {
+        console.error('Card details are not valid:', validationResults.errors);
+        alert('Please enter valid card details.');
+        return; // Exit if the fields are invalid
+      }
+
+      try {
+        // Generate a new nonce
+        const result = await card.tokenize();
+
+        if (result.status === 'OK') {
+          // Send nonce to your Flutter app
+          window.opener.postMessage(result.token, '*');
+          window.close(); // Close the payment tab after processing
+        } else {
+          console.error('Tokenization failed:', result.errors);
+          alert('Tokenization failed. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error during tokenization:', error);
+        alert('An unexpected error occurred. Please try again.');
+      }
+    });
+  });
+</script>
+</body>
+</html>
