@@ -12,38 +12,95 @@
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             // Replace with your actual Sandbox Application ID and Location ID
-            const applicationId = 'sandbox-sq0idb-a-JbuDtx-cqSBty0e5d2kA';
-            const locationId = 'L9H98R67G9F2Y';
+            const applicationId = 'sandbox-sq0idb-a-JbuDtx-cqSBty0e5d2kA'; // Your Square sandbox application ID
+            const locationId = 'L9H98R67G9F2Y'; // Your Square sandbox location ID
 
-            // Initialize the Square payments object
-            const payments = Square.payments(applicationId, locationId);
+            try {
+                // Initialize the Square payments object
+                const payments = Square.payments(applicationId, locationId);
 
-            // Create and attach the card payment method
-            const card = await payments.card();
-            await card.attach('#card-container');
+                // Create and attach the card payment method
+                const card = await payments.card();
+                await card.attach('#card-container');
 
-            // Handle form submission
-            document.getElementById('payment-form').addEventListener('submit', async function (event) {
-                event.preventDefault();
+                // Handle form submission
+                document.getElementById('payment-form').addEventListener('submit', async function (event) {
+                    event.preventDefault(); // Prevent form from submitting in the traditional way
 
-                // Tokenize the card details
-                const result = await card.tokenize();
+                    // Tokenize the card details
+                    const result = await card.tokenize();
 
-                if (result.status === 'OK') {
-                    // If tokenization is successful, send the nonce/token back to the Flutter app
-                    window.opener.postMessage(result.token, '*');
-                    window.close(); // Close the payment tab after processing
-                } else {
-                    // Handle tokenization failure
-                    console.error('Tokenization failed:', result.errors);
-                }
-            });
+                    if (result.status === 'OK') {
+                        // If tokenization is successful, gather additional user details
+                        const email = document.getElementById('email').value;
+                        const firstName = document.getElementById('first-name').value;
+                        const lastName = document.getElementById('last-name').value;
+                        const addressLine1 = document.getElementById('address-line1').value;
+                        const locality = document.getElementById('locality').value;
+                        const administrativeDistrictLevel1 = document.getElementById('administrative-district-level1').value;
+                        const postalCode = document.getElementById('postal-code').value;
+                        const country = document.getElementById('country').value;
+
+                        // Construct the data to send back to Flutter
+                        const message = JSON.stringify({
+                            nonce: result.token,
+                            email: email,
+                            firstName: firstName,
+                            lastName: lastName,
+                            billingAddress: {
+                                address_line_1: addressLine1,
+                                locality: locality,
+                                administrative_district_level_1: administrativeDistrictLevel1,
+                                postal_code: postalCode,
+                                country: country
+                            }
+                        });
+
+                        // Send the nonce and additional data back to the Flutter app
+                        window.opener.postMessage(message, '*');
+                        window.close(); // Close the payment tab after processing
+                    } else {
+                        // Handle tokenization failure
+                        console.error('Tokenization failed:', result.errors);
+                        alert('Card tokenization failed. Please try again.');
+                    }
+                });
+            } catch (error) {
+                console.error('Error initializing Square payments:', error);
+                alert('Error initializing payment process. Please check your application configuration.');
+            }
         });
     </script>
 </head>
 <body>
 <!-- Payment Form -->
 <form id="payment-form">
+    <!-- User Information Fields -->
+    <label for="email">Email:</label>
+    <input type="email" id="email" required><br>
+
+    <label for="first-name">First Name:</label>
+    <input type="text" id="first-name" required><br>
+
+    <label for="last-name">Last Name:</label>
+    <input type="text" id="last-name" required><br>
+
+    <!-- Billing Address Fields -->
+    <label for="address-line1">Address Line 1:</label>
+    <input type="text" id="address-line1" required><br>
+
+    <label for="locality">City:</label>
+    <input type="text" id="locality" required><br>
+
+    <label for="administrative-district-level1">State:</label>
+    <input type="text" id="administrative-district-level1" required><br>
+
+    <label for="postal-code">Postal Code:</label>
+    <input type="text" id="postal-code" required><br>
+
+    <label for="country">Country:</label>
+    <input type="text" id="country" required value="US"><br> <!-- Default value for example -->
+
     <!-- Square Card Element Container -->
     <div id="card-container"></div>
 

@@ -41,7 +41,7 @@ class OrderController extends GetxController {
     }
   }
 
-  /// Processes the order using the saved card nonce with Square payment integration
+  /// Processes the order using the saved customer ID with Square payment integration
   void processOrder(double totalAmount) async {
     try {
       // Start Loader
@@ -54,25 +54,29 @@ class OrderController extends GetxController {
         return;
       }
 
-      // Retrieve the saved card nonce from storage or backend
-      final String? savedCardNonce = await _retrieveSavedCardNonce();
+      // Retrieve the saved customer ID and card ID from storage or backend
+      final String? savedCustomerId = await _retrieveSavedCustomerId();
+      final String? savedCardId = await _retrieveSavedCardId();  // Retrieve saved card ID
 
       // Debugging print statements
-      if (savedCardNonce != null) {
-        print("Saved card nonce found: $savedCardNonce");
+      if (savedCustomerId != null) {
+        print("Saved customer ID found: $savedCustomerId");
       } else {
-        print("No saved card nonce found.");
+        print("No saved customer ID found.");
+      }
+
+      if (savedCardId != null) {
+        print("Saved card ID found: $savedCardId");
+      } else {
+        print("No saved card ID found.");
       }
 
       // Print the total amount
       print("Total amount to be charged: $totalAmount");
 
-      if (savedCardNonce != null) {
-        // Print the saved card nonce
-        print("Using saved card nonce: $savedCardNonce");
-
-        // Process the payment using the saved card nonce
-        bool paymentSuccess = await _chargeCard(savedCardNonce, totalAmount);
+      if (savedCustomerId != null && savedCardId != null) {
+        // Process the payment using the saved customer ID and card ID
+        bool paymentSuccess = await _chargeCustomer(savedCustomerId, savedCardId, totalAmount);
 
         if (paymentSuccess) {
           // Payment was successful, proceed to save the order and clear cart
@@ -84,10 +88,10 @@ class OrderController extends GetxController {
           );
         }
       } else {
-        // Handle the case where no saved card nonce is available
+        // Handle the case where no saved customer ID or card ID is available
         MyLoaders.errorSnackBar(
           title: 'Payment Error',
-          message: 'No saved card information found.',
+          message: 'No saved customer or card information found.',
         );
       }
     } catch (e) {
@@ -101,28 +105,54 @@ class OrderController extends GetxController {
     }
   }
 
-  /// Retrieves the saved card nonce from Firestore
-  Future<String?> _retrieveSavedCardNonce() async {
+  /// Retrieves the saved customer ID from Firestore
+  Future<String?> _retrieveSavedCustomerId() async {
     // Ensure the user is authenticated
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      // Retrieve the nonce from Firestore
+      // Retrieve the customer ID from Firestore under `customerDetails` in `paymentInfo`
       DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .collection('paymentInfo')
-          .doc('cardNonce')
+          .doc('customerDetails')
           .get();
 
       if (docSnapshot.exists && docSnapshot.data() != null) {
-        return docSnapshot.get('nonce');
+        return docSnapshot.get('customerId'); // Fetch customerId from `customerDetails`
       } else {
-        print("No saved card nonce found in Firestore.");
+        print("No saved customer ID found in Firestore.");
         return null;
       }
     } else {
-      print("User not authenticated. Cannot retrieve card nonce.");
+      print("User not authenticated. Cannot retrieve customer ID.");
+      return null;
+    }
+  }
+
+  /// Retrieves the saved card ID from Firestore
+  Future<String?> _retrieveSavedCardId() async {
+    // Ensure the user is authenticated
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Retrieve the card ID from Firestore under `customerDetails` in `paymentInfo`
+      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentInfo')
+          .doc('customerDetails')
+          .get();
+
+      if (docSnapshot.exists && docSnapshot.data() != null) {
+        return docSnapshot.get('cardId'); // Fetch cardId from `customerDetails`
+      } else {
+        print("No saved card ID found in Firestore.");
+        return null;
+      }
+    } else {
+      print("User not authenticated. Cannot retrieve card ID.");
       return null;
     }
   }
@@ -152,27 +182,23 @@ class OrderController extends GetxController {
     ));
   }
 
-  /// Charges the card using the Square payment API
-  Future<bool> _chargeCard(String nonce, double amount) async {
+  /// Charges the customer using the Square payment API
+  Future<bool> _chargeCustomer(String customerId, String cardId, double amount) async {
     try {
       final Uuid uuid = Uuid();  // Instantiate the UUID generator
 
       // Print statements for debugging
-      print("Charging card with nonce: $nonce for amount: $amount");
+      print("Charging customer with ID: $customerId using card ID: $cardId for amount: $amount");
 
       final response = await http.post(
-        Uri.parse('http://localhost:3000/process-payment'),
+        Uri.parse('http://localhost:3000/charge-customer'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'sourceId': nonce, // Make sure nonce is not empty
-          'idempotencyKey': uuid.v4(), // Unique key for this transaction
-          'locationId': 'L9H98R67G9F2Y', // Add your location ID
-          'amount_money': {
-            'amount': (amount * 100).round(), // Convert to cents
-            'currency': 'USD',
-          }
+          'customerId': customerId,
+          'cardId': cardId, // Use cardId for specifying which card to charge
+          'amount': (amount * 100).round(), // Convert to cents
         }),
       );
 
@@ -185,7 +211,7 @@ class OrderController extends GetxController {
         return false;
       }
     } catch (e) {
-      print('Error charging card: $e');
+      print('Error charging customer: $e');
       return false;
     }
   }

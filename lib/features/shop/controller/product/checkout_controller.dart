@@ -29,62 +29,111 @@ class CheckoutController extends GetxController {
 
     // Listen for the message from the payment page
     html.window.onMessage.listen((event) async {
-      String nonce = event.data; // Received nonce from the payment page
-      print('Nonce received: $nonce');
+      try {
+        var data = jsonDecode(event.data); // Decode JSON data received from payment page
+        String nonce = data['nonce']; // Received nonce from the payment page
+        Map<String, dynamic> billingAddress = data['billingAddress']; // Billing address from the payment page
+        String email = data['email'];
+        String firstName = data['firstName'];
+        String lastName = data['lastName'];
 
-      if (nonce.isNotEmpty) {
-        // Save the nonce to Firebase
-        await saveNonceToFirebase(nonce);
-      } else {
-        print('No nonce received or nonce is empty.');
+        print('Nonce received: $nonce');
+
+        if (nonce.isNotEmpty && email.isNotEmpty && firstName.isNotEmpty && lastName.isNotEmpty) {
+          // Create customer and save the card on the server using the nonce
+          Map<String, String?> result = await createCustomerAndSaveCard(nonce, email, firstName, lastName, billingAddress);
+
+          if (result['customerId'] != null && result['cardId'] != null) {
+            // Save the customer ID and card ID to Firebase
+            await saveCustomerDetailsToFirebase(result['customerId']!, result['cardId']!);
+            Get.snackbar('Success', 'Customer created and card saved successfully!', snackPosition: SnackPosition.BOTTOM);
+          } else {
+            Get.snackbar('Error open payment page', 'Failed to save customer details.', snackPosition: SnackPosition.BOTTOM);
+          }
+        } else {
+          print('Incomplete data received from payment page.');
+        }
+      } catch (e) {
+        print('Error processing payment page data: $e');
+        Get.snackbar('Error', 'Invalid data received from payment page.', snackPosition: SnackPosition.BOTTOM);
       }
     });
   }
 
-  Future<void> saveNonceToFirebase(String nonce) async {
+  /// Method to create a customer and save the card on the server
+  Future<Map<String, String?>> createCustomerAndSaveCard(String nonce, String email, String firstName, String lastName, Map<String, dynamic> billingAddress) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/create-customer'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nonce': nonce,
+          'email': email,
+          'firstName': firstName,
+          'lastName': lastName,
+          'billingAddress': billingAddress
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return {
+          'customerId': responseData['customerId'],
+          'cardId': responseData['cardId'],
+        };
+      } else {
+        print('Error createcustomerandsavecard: Failed to create customer: ${response.body}');
+        return {'customerId': null, 'cardId': null};
+      }
+    } catch (e) {
+      print('Error createcustomerandsavecard creating customer on server: $e');
+      return {'customerId': null, 'cardId': null};
+    }
+  }
+
+  /// Method to save the customer ID and card ID to Firebase
+  Future<void> saveCustomerDetailsToFirebase(String customerId, String cardId) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       DocumentReference userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-      await userDoc.collection('paymentInfo').doc('cardNonce').set({
-        'nonce': nonce,
+      await userDoc.collection('paymentInfo').doc('customerDetails').set({
+        'customerId': customerId,
+        'cardId': cardId,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      print("Card nonce saved successfully in Firestore: $nonce");
+      print("Customer and Card ID saved successfully in Firestore: $customerId, $cardId");
     } else {
-      print("User not authenticated. Cannot save card nonce.");
+      print("User not authenticated. Cannot save customer details.");
     }
   }
 
-  /// Method to retrieve the saved card nonce from Firestore
-  Future<String?> _retrieveSavedCardNonce() async {
+  /// Method to retrieve the saved customer ID and card ID from Firebase
+  Future<Map<String, String?>> _retrieveCustomerDetailsFromFirebase() async {
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      DocumentReference userDoc =
-      FirebaseFirestore.instance.collection('users').doc(user.uid);
-
-      DocumentSnapshot docSnapshot =
-      await userDoc.collection('paymentInfo').doc('cardNonce').get();
+      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('paymentInfo')
+          .doc('customerDetails')
+          .get();
 
       if (docSnapshot.exists) {
-        String? nonce = docSnapshot.get('nonce');
-        print("Retrieved nonce: $nonce");
-        return nonce;
+        return {
+          'customerId': docSnapshot.get('customerId'),
+          'cardId': docSnapshot.get('cardId')
+        };
       } else {
-        print("No saved nonce found.");
-        return null;
+        print("No saved customer details found in Firestore.");
+        return {'customerId': null, 'cardId': null};
       }
     } else {
-      print("User not authenticated. Cannot retrieve card nonce.");
-      return null;
+      print("User not authenticated. Cannot retrieve customer details.");
+      return {'customerId': null, 'cardId': null};
     }
-  }
-
-  /// Method to handle the card entry completion event
-  void _onCardEntryComplete() {
-    print("Card entry completed successfully.");
   }
 
   /// Method to select a payment method from the available options
@@ -124,19 +173,19 @@ class CheckoutController extends GetxController {
               MyPaymentTile(
                 paymentMethod: PaymentMethodModel(name: 'Saved Card', image: MyImages.masterCard),
                 onTap: () async {
-                  String? savedCardNonce = await _retrieveSavedCardNonce();
+                  Map<String, String?> savedDetails = await _retrieveCustomerDetailsFromFirebase();
 
-                  if (savedCardNonce != null) {
-                    print("Retrieved saved card nonce: $savedCardNonce");
+                  if (savedDetails['customerId'] != null && savedDetails['cardId'] != null) {
+                    print("Retrieved saved customer details: ${savedDetails['customerId']}, ${savedDetails['cardId']}");
                     selectedPaymentMethod.value = PaymentMethodModel(
                       name: 'Saved Card',
                       image: MyImages.masterCard,
-                      nonce: savedCardNonce,
+                      nonce: savedDetails['customerId'], // Use the customer ID
                     );
                     Get.back();
                   } else {
-                    print("No saved card found.");
-                    Get.snackbar('Error', 'No saved card found.', snackPosition: SnackPosition.BOTTOM);
+                    print("No saved customer details found.");
+                    Get.snackbar('Error', 'No saved customer details found.', snackPosition: SnackPosition.BOTTOM);
                   }
                 },
               ),
