@@ -21,7 +21,7 @@ class MyFormDivider extends StatelessWidget {
           child: Divider(
             color: dark ? MyColors.darkGrey : MyColors.grey,
             thickness: 0.8,
-            indent: 60,
+            indent: 400,
             endIndent: 5,
           ),
         ),
@@ -31,7 +31,7 @@ class MyFormDivider extends StatelessWidget {
             color: dark ? MyColors.darkGrey : MyColors.grey,
             thickness: 0.8,
             indent: 5,
-            endIndent: 60,
+            endIndent: 400,
           ),
         ),
       ],

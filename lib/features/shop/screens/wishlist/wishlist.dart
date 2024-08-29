@@ -33,7 +33,7 @@ class WishlistScreen extends StatelessWidget {
           actions: [
             MyCircularIcon(
               icon: Iconsax.add,
-              onPressed: () => Get.offAll(const NavigationBarMenu()),
+              onPressed: () => Get.offAll( NavigationBarMenu()),
             ),
           ],
         ),
@@ -53,7 +53,7 @@ class WishlistScreen extends StatelessWidget {
                           animation: MyImages.loaders,
                           showAction: false,
                           actionText: 'Let\'s add some',
-                          onActionPressed: () => Get.off(() => const NavigationBarMenu()),
+                          onActionPressed: () => Get.off(() => NavigationBarMenu()),
                       );
                       const loader = MyVerticalProductShimmer (itemCount: 6);
                       final widget = MyCloudHelperFunctions.checkMultiRecordState(snapshot: snapshot, loader: loader, nothingFound: emptyWidget);

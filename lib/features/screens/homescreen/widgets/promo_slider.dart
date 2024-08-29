@@ -23,7 +23,7 @@ class MyPromoSlider extends StatelessWidget {
       () {
         //Loader
         if (controller.isLoading.value)
-          return const MyShimmerEffect(width: double.infinity, height: 190);
+          return const MyShimmerEffect(width: 500, height: 300);
 
         // No Data
         if (controller.banners.isEmpty) {
@@ -33,18 +33,25 @@ class MyPromoSlider extends StatelessWidget {
         } else {
           return Column(
             children: [
-              CarouselSlider(
-                options: CarouselOptions(
-                    viewportFraction: 1,
-                    onPageChanged: (index, _) =>
-                        controller.updatePageIndicator(index)),
-                items: controller.banners
-                    .map((banner) => MyRoundedImage(
-                          imageUrl: banner.imageUrl,
-                          isNetworkImage: true,
-                          onPressed: () => Get.toNamed(banner.targetScreen),
-                        ))
-                    .toList(),
+              Container(
+                width: 500,
+                child: CarouselSlider(
+                  options: CarouselOptions(
+                    autoPlay: true,
+                    animateToClosest: true,
+                    height: 300,
+                      viewportFraction: 1,
+                      onPageChanged: (index, _) =>
+                          controller.updatePageIndicator(index)),
+                  items: controller.banners
+                      .map((banner) => MyRoundedImage(
+
+                            imageUrl: banner.imageUrl,
+                            isNetworkImage: true,
+                            onPressed: () => Get.toNamed(banner.targetScreen),
+                          ))
+                      .toList(),
+                ),
               ),
               const SizedBox(height: MySizes.spaceBtwItems),
               Center(

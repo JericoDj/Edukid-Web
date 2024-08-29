@@ -60,7 +60,7 @@ class BookingOrderRepository extends GetxController {
           image: MyImages.accountGIF,
           title: 'Booking Successful!',
           subtitle: 'Your booking has been confirmed!',
-          onPressed: () => Get.offAll(() => const NavigationBarMenu()),
+          onPressed: () => Get.offAll(() =>  NavigationBarMenu()),
         ));
       } else {
         throw Exception('Unable to find user information. Try again in a few minutes.');

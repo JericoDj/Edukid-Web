@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -30,28 +29,30 @@ class MySearchContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        // Adjust this padding value to move the search bar down
+        padding: const EdgeInsets.only(top: 25, bottom: 25),
         child: Container(
-            width: MyDeviceUtils.getScreenWidth(context),
-            padding: const EdgeInsets.all(MySizes.md),
-            decoration: BoxDecoration(
-              color: showBackround
-                  ? dark
-                      ? MyColors.dark
-                      : MyColors.light
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(MySizes.cardRadiusLg),
-              border: showBorder ? Border.all(color: MyColors.primaryColor) : null,
-            ),
-            child: Row(
-              children: [
-                Icon(icon, color: MyColors.darkerGrey),
-                const SizedBox(
-                  width: MySizes.spaceBtwItems,
-                ),
-                Text(text, style: Theme.of(context).textTheme.bodySmall),
-              ],
-            )
+          height: 45,
+          width: MyDeviceUtils.getScreenWidth(context),
+          padding: const EdgeInsets.all(MySizes.xs),
+          decoration: BoxDecoration(
+            color: showBackround
+                ? dark
+                ? MyColors.dark
+                : MyColors.light
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(MySizes.cardRadiusMd),
+            border: showBorder ? Border.all(color: MyColors.primaryColor) : null,
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: MyColors.darkerGrey),
+              const SizedBox(
+                width: MySizes.spaceBtwItems,
+              ),
+              Text(text, style: Theme.of(context).textTheme.bodySmall),
+            ],
+          ),
         ),
       ),
     );

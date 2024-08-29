@@ -33,6 +33,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
       child: AppBar(
+        backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         leading: showBackArrow
             ? IconButton(
@@ -42,12 +43,12 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
             Get.back();
           },
           icon: Icon(Iconsax.arrow_left,
-              color: dark ? MyColors.white : MyColors.dark),
-        )
+              color: dark ? MyColors.transparent : MyColors.dark),
+              )
             : leadingIcon != null
-            ? IconButton(
-            onPressed: leadingOnPressed, icon: Icon(leadingIcon!))
-            : null,
+                ? IconButton(
+                    onPressed: leadingOnPressed, icon: Icon(leadingIcon!))
+                : null,
         title: title,
         actions: actions,
       ),

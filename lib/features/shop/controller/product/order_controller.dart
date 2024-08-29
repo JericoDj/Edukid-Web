@@ -178,7 +178,7 @@ class OrderController extends GetxController {
       image: MyImages.accountGIF,
       title: 'Payment Success!',
       subtitle: 'Your item will be shipped soon!',
-      onPressed: () => Get.offAll(() => const NavigationBarMenu()),
+      onPressed: () => Get.offAll(() =>  NavigationBarMenu()),
     ));
   }
 

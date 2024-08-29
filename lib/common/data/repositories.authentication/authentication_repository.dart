@@ -50,7 +50,7 @@ class AuthenticationRepository extends GetxController {
       if (user.emailVerified) {
         // Initialize User Specific Storage
         await MyStorageUtility.init(user.uid);
-        Get.offAll(() => const NavigationBarMenu());
+        Get.offAll(() =>  NavigationBarMenu());
       } else {
         final userEmail = user.email ?? noUser; // Use noUser if email is null
         Get.offAll(() =>

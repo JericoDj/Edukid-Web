@@ -1,39 +1,44 @@
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
-
 import '../../../common/data/repositories.authentication/categories/category_repository.dart';
 import '../../../common/data/repositories.authentication/product/product_repository.dart';
 import '../../../common/widgets/loaders/loaders.dart';
-
 import '../models/category_model.dart';
 import '../models/product_model.dart';
 
 class CategoryController extends GetxController {
+  // Singleton instance
   static CategoryController get instance => Get.find();
+
+  // Observables
   final isLoading = false.obs;
-  final _categoryRepository = Get.put(CategoryRepository());
   RxList<CategoryModel> allCategories = <CategoryModel>[].obs;
   RxList<CategoryModel> featuredCategories = <CategoryModel>[].obs;
 
+  // Repositories
+  final _categoryRepository = Get.put(CategoryRepository());
+
   @override
   void onInit() {
-    fetchCategories();
     super.onInit();
+    fetchCategories(); // Fetch categories on controller initialization
   }
 
   Future<void> fetchCategories() async {
     try {
       isLoading.value = true;
       final categories = await _categoryRepository.getAllCategories();
-      allCategories.assignAll(categories);
+      allCategories.assignAll(categories ?? []);
+
+      print('Fetched Categories: ${allCategories.length}');
 
       featuredCategories.assignAll(
         allCategories
-            .where(
-                (category) => category.isFeatured && category.parentId.isEmpty)
+            .where((category) => category != null && category.isFeatured && category.parentId.isEmpty)
             .take(8)
             .toList(),
       );
+
+      print('Featured Categories: ${featuredCategories.length}');
     } catch (e) {
       MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
     } finally {
@@ -41,49 +46,46 @@ class CategoryController extends GetxController {
     }
   }
 
-  /// Load selected category data
+  // Fetch sub-categories based on a parent category ID
   Future<List<CategoryModel>> getSubCategories(String categoryId) async {
     try {
       final subCategories = await _categoryRepository.getSubCategories(categoryId);
-      return subCategories;
+      return subCategories ?? []; // Return empty list if null
     } catch (e) {
+      // Show an error message and return an empty list
       MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
       return [];
     }
   }
 
-  /// Get Category or sub category products
-
-  Future<List<ProductModel>> getCategoryProducts(
-      {required String categoryId, int limit = 4}) async {
+  // Fetch products for a specific category
+  Future<List<ProductModel>> getCategoryProducts({
+    required String categoryId,
+    int limit = 4,
+  }) async {
     try {
-
-
-      // Fetch Limited (4) products against each subcategory;
       final products = await ProductRepository.instance
           .getProductsForCategory(categoryId: categoryId, limit: limit);
-      return products;
+      return products ?? []; // Return empty list if null
     } catch (e) {
+      // Show an error message and return an empty list
       MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      // You might want to return an empty list or handle the error appropriately.
       return [];
     }
   }
 
-  /// Get Category or sub category products
-
-  Future<List<ProductModel>> getSubCategoryProducts(
-      {required String categoryId, int limit = 4}) async {
+  // Fetch products for a specific sub-category
+  Future<List<ProductModel>> getSubCategoryProducts({
+    required String categoryId,
+    int limit = 4,
+  }) async {
     try {
-
-
-      // Fetch Limited (4) products against each subcategory;
       final products = await ProductRepository.instance
           .getProductsForSubCategory(categoryId: categoryId, limit: limit);
-      return products;
+      return products ?? []; // Return empty list if null
     } catch (e) {
+      // Show an error message and return an empty list
       MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
-      // You might want to return an empty list or handle the error appropriately.
       return [];
     }
   }

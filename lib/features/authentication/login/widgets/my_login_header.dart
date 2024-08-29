@@ -15,12 +15,13 @@ class MyLoginHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: Alignment.center,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Image(
             height: 150,
+            alignment: Alignment.center,
             image: AssetImage(
                 dark ? MyImages.lightAppLogo : MyImages.darkAppLogo),
           ),
