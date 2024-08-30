@@ -26,6 +26,7 @@ class MyCategoryTab extends StatelessWidget {
 
 
     return ListView(
+
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         children: [
@@ -39,7 +40,9 @@ class MyCategoryTab extends StatelessWidget {
                 /// products below the box
                 /// 1
                 /// category ID value is the ID  of the category
+                /// you can remove this if you want
                 FutureBuilder(
+
                     future:
                         controller.getCategoryProducts(categoryId: category.id),
 
@@ -54,7 +57,10 @@ class MyCategoryTab extends StatelessWidget {
                       /// Record Found!
                       final products = snapshot.data!;
 
+
+                      /// this is the items shown below
                       return Column(
+
                         children: [
                           MySectionHeading(
                             title: 'You might like',
@@ -66,7 +72,7 @@ class MyCategoryTab extends StatelessWidget {
                           ),
                           const SizedBox(height: MySizes.spaceBtwItems),
                           MyGridLayoutWidget(
-                              mainAxisExtent: 320,
+                              mainAxisExtent: 350,
                               itemCount: products.length,
                               itemBuilder: (_, index) => MyProductCardVertical(
                                   product: products[index]))

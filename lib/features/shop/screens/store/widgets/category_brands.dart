@@ -45,34 +45,39 @@ class CategoryBrands extends StatelessWidget {
 
         // Records Found!
         final brands = snapshot.data!;
+      /// this is the data per grade
+        return Container(
+          width: 230,
+          child: ListView.builder(
 
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: brands.length,
-          itemBuilder: (_, index) {
-            final brand = brands[index];
-            return FutureBuilder(
-              future: controller.getBrandProducts(brandId: brand.id, limit: 3),
-              builder: (context, snapshot) {
-                // Handle Loader, No Record, OR Error Message
-                final productWidget = MyCloudHelperFunctions.checkMultiRecordState(
-                  snapshot: snapshot,
-                  loader: loader,
-                );
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            itemCount: brands.length,
+            itemBuilder: (_, index) {
+              final brand = brands[index];
+              return FutureBuilder(
 
-                if (productWidget != null) return productWidget;
+                future: controller.getBrandProducts(brandId: brand.id, limit: 3),
+                builder: (context, snapshot) {
+                  // Handle Loader, No Record, OR Error Message
+                  final productWidget = MyCloudHelperFunctions.checkMultiRecordState(
+                    snapshot: snapshot,
+                    loader: loader,
+                  );
 
-                // Record Found!
-                final products = snapshot.data!;
+                  if (productWidget != null) return productWidget;
 
-                return MyBrandShowCase(
-                  brand: brand,
-                  images: products.map((e) => e.thumbnail).toList(),
-                );
-              },
-            );
-          },
+                  // Record Found!
+                  final products = snapshot.data!;
+
+                  return MyBrandShowCase(
+                    brand: brand,
+                    images: products.map((e) => e.thumbnail).toList(),
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );

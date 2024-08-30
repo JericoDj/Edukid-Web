@@ -31,7 +31,9 @@ class MyBrandShowCase extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Get.to(() => BrandProducts(brand: brand)),
+      /// holder of the item
       child: MyRoundedContainer(
+        width: 10,
         showBorder: true,
         borderColor: MyColors.darkGrey,
         padding: const EdgeInsets.all(MySizes.md),
@@ -48,15 +50,23 @@ class MyBrandShowCase extends StatelessWidget {
     );
   }
 
+  /// image of the iem
+
   Widget brandTopProductImageWidget(String image, context) {
-    return Expanded(
+    return Flexible(
+      fit: FlexFit.tight,
+      flex: 5,
+      /// imgae of the item
       child: MyRoundedContainer(
-        height: 100,
+        width: 10,
+
+        height: 150 ,
         padding: const EdgeInsets.all(MySizes.md),
         margin: const EdgeInsets.only (right: MySizes.sm),
         backgroundColor: MyHelperFunctions.isDarkMode(context) ? MyColors
             .darkerGrey : MyColors.light,
         child: CachedNetworkImage(
+          height: 20,
             fit: BoxFit.contain,
             imageUrl: image,
           progressIndicatorBuilder: (context, url, downloadprogress) => const MyShimmerEffect(width: 100, height: 100),

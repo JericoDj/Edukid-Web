@@ -21,6 +21,7 @@ class MyTabBar extends StatelessWidget implements PreferredSizeWidget {
       color: dark ? MyColors.black : MyColors.white,
       child: TabBar(
         tabs: tabs,
+        tabAlignment: TabAlignment.center,
         isScrollable: true,
         indicatorColor: MyColors.primaryColor,
         labelColor: dark ? MyColors.white : MyColors.primaryColor,

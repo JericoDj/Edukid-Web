@@ -19,15 +19,48 @@ import '../../shop/screens/order/order.dart';
 import '../../shop/screens/wishlist/wishlist.dart';
 import '../personalization/screens/address/address.dart';
 
-
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
+import '../../../common/data/repositories.authentication/authentication_repository.dart';
+import '../../../common/widgets/appbar.dart';
+import '../../../common/widgets/appbar/myAppBarController.dart';
+import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
+import '../../../common/widgets/list_tiles/settings.dart';
+import '../../../common/widgets/list_tiles/user_profile_tile.dart';
+import '../../../common/widgets/texts/section_heading.dart';
+import '../../../utils/constants/colors.dart';
+import '../../../utils/constants/sizes.dart';
+import '../../personalization/controllers/user_controller.dart';
+import '../../shop/cart/cart.dart';
+import '../../shop/screens/account_privacy/account_privacy_screen.dart';
+import '../../shop/screens/coupons/coupons_screen.dart';
+import '../../shop/screens/order/order.dart';
+import '../../shop/screens/wishlist/wishlist.dart';
+import '../personalization/screens/address/address.dart';
 class SettingsScreen extends StatelessWidget {
   final bool isOpen;
   final VoidCallback onClose;
+  final VoidCallback onEditProfile;
+  final VoidCallback onUserAddress; // Callback for UserAddressScreen
+  final VoidCallback onCart;
+  final VoidCallback onOrder;
+  final VoidCallback onWishlist;
+  final VoidCallback onCoupon;
+  final VoidCallback onAccountPrivacy;
 
   const SettingsScreen({
     Key? key,
     required this.isOpen,
     required this.onClose,
+    required this.onEditProfile,
+    required this.onUserAddress, // Accept the new callback
+    required this.onCart,
+    required this.onOrder,
+    required this.onWishlist,
+    required this.onCoupon,
+    required this.onAccountPrivacy,
   }) : super(key: key);
 
   @override
@@ -52,13 +85,9 @@ class SettingsScreen extends StatelessWidget {
               MyPrimaryHeaderContainer(
                 child: Column(
                   children: [
-
                     MyUserProfileTile(
-                      onPressed: () async {
-                        var result = await Get.to(() => const EditProfileScreen());
-                        if (result != null) {
-                          previousScreenController.updateUIWithData(result);
-                        }
+                      onPressed: () {
+                        onEditProfile();
                       },
                     ),
                     const SizedBox(
@@ -68,7 +97,6 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               Padding(
-
                 padding: const EdgeInsets.all(MySizes.defaultspace),
                 child: Column(
                   children: [
@@ -78,35 +106,41 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: MySizes.spaceBtwItems),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'My Addresses',
-                        subTitle: 'Set shopping delivery address',
-                        onTap: () => Get.to(() => UserAddressScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'My Addresses',
+                      subTitle: 'Set shopping delivery address',
+                      onTap: () => onUserAddress(),
+                    ),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'My Cart',
-                        subTitle: 'Add, remove products and move to checkout',
-                        onTap: () => Get.to(() => CartScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'My Cart',
+                      subTitle: 'Add, remove products and move to checkout',
+                      onTap: () => onCart(),
+                    ),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'My Orders',
-                        subTitle: 'In-progress and Completed Orders',
-                        onTap: () => Get.to(() => OrderScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'My Orders',
+                      subTitle: 'In-progress and Completed Orders',
+                      onTap: () => onOrder(),
+                    ),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'My Wishlist',
-                        subTitle: 'Add, Remove products to your wishlist',
-                        onTap: () => Get.to(() => WishlistScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'My Wishlist',
+                      subTitle: 'Add, Remove products to your wishlist',
+                      onTap: () => onWishlist(),
+                    ),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'My Coupons',
-                        subTitle: 'List of all coupons',
-                        onTap: () => Get.to(() => CouponScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'My Coupons',
+                      subTitle: 'List of all coupons',
+                      onTap: () => onCoupon(),
+                    ),
                     MySettingsMenuTile(
-                        icon: Iconsax.safe_home,
-                        title: 'Account Privacy',
-                        subTitle: 'Manage data usage and connected accounts',
-                        onTap: () => Get.to(() => AccountPrivacyScreen())),
+                      icon: Iconsax.safe_home,
+                      title: 'Account Privacy',
+                      subTitle: 'Manage data usage and connected accounts',
+                      onTap: () => onAccountPrivacy(),
+                    ),
                     const SizedBox(height: MySizes.spaceBtwSections),
                     const MySectionHeading(
                       title: 'App Settings',

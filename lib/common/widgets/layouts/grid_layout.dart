@@ -22,6 +22,7 @@ class MyGridLayoutWidget extends StatelessWidget {
 
     return Center( // Wrap with Center to align grid in the center when itemCount is 1
       child: Container(
+
         constraints: BoxConstraints(
           maxWidth: itemCount == 1 ? 200 : double.infinity, // Adjust width if only one item
         ),

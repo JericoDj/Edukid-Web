@@ -30,7 +30,6 @@ class MyBrandCard extends StatelessWidget {
 
       /// container design
       child: MyRoundedContainer(
-        padding: const EdgeInsets.all(MySizes.sm),
         showBorder: showBorder,
         borderColor: MyColors.primaryColor,
         backgroundColor: Colors.transparent,
@@ -38,26 +37,26 @@ class MyBrandCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ///Icon
-             Flexible(
-              child: MyCircularImage(
-                isNetworkImage: true,
-                image: brand.image,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-            SizedBox(
-              width: MySizes.spaceBtwItems / 2,
-            ),
+             Center(
+               child: Flexible(
+                child: MyCircularImage(
+                  isNetworkImage: true,
+
+                  image: brand.image,
+                  backgroundColor: Colors.transparent,
+                ),
+                           ),
+             ),
 
             /// Text
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                    MyBrandTitleText(
                     title: brand.name,
-                    brandTextSize: TextSizes.medium,
+                    brandTextSize: TextSizes.small,
                   ),
                   Text(
                     '${brand.productsCount ?? 0} products',

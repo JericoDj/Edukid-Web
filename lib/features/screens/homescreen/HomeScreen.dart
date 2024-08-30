@@ -62,74 +62,55 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(MySizes.defaultspace),
               child: Column(
                 children: [
+                  /// PromoSlider
+                  MyPromoSlider(),
+                  SizedBox(height: MySizes.spaceBtwSections,), // Adjust the space between the slider and buttons
 
-
-
-                  /// PromoSlider and Buttons
+                  /// Buttons in a Row
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Flexible(
-                        flex: 2,
-                          child: Container(),
-                      ),
-                      Flexible(
-                        flex: 3,
-                        child: MyPromoSlider(),
-                      ),
-                      SizedBox(width: 10,),
-                      // Adjust the space between the slider and buttons
-                      Flexible(
-                        flex: 3,
-                        child: Container(
-                          child: Column(
-                            children: [
-                              Container(
-                                width: 200,
-                                child: ElevatedButton(
-                                  onPressed: () => navigationController
-                                      .navigateTo('bookingSession'),
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        WidgetStateProperty.all(MyColors.white),
-                                    side: WidgetStateProperty.all<BorderSide>(
-                                      BorderSide(color: MyColors.primaryColor),
-                                    ),
-                                    shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                      ),
-                                    ),
-                                  ),
-                                  child: Text('Try a Free Session',
-                                      style: TextStyle(
-                                          color: MyColors.primaryColor)),
-                                ),
+                      Container(
+                        width: 200,
+                        child: ElevatedButton(
+                          onPressed: () => navigationController
+                              .navigateTo('bookingSession'),
+                          style: ButtonStyle(
+                            backgroundColor:
+                            WidgetStateProperty.all(MyColors.white),
+                            side: WidgetStateProperty.all<BorderSide>(
+                              BorderSide(color: MyColors.primaryColor),
+                            ),
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
                               ),
-                              SizedBox(height: MySizes.spaceBtwItems),
-                              // Adjust the space between buttons
-                              Container(
-                                width: 200,
-                                child: ElevatedButton(
-                                  onPressed: () => navigationController
-                                      .navigateTo('bookingSession'),
-                                  style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all(
-                                        MyColors.primaryColor),
-                                    shape: WidgetStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20.0),
-                                      ),
-                                    ),
-                                  ),
-                                  child: Text('Book a Session',
-                                      style: TextStyle(color: Colors.white)),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
+                          child: Text('Try a Free Session',
+                              style: TextStyle(
+                                  color: MyColors.primaryColor)),
+                        ),
+                      ),
+                      SizedBox(width: 20), // Adjust the space between buttons
+                      Container(
+                        width: 200,
+                        child: ElevatedButton(
+                          onPressed: () => navigationController
+                              .navigateTo('bookingSession'),
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                                MyColors.primaryColor),
+                            shape: WidgetStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                            ),
+                          ),
+                          child: Text('Book a Session',
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ),
                     ],

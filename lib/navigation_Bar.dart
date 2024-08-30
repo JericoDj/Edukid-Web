@@ -1,26 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 
 import 'common/widgets/customShapes/containers/search_container.dart';
+import 'features/screens/gamesscreen/games screen.dart';
 import 'features/screens/homescreen/HomeScreen.dart';
 import 'features/screens/navigation_controller.dart';
+import 'features/screens/personalization/screens/address/address.dart';
 import 'features/screens/profilescreen/settings.dart';
 import 'features/shop/cart/cart.dart';
 import 'features/shop/controller/product/product_controller.dart';
+import 'features/shop/screens/account_privacy/account_privacy_screen.dart';
 import 'features/shop/screens/bookings/bookings.dart';
+import 'features/shop/screens/coupons/coupons_screen.dart';
 import 'features/shop/screens/order/order.dart';
 import 'features/shop/screens/store/store.dart';
 import 'features/shop/screens/bookings/booking_session.dart';
 import 'features/shop/screens/all_products/all_products.dart';
+import 'features/shop/screens/wishlist/wishlist.dart';
+
+
 
 class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
   @override
   _NavigationBarMenuState createState() => _NavigationBarMenuState();
 
   @override
-  Size get preferredSize => Size.fromHeight(300);  // Further increase the height
+  Size get preferredSize => Size.fromHeight(300); // Further increase the height
 }
 
 class _NavigationBarMenuState extends State<NavigationBarMenu> {
@@ -32,10 +40,37 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
     });
   }
 
+  void _navigateToEditProfile() {
+    Get.find<NavigationController>().navigateTo('editProfile');
+  }
+
+  void _navigateToUserAddress() {
+    Get.find<NavigationController>().navigateTo('userAddress');
+  }
+
+  void _navigateToCart() {
+    Get.find<NavigationController>().navigateTo('cart');
+  }
+
+  void _navigateToOrder() {
+    Get.find<NavigationController>().navigateTo('order');
+  }
+
+  void _navigateToWishlist() {
+    Get.find<NavigationController>().navigateTo('wishlist');
+  }
+
+  void _navigateToCoupon() {
+    Get.find<NavigationController>().navigateTo('coupon');
+  }
+
+  void _navigateToAccountPrivacy() {
+    Get.find<NavigationController>().navigateTo('accountPrivacy');
+  }
+
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => NavigationController());
-
     final NavigationController navigationController = Get.find();
 
     final Map<String, Widget Function()> screens = {
@@ -44,14 +79,22 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
       'bookings': () => BookingsScreen(),
       'order': () => OrderScreen(),
       'cart': () => CartScreen(),
-      'bookingSession': () => BookingSessionScreen(selectedDates: [], selectedTimes: []),
+      'bookingSession': () =>
+          BookingSessionScreen(selectedDates: [], selectedTimes: []),
       'allProducts': () {
         Get.lazyPut(() => ProductController());
         return AllProductsScreen(
           title: 'Popular Products',
-          futureMethod: Get.find<ProductController>().fetchAllFeaturedProducts(),
+          futureMethod:
+          Get.find<ProductController>().fetchAllFeaturedProducts(),
         );
       },
+      'games': () => GamesScreen(),
+      'editProfile': () => EditProfileScreen(),
+      'userAddress': () => UserAddressScreen(),
+      'wishlist': () => WishlistScreen(),
+      'coupon': () => CouponScreen(),
+      'accountPrivacy': () => AccountPrivacyScreen(),
     };
 
     return Scaffold(
@@ -59,7 +102,7 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
         backgroundColor: MyColors.primaryColor,
         titleSpacing: 0,
         title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,  // Center vertically
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
@@ -77,12 +120,13 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
                   _buildNavButton('store', Iconsax.shop, 'Store'),
                   _buildNavButton('bookings', Iconsax.task, 'Bookings'),
                   _buildNavButton('order', Iconsax.note, 'Worksheets'),
+                  _buildNavButton('games', Iconsax.game, 'Games'),
                 ],
               ),
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),  // Adjust padding for better alignment
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: MySearchContainer(text: ' Search for Items'),
               ),
             ),
@@ -95,9 +139,10 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Iconsax.setting_2, color: Colors.white),
+                  icon: Icon(Iconsax.user, color: Colors.white),
                   onPressed: _toggleDrawer,
                 ),
+                SizedBox(width: 10)
               ],
             ),
           ],
@@ -109,6 +154,13 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
           SettingsScreen(
             isOpen: _isDrawerOpen,
             onClose: _toggleDrawer,
+            onEditProfile: _navigateToEditProfile,
+            onUserAddress: _navigateToUserAddress,
+            onCart: _navigateToCart,
+            onOrder: _navigateToOrder,
+            onWishlist: _navigateToWishlist,
+            onCoupon: _navigateToCoupon,
+            onAccountPrivacy: _navigateToAccountPrivacy,
           ),
         ],
       ),
@@ -121,12 +173,16 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
       return TextButton.icon(
         icon: Icon(
           icon,
-          color: navigationController.currentScreen.value == screenKey ? Colors.yellow : Colors.white,
+          color: navigationController.currentScreen.value == screenKey
+              ? Colors.yellow
+              : Colors.white,
         ),
         label: Text(
           label,
           style: TextStyle(
-            color: navigationController.currentScreen.value == screenKey ? Colors.yellow : Colors.white,
+            color: navigationController.currentScreen.value == screenKey
+                ? Colors.yellow
+                : Colors.white,
           ),
         ),
         onPressed: () {
