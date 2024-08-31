@@ -30,98 +30,82 @@ class StoreScreen extends StatelessWidget {
     return DefaultTabController(
       length: categories.length,
       child: Scaffold(
-        body: NestedScrollView(
+        body: SingleChildScrollView(
 
-          headerSliverBuilder: (_, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                automaticallyImplyLeading: false,
-                pinned: true,
-                floating: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Section with SliverAppBar Content
+              Container(
+                color: dark ? MyColors.black : MyColors.white,
+                padding: const EdgeInsets.all(MySizes.defaultspace),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MySectionHeading(
+                      title: 'Featured Items',
+                      onPressed: () => Get.to(() => AllBrandsScreen()),
+                    ),
+                    const SizedBox(height: MySizes.spaceBtwItems / 2),
 
-                backgroundColor: dark ? MyColors.black : MyColors.white,
-                expandedHeight: 220,
-                flexibleSpace: Padding(
-                  padding: const EdgeInsets.all(MySizes.defaultspace),
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      /// this is inside edukid and little achievers hub
-                      MySectionHeading(
-                        title: 'Featured Items',
-                        onPressed: () => Get.to(() => AllBrandsScreen()),
-                      ),
-                      const SizedBox(height: MySizes.spaceBtwItems / 2),
+                    /// Brand Grids
+                    Obx(() {
 
-                      /// Brand Grids
-                      Obx(() {
-                        if (brandController.isLoading.value) {
-                          return MyBrandShimmer();
-                        }
 
-                        if (brandController.featuredBrands.isEmpty) {
-                          return Center(
-                            child: Text(
-                              'No Data Found',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .apply(color: MyColors.white),
+                      return Center(
+                        child: Container(
+                          width: 800,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              mainAxisExtent: 100,
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 50,
+                              childAspectRatio: 10,
                             ),
-                          );
-                        }
-                      /// this entirely the place of little achivers and theedukid
-                        return Center(
-                          child: Container(
-                            height: 200,
-                            width: 800,
-                            child: GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                mainAxisExtent: 100,
-                                crossAxisCount: 3, // Number of columns
-                                crossAxisSpacing: 10, // Spacing between columns
-                                mainAxisSpacing: 50, // Spacing between rows
-                                childAspectRatio: 10, // Aspect ratio for grid items
-                              ),
-                              itemCount: brandController.featuredBrands.length,
-                              itemBuilder: (_, index) {
-                                final brand = brandController.featuredBrands[index];
-                                return Center(
-                                  child: MyBrandCard(
-                                    showBorder: true,
-                                    brand: brand,
-                                    onTap: () => Get.to(() => BrandProducts(brand: brand)),
-                                  ),
-                                );
-                              },
-                            ),
+                            itemCount: brandController.featuredBrands.length,
+                            itemBuilder: (_, index) {
+                              final brand = brandController.featuredBrands[index];
+                              return Center(
+                                child: MyBrandCard(
+                                  showBorder: true,
+                                  brand: brand,
+                                  onTap: () => Get.to(() => BrandProducts(brand: brand)),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
+                        ),
+                      );
+                    }),
 
-                /// Tab bar at the bottom of the SliverAppBar/// this is the grade 1
-                bottom: MyTabBar(
-                  tabs: categories
-                      .map((category) => Tab(
-                    child: Text(category.name),
-                  ))
+
+                    SizedBox(height: MySizes.spaceBtwItems,),
+
+                    /// Tab Bar Below Content
+                    MyTabBar(
+                      tabs: categories
+                          .map((category) => Tab(
+                        child: Text(category.name),
+                      ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+
+              /// Tab Bar View
+              Container(
+                height: 400, // Set an appropriate height
+                child: TabBarView(
+                  children: categories
+                      .map((category) => MyCategoryTab(category: category))
                       .toList(),
                 ),
               ),
-            ];
-          },
-
-          /// Body of the tab views /// everything below the grade 1///
-          body: TabBarView(
-            children: categories
-                .map((category) => MyCategoryTab(category: category))
-                .toList(),
+            ],
           ),
         ),
       ),

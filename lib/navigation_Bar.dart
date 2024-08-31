@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
 import 'package:webedukid/utils/constants/colors.dart';
-
 import 'common/widgets/customShapes/containers/search_container.dart';
 import 'features/screens/gamesscreen/games screen.dart';
 import 'features/screens/homescreen/HomeScreen.dart';
@@ -20,53 +19,40 @@ import 'features/shop/screens/store/store.dart';
 import 'features/shop/screens/bookings/booking_session.dart';
 import 'features/shop/screens/all_products/all_products.dart';
 import 'features/shop/screens/wishlist/wishlist.dart';
+import 'features/screens/profilescreen/widgets/change_name.dart'; // Import Change Name screen
 
-
+// Use a GlobalKey to manage the state of NavigationBarMenu
+final GlobalKey<NavigationBarMenuState> navigationBarKey = GlobalKey<NavigationBarMenuState>();
 
 class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
   @override
-  _NavigationBarMenuState createState() => _NavigationBarMenuState();
+  NavigationBarMenuState createState() => NavigationBarMenuState();
 
   @override
-  Size get preferredSize => Size.fromHeight(300); // Further increase the height
+  Size get preferredSize => const Size.fromHeight(300);
 }
 
-class _NavigationBarMenuState extends State<NavigationBarMenu> {
+class NavigationBarMenuState extends State<NavigationBarMenu> {
   bool _isDrawerOpen = false;
+  bool _isEditProfileDrawerOpen = false;
+  bool _isChangeNameDrawerOpen = false; // Secondary drawer state
 
-  void _toggleDrawer() {
+  void toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
+      if (!_isDrawerOpen) {
+        _isEditProfileDrawerOpen = false;
+        _isChangeNameDrawerOpen = false;
+      }
     });
   }
 
-  void _navigateToEditProfile() {
-    Get.find<NavigationController>().navigateTo('editProfile');
+  void toggleEditProfileDrawer() {
+    setState(() {
+      _isEditProfileDrawerOpen = !_isEditProfileDrawerOpen;
+    });
   }
 
-  void _navigateToUserAddress() {
-    Get.find<NavigationController>().navigateTo('userAddress');
-  }
-
-  void _navigateToCart() {
-    Get.find<NavigationController>().navigateTo('cart');
-  }
-
-  void _navigateToOrder() {
-    Get.find<NavigationController>().navigateTo('order');
-  }
-
-  void _navigateToWishlist() {
-    Get.find<NavigationController>().navigateTo('wishlist');
-  }
-
-  void _navigateToCoupon() {
-    Get.find<NavigationController>().navigateTo('coupon');
-  }
-
-  void _navigateToAccountPrivacy() {
-    Get.find<NavigationController>().navigateTo('accountPrivacy');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,14 +65,12 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
       'bookings': () => BookingsScreen(),
       'order': () => OrderScreen(),
       'cart': () => CartScreen(),
-      'bookingSession': () =>
-          BookingSessionScreen(selectedDates: [], selectedTimes: []),
+      'bookingSession': () => BookingSessionScreen(selectedDates: [], selectedTimes: []),
       'allProducts': () {
         Get.lazyPut(() => ProductController());
         return AllProductsScreen(
           title: 'Popular Products',
-          futureMethod:
-          Get.find<ProductController>().fetchAllFeaturedProducts(),
+          futureMethod: Get.find<ProductController>().fetchAllFeaturedProducts(),
         );
       },
       'games': () => GamesScreen(),
@@ -106,10 +90,7 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: Image.asset(
-                'assets/EdukidLogo.jpg',
-                height: 50,
-              ),
+              child: Image.asset('assets/EdukidLogo.jpg', height: 50),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -127,22 +108,20 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                child: MySearchContainer(text: ' Search for Items'),
+                child: MySearchContainer(text: 'Search for Items'),
               ),
             ),
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Iconsax.shopping_cart, color: Colors.white),
-                  onPressed: () {
-                    navigationController.navigateTo('cart');
-                  },
+                  icon: const Icon(Iconsax.shopping_cart, color: Colors.white),
+                  onPressed: () => navigationController.navigateTo('cart'),
                 ),
                 IconButton(
-                  icon: Icon(Iconsax.user, color: Colors.white),
-                  onPressed: _toggleDrawer,
+                  icon: const Icon(Iconsax.user, color: Colors.white),
+                  onPressed: toggleDrawer,
                 ),
-                SizedBox(width: 10)
+                const SizedBox(width: 10)
               ],
             ),
           ],
@@ -151,17 +130,31 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
       body: Stack(
         children: [
           Obx(() => screens[navigationController.currentScreen.value]!()),
-          SettingsScreen(
-            isOpen: _isDrawerOpen,
-            onClose: _toggleDrawer,
-            onEditProfile: _navigateToEditProfile,
-            onUserAddress: _navigateToUserAddress,
-            onCart: _navigateToCart,
-            onOrder: _navigateToOrder,
-            onWishlist: _navigateToWishlist,
-            onCoupon: _navigateToCoupon,
-            onAccountPrivacy: _navigateToAccountPrivacy,
-          ),
+          if (_isDrawerOpen)
+            SettingsScreen(
+              isOpen: _isDrawerOpen,
+              onClose: toggleDrawer,
+              onEditProfile: toggleEditProfileDrawer,
+              onUserAddress: () => navigationController.navigateTo('userAddress'),
+              onCart: () => navigationController.navigateTo('cart'),
+              onOrder: () => navigationController.navigateTo('order'),
+              onWishlist: () => navigationController.navigateTo('wishlist'),
+              onCoupon: () => navigationController.navigateTo('coupon'),
+              onAccountPrivacy: () => navigationController.navigateTo('accountPrivacy'),
+            ),
+          if (_isEditProfileDrawerOpen)
+            Positioned(
+              right: 0,
+              top: 80,
+              bottom: 0,
+              width: 400,
+              child: Material(
+                borderRadius: BorderRadius.circular(30),
+                color: Colors.transparent,
+                elevation: 10,
+                child: EditProfileScreen(),
+              ),
+            ),
         ],
       ),
     );
@@ -173,21 +166,15 @@ class _NavigationBarMenuState extends State<NavigationBarMenu> {
       return TextButton.icon(
         icon: Icon(
           icon,
-          color: navigationController.currentScreen.value == screenKey
-              ? Colors.yellow
-              : Colors.white,
+          color: navigationController.currentScreen.value == screenKey ? Colors.yellow : Colors.white,
         ),
         label: Text(
           label,
           style: TextStyle(
-            color: navigationController.currentScreen.value == screenKey
-                ? Colors.yellow
-                : Colors.white,
+            color: navigationController.currentScreen.value == screenKey ? Colors.yellow : Colors.white,
           ),
         ),
-        onPressed: () {
-          navigationController.navigateTo(screenKey);
-        },
+        onPressed: () => navigationController.navigateTo(screenKey),
       );
     });
   }

@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../utils/formatters/formatter.dart';
 
 class UserModel {
-// Keep those values final which you do not want to update
+  // Keep those values final which you do not want to update
   final String id;
   String firstName;
   String lastName;
@@ -11,6 +10,8 @@ class UserModel {
   final String email;
   String phoneNumber;
   String profilePicture;
+  String gender;    // New field for gender
+  String birthday;  // New field for birthday
 
   /// Constructor for UserModel.
   UserModel({
@@ -21,6 +22,8 @@ class UserModel {
     required this.email,
     required this.phoneNumber,
     required this.profilePicture,
+    this.gender = '',    // Initialize gender with an empty string
+    this.birthday = '',  // Initialize birthday with an empty string
   });
 
   /// Helper function to get the full name.
@@ -38,22 +41,23 @@ class UserModel {
     String firstName = nameParts[0].toLowerCase();
     String lastName = nameParts.length > 1 ? nameParts[1].toLowerCase() : "";
 
-    String camelCaseUsername =
-        "$firstName$lastName"; // Combine first and last name
+    String camelCaseUsername = "$firstName$lastName"; // Combine first and last name
     String usernameWithPrefix = "cwt_$camelCaseUsername"; // Add "cwt_" prefix
     return usernameWithPrefix;
   }
 
   /// Static function to create an empty user model.
   static UserModel empty() => UserModel(
-        id: '',
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: '',
-        phoneNumber: '',
-        profilePicture: '',
-      );
+    id: '',
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    phoneNumber: '',
+    profilePicture: '',
+    gender: '',     // Initialize gender
+    birthday: '',   // Initialize birthday
+  );
 
   /// Convert model to JSON structure for storing data in Firebase.
   Map<String, dynamic> toJson() {
@@ -64,6 +68,8 @@ class UserModel {
       'Email': email,
       'PhoneNumber': phoneNumber,
       'ProfilePicture': profilePicture,
+      'Gender': gender,       // Include gender in JSON
+      'Birthday': birthday,   // Include birthday in JSON
     };
   }
 
@@ -78,6 +84,8 @@ class UserModel {
       email: data?['Email'] ?? '',
       phoneNumber: data?['PhoneNumber'] ?? '',
       profilePicture: data?['ProfilePicture'] ?? '',
+      gender: data?['Gender'] ?? '',       // Assign gender from data
+      birthday: data?['Birthday'] ?? '',   // Assign birthday from data
     );
   }
 }

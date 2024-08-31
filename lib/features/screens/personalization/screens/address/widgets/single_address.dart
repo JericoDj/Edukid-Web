@@ -35,6 +35,7 @@ class MySingleAddress extends StatelessWidget {
         child: MyRoundedContainer(
           width: double.infinity,
           padding: EdgeInsets.all(MySizes.md),
+
           showBorder: true,
           backgroundColor: selectedAddress
               ? MyColors.primaryColor.withOpacity(0.5)
@@ -66,7 +67,7 @@ class MySingleAddress extends StatelessWidget {
                     '${address.name}', // Assuming 'name' is the field for the name in your AddressModel
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                   SizedBox(
                     height: MySizes.sm / 2,
@@ -74,13 +75,14 @@ class MySingleAddress extends StatelessWidget {
                   Text(
                     '(${address.phoneNumber})', // Assuming 'phoneNumber' is the field for the phone number in your AddressModel
                     maxLines: 1,
+                    style: Theme.of(context).textTheme.bodyMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(
                     height: MySizes.sm / 2,
                   ),
                   Text(
-                    ' ${address.street} ${address.city}', // Assuming 'street' and 'city' are the fields for the street and city in your AddressModel
+                    ' ${address.street} ${address.city}',style: Theme.of(context).textTheme.bodySmall , // Assuming 'street' and 'city' are the fields for the street and city in your AddressModel
                     softWrap: true,
                   ),
                 ],

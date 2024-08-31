@@ -1,17 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/data/repositories.authentication/user_repository.dart';
 import '../../../../common/widgets/loaders/loaders.dart';
-
-
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/network manager/network_manager.dart';
-
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../personalization/controllers/user_controller.dart';
-
 
 class UpdateNameController extends GetxController {
   static UpdateNameController get instance => Get.find();
@@ -54,10 +49,11 @@ class UpdateNameController extends GetxController {
       };
       await userRepository.updateSingleField(name);
 
-      userController.user.value.firstName = firstName.text.trim();
-      userController.user.value.lastName = lastName.text.trim();
-
-
+      // Update the userController's reactive user model
+      userController.user.update((user) {
+        user?.firstName = firstName.text.trim();
+        user?.lastName = lastName.text.trim();
+      });
 
       Get.back();
       MyLoaders.successSnackBar(
@@ -72,15 +68,9 @@ class UpdateNameController extends GetxController {
       );
     }
   }
-}
 
-/// delete account warning
-
-///
-
-///
-
-/// upload profile image
+  /// Additional methods for delete account warning, uploading profile image, etc.
   uploadUserProfilePicture() async {
-
+    // Your implementation for uploading profile image
   }
+}

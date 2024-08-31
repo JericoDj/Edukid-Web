@@ -42,7 +42,7 @@ class MyProductCardVertical extends StatelessWidget {
           color: dark ? MyColors.darkerGrey : MyColors.white,
         ),
         child: MyRoundedContainer(
-          height: 500, // Adjust the height of this container
+          height: 300, // Adjust the height of this container
           padding: const EdgeInsets.all(MySizes.sm),
           backgroundColor: dark ? MyColors.dark : MyColors.light,
           child: Column(
@@ -52,7 +52,7 @@ class MyProductCardVertical extends StatelessWidget {
                 children: [
                   MyRoundedImage(
                     imageUrl: product.thumbnail,
-                    height: 200,
+                    height: 150,
                     applyImageRadius: true,
                     isNetworkImage: true,
                     backgroundColor: Colors.transparent,

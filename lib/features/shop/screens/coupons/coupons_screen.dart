@@ -24,75 +24,74 @@ class CouponScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Coupons'),
+        centerTitle: true, // Center the title
       ),
-      body: Obx(
-            () => ListView.builder(
-          itemCount: couponController.coupons.length,
-          itemBuilder: (context, index) {
-            Map<String, dynamic> couponData = couponController.coupons[index];
-            Coupon coupon = Coupon(
-              code: couponData['code'],
-              discount: couponData['discount'].toDouble(), // Convert int to double
-              expiryDate: DateTime.fromMillisecondsSinceEpoch(
-                couponData['expiryDate'].millisecondsSinceEpoch,
-              ),
-            );
-            return Padding(
-              padding: EdgeInsets.all(10.0),
-              child: _buildCouponCard(context, coupon),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCouponCard(BuildContext context, Coupon coupon) {
-    return Card(
-      elevation: 3.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-        side: BorderSide(color: Colors.blue),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(15.0),
+      body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start, // Align to top center
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Coupon Code: ${coupon.code}',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10.0),
-            Text(
-              'Discount: ${coupon.discount}%',
-              style: TextStyle(fontSize: 14.0),
-            ),
-            SizedBox(height: 5.0),
-            Text(
-              'Expiry Date: ${coupon.expiryDate.day}/${coupon.expiryDate.month}/${coupon.expiryDate.year}',
-              style: TextStyle(fontSize: 14.0),
+            Obx(
+                  () => ListView.builder(
+                shrinkWrap: true,
+                itemCount: couponController.coupons.length,
+                itemBuilder: (context, index) {
+                  Map<String, dynamic> couponData = couponController.coupons[index];
+                  Coupon coupon = Coupon(
+                    code: couponData['code'],
+                    discount: couponData['discount'].toDouble(), // Convert int to double
+                    expiryDate: DateTime.fromMillisecondsSinceEpoch(
+                      couponData['expiryDate'].millisecondsSinceEpoch,
+                    ),
+                  );
+                  return Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Center(
+                      child: _buildCouponCard(context, coupon),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
 
-void main() {
-  runApp(MyApp());
-}
+  Widget _buildCouponCard(BuildContext context, Coupon coupon) {
+    return ConstrainedBox(
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Coupon App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      constraints: BoxConstraints(maxWidth: 600,), // Set a smaller maximum width for the card
+      child: Card(
+        elevation: 3.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          side: BorderSide(color: Colors.blue),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Coupon Code: ${coupon.code}',
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                'Discount: ${coupon.discount}%',
+                style: TextStyle(fontSize: 14.0),
+              ),
+              SizedBox(height: 5.0),
+              Text(
+                'Expiry Date: ${coupon.expiryDate.day}/${coupon.expiryDate.month}/${coupon.expiryDate.year}',
+                style: TextStyle(fontSize: 14.0),
+              ),
+            ],
+          ),
+        ),
       ),
-      home: CouponScreen(),
     );
   }
 }

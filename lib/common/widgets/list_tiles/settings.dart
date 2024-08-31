@@ -22,15 +22,15 @@ class MySettingsMenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, size: 28, color: MyColors.primaryColor),
+      leading: Icon(icon, size: 24, color: MyColors.primaryColor),
       title: Text(title, style: Theme
           .of(context)
           .textTheme
-          .titleMedium),
+          .bodyMedium),
       subtitle: Text(subTitle, style: Theme
           .of(context)
           .textTheme
-          .labelMedium),
+          .labelSmall),
       trailing: trailing,
       onTap: onTap,
     ); // ListTile

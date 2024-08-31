@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 import '../../../common/data/repositories.authentication/user_repository.dart';
 import '../../../common/widgets/loaders/loaders.dart';
 import '../../../common/data/repositories.authentication/authentication_repository.dart';
@@ -15,7 +14,6 @@ import '../../../utils/popups/full_screen_loader.dart';
 import '../../authentication/login/login.dart';
 import '../../models/user_model.dart';
 import '../../screens/signup/widgets/re_authenticate_user_login_form.dart';
-
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
@@ -64,6 +62,8 @@ class UserController extends GetxController {
             email: userCredentials.user!.email ?? '',
             phoneNumber: userCredentials.user!.phoneNumber ?? '',
             profilePicture: userCredentials.user!.photoURL ?? '',
+            gender: '', // Optional field, can be set later
+            birthday: '', // Optional field, can be set later
           );
 
           await userRepository.saveUserRecord(newUser);
@@ -195,10 +195,8 @@ class UserController extends GetxController {
   }
 
   Future<void> _deleteOldProfilePicture(String oldProfilePictureUrl) async {
-    // Check if the old profile picture is not the default image
     if (oldProfilePictureUrl.isNotEmpty && oldProfilePictureUrl != MyImages.accountGIF) {
       try {
-        // Extract the filename with query parameters from the URL
         final fileNameWithQuery = oldProfilePictureUrl.split('/').last;
 
         // Remove query parameters to get the actual filename
@@ -215,6 +213,70 @@ class UserController extends GetxController {
       } catch (e) {
         print('Error deleting old profile picture from Firebase Storage: $e');
       }
+    }
+  }
+
+  Future<void> updateGender(String gender) async {
+    try {
+      MyFullScreenLoader.openLoadingDialog('Updating Gender...', MyImages.loaders);
+
+      final isConnected = await NetworkManager.instance.isConnected();
+      if (!isConnected) {
+        MyFullScreenLoader.stopLoading();
+        return;
+      }
+
+      final json = {'Gender': gender};
+      await userRepository.updateSingleField(json);
+
+      // Update the userController's reactive user model
+      user.update((user) {
+        user?.gender = gender;
+      });
+
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.successSnackBar(
+        title: 'Gender Updated',
+        message: 'Your gender has been updated successfully.',
+      );
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.errorSnackBar(
+        title: 'Oh Snap!',
+        message: e.toString(),
+      );
+    }
+  }
+
+  Future<void> updateBirthday(String birthday) async {
+    try {
+      MyFullScreenLoader.openLoadingDialog('Updating Birthday...', MyImages.loaders);
+
+      final isConnected = await NetworkManager.instance.isConnected();
+      if (!isConnected) {
+        MyFullScreenLoader.stopLoading();
+        return;
+      }
+
+      final json = {'Birthday': birthday};
+      await userRepository.updateSingleField(json);
+
+      // Update the userController's reactive user model
+      user.update((user) {
+        user?.birthday = birthday;
+      });
+
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.successSnackBar(
+        title: 'Birthday Updated',
+        message: 'Your birthday has been updated successfully.',
+      );
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.errorSnackBar(
+        title: 'Oh Snap!',
+        message: e.toString(),
+      );
     }
   }
 }

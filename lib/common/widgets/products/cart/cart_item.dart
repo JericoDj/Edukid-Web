@@ -24,6 +24,7 @@ class MyCartItem extends StatelessWidget {
       children: [
         // Image
         MyRoundedImage(
+
           imageUrl: cartItem.image ?? '',
           width: 60,
           height: 60,

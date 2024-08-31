@@ -8,58 +8,72 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/constants/text_strings.dart';
 import '../../../../utils/validators/validation.dart';
 
-
-class ChangeName extends StatelessWidget {
-  const ChangeName({Key? key});
+class ChangeNameDialog extends StatelessWidget {
+  const ChangeNameDialog({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(UpdateNameController());
-    return Scaffold(
-      appBar: MyAppBar(
-        showBackArrow: true,
-        title: Text('Change Name', style: Theme.of(context).textTheme.headlineSmall),
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(MySizes.defaultspace),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Use real name for easy verification. This name will appear on several pages.',
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-            const SizedBox(height: MySizes.spaceBtwSections),
-
-            Form(
-              key: controller.updateUserNameFormKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    controller: controller.firstName,
-                    validator: (value) => MyValidator.validateEmptyText('First name', value),
-                    decoration: const InputDecoration(labelText: 'First Name', prefixIcon: Icon(Iconsax.user)),
-                  ),
-                  const SizedBox(height: MySizes.spaceBtwInputItems),
-                  TextFormField(
-                    controller: controller.lastName,
-                    validator: (value) => MyValidator.validateEmptyText('Last Name', value),
-                    decoration: const InputDecoration(labelText: 'Last Name', prefixIcon: Icon(Iconsax.user)),
-                  ),
-                ],
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400),
+        // Set a maximum width for the dialog
+        child: Padding(
+          padding: const EdgeInsets.all(MySizes.defaultspace),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            // Ensure dialog takes minimal height
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Use real name for easy verification. This name will appear on several pages.',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
-            ),
-            const SizedBox(height: MySizes.spaceBtwSections),
-
-            // Save Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => controller.updateUserName(),
-                child: const Text('Save'),
+              const SizedBox(height: MySizes.spaceBtwSections),
+              Form(
+                key: controller.updateUserNameFormKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: controller.firstName,
+                      validator: (value) =>
+                          MyValidator.validateEmptyText('First name', value),
+                      decoration: const InputDecoration(
+                          labelText: 'First Name',
+                          prefixIcon: Icon(Iconsax.user)),
+                    ),
+                    const SizedBox(height: MySizes.spaceBtwInputItems),
+                    TextFormField(
+                      controller: controller.lastName,
+                      validator: (value) =>
+                          MyValidator.validateEmptyText('Last Name', value),
+                      decoration: const InputDecoration(
+                          labelText: 'Last Name',
+                          prefixIcon: Icon(Iconsax.user)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: MySizes.spaceBtwSections),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    controller.updateUserName(); // Perform update
+                    // Pass the updated name back to the previous screen
+                    Get.back(result: {
+                      'firstName': controller.firstName.text,
+                      'lastName': controller.lastName.text
+                    });
+                  },
+                  child: const Text('Save'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

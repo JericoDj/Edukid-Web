@@ -31,8 +31,10 @@ class MyAnimationLoaderWidget extends StatelessWidget {
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+
             Lottie.asset(animation,
-                width: MediaQuery.of(context).size.width),
+                height: MediaQuery.of(context).size.width/6,
+                width: MediaQuery.of(context).size.width/6),
             // Display Lottie animation
             const SizedBox(height: MySizes.defaultspace),
             Text(

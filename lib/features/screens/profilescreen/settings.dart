@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
 import '../../../common/data/repositories.authentication/authentication_repository.dart';
-import '../../../common/widgets/appbar.dart';
 import '../../../common/widgets/appbar/myAppBarController.dart';
 import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
 import '../../../common/widgets/list_tiles/settings.dart';
@@ -19,31 +17,11 @@ import '../../shop/screens/order/order.dart';
 import '../../shop/screens/wishlist/wishlist.dart';
 import '../personalization/screens/address/address.dart';
 
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
-import '../../../common/data/repositories.authentication/authentication_repository.dart';
-import '../../../common/widgets/appbar.dart';
-import '../../../common/widgets/appbar/myAppBarController.dart';
-import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
-import '../../../common/widgets/list_tiles/settings.dart';
-import '../../../common/widgets/list_tiles/user_profile_tile.dart';
-import '../../../common/widgets/texts/section_heading.dart';
-import '../../../utils/constants/colors.dart';
-import '../../../utils/constants/sizes.dart';
-import '../../personalization/controllers/user_controller.dart';
-import '../../shop/cart/cart.dart';
-import '../../shop/screens/account_privacy/account_privacy_screen.dart';
-import '../../shop/screens/coupons/coupons_screen.dart';
-import '../../shop/screens/order/order.dart';
-import '../../shop/screens/wishlist/wishlist.dart';
-import '../personalization/screens/address/address.dart';
 class SettingsScreen extends StatelessWidget {
   final bool isOpen;
   final VoidCallback onClose;
   final VoidCallback onEditProfile;
-  final VoidCallback onUserAddress; // Callback for UserAddressScreen
+  final VoidCallback onUserAddress;
   final VoidCallback onCart;
   final VoidCallback onOrder;
   final VoidCallback onWishlist;
@@ -55,7 +33,7 @@ class SettingsScreen extends StatelessWidget {
     required this.isOpen,
     required this.onClose,
     required this.onEditProfile,
-    required this.onUserAddress, // Accept the new callback
+    required this.onUserAddress,
     required this.onCart,
     required this.onOrder,
     required this.onWishlist,
@@ -70,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
     final previousScreenController = Get.find<PreviousScreenController>();
 
     return AnimatedPositioned(
-      duration: Duration(milliseconds: 30),
+      duration: const Duration(milliseconds: 300), // Smooth animation
       right: isOpen ? 0 : -400, // Adjust this value based on your drawer width
       top: 0,
       bottom: 0,
@@ -86,9 +64,7 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     MyUserProfileTile(
-                      onPressed: () {
-                        onEditProfile();
-                      },
+                      onPressed: onEditProfile, // Call the provided callback
                     ),
                     const SizedBox(
                       height: MySizes.spaceBtwSections,
@@ -97,7 +73,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(MySizes.defaultspace),
+                padding: const EdgeInsets.all(MySizes.spaceBtwItems / 2),
                 child: Column(
                   children: [
                     const MySectionHeading(
@@ -109,37 +85,32 @@ class SettingsScreen extends StatelessWidget {
                       icon: Iconsax.safe_home,
                       title: 'My Addresses',
                       subTitle: 'Set shopping delivery address',
-                      onTap: () => onUserAddress(),
+                      onTap: onUserAddress,
                     ),
                     MySettingsMenuTile(
                       icon: Iconsax.safe_home,
                       title: 'My Cart',
                       subTitle: 'Add, remove products and move to checkout',
-                      onTap: () => onCart(),
+                      onTap: onCart,
                     ),
                     MySettingsMenuTile(
                       icon: Iconsax.safe_home,
                       title: 'My Orders',
                       subTitle: 'In-progress and Completed Orders',
-                      onTap: () => onOrder(),
+                      onTap: onOrder,
                     ),
-                    MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
-                      title: 'My Wishlist',
-                      subTitle: 'Add, Remove products to your wishlist',
-                      onTap: () => onWishlist(),
-                    ),
+
                     MySettingsMenuTile(
                       icon: Iconsax.safe_home,
                       title: 'My Coupons',
                       subTitle: 'List of all coupons',
-                      onTap: () => onCoupon(),
+                      onTap: onCoupon,
                     ),
                     MySettingsMenuTile(
                       icon: Iconsax.safe_home,
                       title: 'Account Privacy',
                       subTitle: 'Manage data usage and connected accounts',
-                      onTap: () => onAccountPrivacy(),
+                      onTap: onAccountPrivacy,
                     ),
                     const SizedBox(height: MySizes.spaceBtwSections),
                     const MySectionHeading(

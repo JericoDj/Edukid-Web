@@ -23,138 +23,153 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProductController());
+    final ScrollController scrollController = ScrollController();
     final NavigationController navigationController = Get.find();
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            /// HEADER
-            const MyPrimaryHeaderContainer(
-              child: Column(
-                children: [
+      body: Scrollbar(
+        interactive: true,
+        thumbVisibility: true,
+        trackVisibility: true,
 
-                  /// CATEGORIES
-                  Padding(
-                    padding: EdgeInsets.only(left: MySizes.defaultspace),
-                    child: Column(
+
+        radius: Radius.circular(MySizes.md),
+        controller: scrollController,
+
+        thickness: MySizes.sm,
+
+        child: SingleChildScrollView(
+
+          controller: scrollController,
+          child: Column(
+            children: [
+              /// HEADER
+              const MyPrimaryHeaderContainer(
+                child: Column(
+                  children: [
+
+                    /// CATEGORIES
+                    Padding(
+                      padding: EdgeInsets.only(left: MySizes.defaultspace),
+                      child: Column(
+                        children: [
+                          /// HEADING OF CATEGORIES
+                          MySectionHeading(
+                            title: '',
+                            showActionButton: false,
+                            textColor: MyColors.white,
+                          ),
+                          SizedBox(height: MySizes.spaceBtwItems / 3),
+
+                          /// LIST OF CATEGORIES
+                          MyHomeCategories(),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwSections),
+                  ],
+                ),
+              ),
+
+              /// BODY OF PAGE
+              Padding(
+                padding: const EdgeInsets.all(MySizes.defaultspace),
+                child: Column(
+                  children: [
+                    /// PromoSlider
+                    MyPromoSlider(),
+                    SizedBox(height: MySizes.spaceBtwSections,), // Adjust the space between the slider and buttons
+
+                    /// Buttons in a Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        /// HEADING OF CATEGORIES
-                        MySectionHeading(
-                          title: '',
-                          showActionButton: false,
-                          textColor: MyColors.white,
+                        Container(
+                          width: 200,
+                          child: ElevatedButton(
+                            onPressed: () => navigationController
+                                .navigateTo('bookingSession'),
+                            style: ButtonStyle(
+                              backgroundColor:
+                              WidgetStateProperty.all(MyColors.white),
+                              side: WidgetStateProperty.all<BorderSide>(
+                                BorderSide(color: MyColors.primaryColor),
+                              ),
+                              shape: MaterialStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                              ),
+                            ),
+                            child: Text('Try a Free Session',
+                                style: TextStyle(
+                                    color: MyColors.primaryColor)),
+                          ),
                         ),
-                        SizedBox(height: MySizes.spaceBtwItems / 3),
-
-                        /// LIST OF CATEGORIES
-                        MyHomeCategories(),
+                        SizedBox(width: 20), // Adjust the space between buttons
+                        Container(
+                          width: 200,
+                          child: ElevatedButton(
+                            onPressed: () => navigationController
+                                .navigateTo('bookingSession'),
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  MyColors.primaryColor),
+                              shape: WidgetStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                              ),
+                            ),
+                            child: Text('Book a Session',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: MySizes.spaceBtwSections),
-                ],
-              ),
-            ),
+                    SizedBox(height: MySizes.spaceBtwSections),
 
-            /// BODY OF PAGE
-            Padding(
-              padding: const EdgeInsets.all(MySizes.defaultspace),
-              child: Column(
-                children: [
-                  /// PromoSlider
-                  MyPromoSlider(),
-                  SizedBox(height: MySizes.spaceBtwSections,), // Adjust the space between the slider and buttons
+                    /// Worksheets Heading
+                    MySectionHeading(
+                      title: 'Worksheets',
+                      onPressed: () {
+                        navigationController.navigateTo(
+                            'allProducts'); // Navigate to AllProductsScreen with its controller
+                      },
+                    ),
 
-                  /// Buttons in a Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 200,
-                        child: ElevatedButton(
-                          onPressed: () => navigationController
-                              .navigateTo('bookingSession'),
-                          style: ButtonStyle(
-                            backgroundColor:
-                            WidgetStateProperty.all(MyColors.white),
-                            side: WidgetStateProperty.all<BorderSide>(
-                              BorderSide(color: MyColors.primaryColor),
+                    /// Popular Products (WorkSheets)
+                    Container(
+                      alignment: Alignment.center,
+                      child: Obx(() {
+                        if (controller.isLoading.value)
+                          return const MyVerticalProductShimmer();
+
+                        if (controller.featuredProducts.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No Data Found',
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                            ),
-                          ),
-                          child: Text('Try a Free Session',
-                              style: TextStyle(
-                                  color: MyColors.primaryColor)),
-                        ),
-                      ),
-                      SizedBox(width: 20), // Adjust the space between buttons
-                      Container(
-                        width: 200,
-                        child: ElevatedButton(
-                          onPressed: () => navigationController
-                              .navigateTo('bookingSession'),
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
-                                MyColors.primaryColor),
-                            shape: WidgetStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                            ),
-                          ),
-                          child: Text('Book a Session',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: MySizes.spaceBtwSections),
+                          );
+                        }
 
-                  /// Worksheets Heading
-                  MySectionHeading(
-                    title: 'Worksheets',
-                    onPressed: () {
-                      navigationController.navigateTo(
-                          'allProducts'); // Navigate to AllProductsScreen with its controller
-                    },
-                  ),
-
-                  /// Popular Products (WorkSheets)
-                  Container(
-                    alignment: Alignment.center,
-                    child: Obx(() {
-                      if (controller.isLoading.value)
-                        return const MyVerticalProductShimmer();
-
-                      if (controller.featuredProducts.isEmpty) {
-                        return Center(
-                          child: Text(
-                            'No Data Found',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                        return MyGridLayoutWidget(
+                          mainAxisExtent: 321,
+                          itemCount: controller.featuredProducts.length,
+                          itemBuilder: (_, index) => MyProductCardVertical(
+                            product: controller.featuredProducts[index],
                           ),
                         );
-                      }
-
-                      return MyGridLayoutWidget(
-                        mainAxisExtent: 321,
-                        itemCount: controller.featuredProducts.length,
-                        itemBuilder: (_, index) => MyProductCardVertical(
-                          product: controller.featuredProducts[index],
-                        ),
-                      );
-                    }),
-                  ),
-                ],
+                      }),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

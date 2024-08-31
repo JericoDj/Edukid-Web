@@ -25,6 +25,7 @@ class MyCartItemsListView extends StatelessWidget {
           () => ListView.separated(
         shrinkWrap: true,
         itemCount: cartController.cartItems.length,
+
         separatorBuilder: (_, __) =>
         const SizedBox(height: MySizes.spaceBtwSections),
         itemBuilder: (_, index) => Dismissible(
