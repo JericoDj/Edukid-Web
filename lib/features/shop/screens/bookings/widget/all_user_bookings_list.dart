@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../../utils/constants/colors.dart';
+// Import necessary constants and controllers
+import '../../../../../utils/constants/colors.dart'; // Ensure correct path
 import '../../../controller/bookings/booking_order_controller.dart';
 import '../../../models/booking_orders_model.dart';
-// Import MyColors.primaryColor
 
 class AllBookingsScreen extends StatelessWidget {
   final BookingOrderController _bookingOrderController = Get.find<BookingOrderController>();
@@ -13,7 +13,7 @@ class AllBookingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyColors.primaryColor, // Set app bar color here
+        backgroundColor: MyColors.primaryColor, // Ensure MyColors is imported correctly
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white), // Make the back button white
           onPressed: () => Get.back(), // Navigate back when pressed

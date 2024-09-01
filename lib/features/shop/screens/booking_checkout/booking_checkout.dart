@@ -55,68 +55,66 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
     final totalAmount = MyPricingCalculator.calculateTotalPrice(subTotal, 'US');
     final dark = MyHelperFunctions.isDarkMode(context);
 
-    return Scaffold(
-      appBar: MyAppBar(
-        showBackArrow: true,
-        title: Text(
-          'Booking Review',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(MySizes.defaultspace),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// booking details
-              BookingDetails(widget: widget),
-
-              const SizedBox(height: 16.0),
-              MyCouponCode(),
-              const SizedBox(height: 16.0),
-              MyRoundedContainer(
-                showBorder: true,
-                padding: EdgeInsets.all(16.0),
-                backgroundColor: dark ? Colors.grey[900]! : Colors.white,
-                child: Column(
-                  children: [
-                    MyBookingBillingAmountSection(subTotal: subTotal),
-                    SizedBox(height: 16.0),
-                    Divider(),
-                    SizedBox(height: 16.0),
-                    MyBillingPaymentSection(),
-                    SizedBox(height: 16.0),
-                    MyBillingAddressSection(),
-                    GooglePayButton(
-                      paymentConfiguration: PaymentConfiguration.fromJsonString( 'gpay.json'),
-                      paymentItems: [],
-                      type: GooglePayButtonType.buy,
-                      margin: EdgeInsets.only(top: 15.0),
-                      onPaymentResult: (data) {
-                        print(data);
-                      },
-                      loadingIndicator: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        width: 650,
+        child: Scaffold(
+          appBar: MyAppBar(
+            showBackArrow: true,
+            title: Text(
+              'Booking Review',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
           ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: subTotal > 0
-              ? () {
-            final controller = Get.put(BookingOrderController());
-            controller.processOrder(totalAmount,widget.pickedDates, widget.pickedTimes);
-          }
-              : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
-          child: Text('Checkout \$$totalAmount'),
+          body: Padding(
+            padding: const EdgeInsets.all(MySizes.defaultspace),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// booking details
+                  BookingDetails(widget: widget),
+
+                  const SizedBox(height: 16.0),
+                  MyCouponCode(),
+                  const SizedBox(height: 16.0),
+                  MyRoundedContainer(
+                    showBorder: true,
+                    padding: EdgeInsets.all(16.0),
+                    backgroundColor: dark ? Colors.grey[900]! : Colors.white,
+                    child: Column(
+                      children: [
+                        MyBookingBillingAmountSection(subTotal: subTotal),
+                        SizedBox(height: 16.0),
+                        Divider(),
+                        SizedBox(height: 16.0),
+                        MyBillingPaymentSection(),
+                        SizedBox(height: 16.0),
+                        MyBillingAddressSection(),
+
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+
+
+          /// checkout button
+          bottomNavigationBar: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: subTotal > 0
+                  ? () {
+                final controller = Get.put(BookingOrderController());
+                controller.processOrder(totalAmount,widget.pickedDates, widget.pickedTimes);
+              }
+                  : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
+              child: Text('Checkout \$$totalAmount'),
+            ),
+          ),
         ),
       ),
     );

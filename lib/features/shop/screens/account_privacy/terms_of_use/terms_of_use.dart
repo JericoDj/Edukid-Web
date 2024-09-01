@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class TermsOfUseScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Terms of Use'),
+void showTermsOfUseDialog(BuildContext context) {
+  Get.dialog(
+    Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      body: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -38,17 +38,19 @@ class TermsOfUseScreen extends StatelessWidget {
                     'and conditions. If you do not agree with any part of these terms, please do not use EduKid.',
                 style: TextStyle(fontSize: 16),
               ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Get.back(); // Close the dialog
+                  },
+                  child: Text('Close'),
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: TermsOfUseScreen(),
-  ));
+    ),
+  );
 }

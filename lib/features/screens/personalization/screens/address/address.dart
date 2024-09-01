@@ -18,26 +18,32 @@ class UserAddressScreen extends StatelessWidget {
     final controller = Get.put(AddressController());
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Center the AppBar title and back button
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10.0), // Add some top padding for spacing
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight), // Set the height of the AppBar
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16.0), // Add some top padding for spacing
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
 
-                  Text(
-                    'Addresses',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
+                Text(
+                  'Addresses',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      body: Stack(
+
+
+        children: [
+          // Center the AppBar title and back button
+
           Align(
             alignment: Alignment.topCenter, // Align to the top center
             child: Padding(

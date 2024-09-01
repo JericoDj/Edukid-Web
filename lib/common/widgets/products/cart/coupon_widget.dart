@@ -44,7 +44,7 @@ class MyCouponCode extends StatelessWidget {
 
           /// apply button
           SizedBox(
-            width: 80,
+            width: 100,
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(

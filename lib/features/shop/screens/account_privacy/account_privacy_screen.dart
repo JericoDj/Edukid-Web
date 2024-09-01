@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:webedukid/features/shop/screens/account_privacy/terms_of_use/terms_of_use.dart';
 import 'package:webedukid/utils/constants/sizes.dart';
 
+
 class AccountPrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class AccountPrivacyScreen extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center, // Center the text
                 ),
-                SizedBox(height: MySizes.spaceBtwInputItems,),
+                SizedBox(height: MySizes.spaceBtwInputItems),
                 Text(
                   'Learn about how we handle your data and your privacy rights.',
                   style: TextStyle(
@@ -55,7 +56,7 @@ class AccountPrivacyScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ),
-                  onTap: () => Get.to(() => TermsOfUseScreen()),
+                  onTap: () => showTermsOfUseDialog(context), // Use the dialog function
                 ),
                 ListTile(
                   title: Center(

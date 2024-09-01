@@ -50,7 +50,6 @@ class OrderController extends GetxController {
       // Get user authentication ID
       final userId = AuthenticationRepository.instance.authUser?.uid;
       if (userId == null || userId.isEmpty) {
-        print("User ID is null or empty");
         return;
       }
 
@@ -58,21 +57,6 @@ class OrderController extends GetxController {
       final String? savedCustomerId = await _retrieveSavedCustomerId();
       final String? savedCardId = await _retrieveSavedCardId();  // Retrieve saved card ID
 
-      // Debugging print statements
-      if (savedCustomerId != null) {
-        print("Saved customer ID found: $savedCustomerId");
-      } else {
-        print("No saved customer ID found.");
-      }
-
-      if (savedCardId != null) {
-        print("Saved card ID found: $savedCardId");
-      } else {
-        print("No saved card ID found.");
-      }
-
-      // Print the total amount
-      print("Total amount to be charged: $totalAmount");
 
       if (savedCustomerId != null && savedCardId != null) {
         // Process the payment using the saved customer ID and card ID
