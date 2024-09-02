@@ -65,7 +65,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'bookings': () => BookingsScreen(),
       'order': () => OrderScreen(),
       'cart': () => CartScreen(),
-      'bookingSession': () => BookingSessionScreen(selectedDates: [], selectedTimes: []),
+      'bookingSession': () => BookingSessionScreen(),
       'allProducts': () {
         Get.lazyPut(() => ProductController());
         return AllProductsScreen(
