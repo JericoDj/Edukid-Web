@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:webedukid/utils/constants/colors.dart';
+import 'package:webedukid/utils/constants/sizes.dart';
 
 import '../booking_checkout/booking_checkout.dart';
+import 'booking_session.dart';
+import 'booking_session_controller.dart';
 
 class BookingSessionScreen extends StatelessWidget {
   final controller = Get.put(BookingController());
@@ -16,136 +20,175 @@ class BookingSessionScreen extends StatelessWidget {
           alignment: Alignment.topCenter,
           child: Container(
             alignment: Alignment.center,
-            width: 600,
+            width: 800,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text('Select a Date and Time', style: TextStyle(fontSize: 20)),
+                  child: Text('Select a Date and Time',
+                      style: TextStyle(fontSize: 20)),
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Calendar with border
                     Expanded(
                       child: Obx(() {
-                        return TableCalendar(
-                          firstDay: DateTime.utc(2023, 1, 1),
-                          lastDay: DateTime.utc(2025, 12, 31),
-                          focusedDay: controller.focusedDate.value,
-                          selectedDayPredicate: (day) => controller.selectedDates.contains(_normalizeDate(day)),
-                          onDaySelected: (selectedDay, focusedDay) {
-                            controller.updateSelectedDates(_normalizeDate(selectedDay));
-                          },
-                          calendarStyle: CalendarStyle(
-                            todayDecoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
-                            selectedDecoration: BoxDecoration(
-                              color: controller.selectedTimeSlots.containsKey(controller.focusedDate.value)
-                                  ? Colors.green
-                                  : Colors.yellow,
-                              shape: BoxShape.circle,
-                            ),
+                        return Container(
+                          height: 400,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: MyColors.primaryColor, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                          calendarBuilders: CalendarBuilders(
-                            defaultBuilder: (context, date, focusedDay) {
-                              Color? dayColor = controller.getDayColor(_normalizeDate(date));
-                              if (dayColor == null) {
-                                return Center(
+                          padding: EdgeInsets.all(8.0),
+                          child: TableCalendar(
+                            firstDay: DateTime.utc(2023, 1, 1),
+                            lastDay: DateTime.utc(2025, 12, 31),
+                            focusedDay: controller.focusedDate.value,
+                            onDaySelected: (selectedDay, focusedDay) {
+                              controller.updateChosenDate(
+                                  _normalizeDate(selectedDay));
+                            },
+                            calendarBuilders: CalendarBuilders(
+                              defaultBuilder: (context, date, focusedDay) {
+                                Color dayColor = controller
+                                    .getDayColor(_normalizeDate(date));
+
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: dayColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
                                   child: Text(
                                     '${date.day}',
-                                    style: TextStyle(color: Colors.black), // Default text color
+                                    style: TextStyle(
+                                      color: dayColor == Colors.yellow ||
+                                          dayColor == Colors.white
+                                          ? Colors.black
+                                          : Colors
+                                          .white, // Adjust text color based on background
+                                    ),
                                   ),
                                 );
-                              }
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: dayColor,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '${date.day}',
-                                  style: TextStyle(
-                                    color: dayColor == Colors.yellow ? Colors.black : Colors.white,
+                              },
+                              todayBuilder: (context, date, focusedDay) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey,
+                                    shape: BoxShape.circle,
                                   ),
-                                ),
-                              );
-                            },
-                            todayBuilder: (context, date, focusedDay) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  '${date.day}',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              );
-                            },
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    '${date.day}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         );
                       }),
                     ),
+                    SizedBox(width: 16.0),
+                    // Add spacing between the calendar and timeslot
+                    // Timeslots with border
                     Expanded(
                       child: Obx(() {
-                        final timeSlotsForDay = controller.getTimeSlotsForDate(_normalizeDate(controller.focusedDate.value));
-                        if (timeSlotsForDay.isEmpty) {
-                          return Center(child: Text("Please Select a Date"));
-                        } else {
-                          return Column(
+                        final timeSlotsForDay = controller.getTimeSlotsForDate(
+                            _normalizeDate(controller.focusedDate.value));
+                        return Container(
+                          height: 400,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: MyColors.primaryColor, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          padding: EdgeInsets.all(8.0),
+                          child: timeSlotsForDay.isEmpty
+                              ? Center(child: Text("Please Select a Date"))
+                              : Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Text(
                                   "Time Slots for ${DateFormat.yMMMMd().format(controller.focusedDate.value)}",
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                               ...timeSlotsForDay.map((timeSlot) {
-                                bool isSelected = controller.selectedTimeSlots[_normalizeDate(controller.focusedDate.value)] == timeSlot;
+                                bool isChosen =
+                                    controller.selectedTimeSlots[
+                                    _normalizeDate(controller
+                                        .focusedDate.value)] ==
+                                        timeSlot;
                                 return ListTile(
                                   title: Text(
                                     '${timeSlot.format(context)}',
-                                    style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+                                    style: TextStyle(color: isChosen ? Colors.white : Colors.black),
                                   ),
-                                  tileColor: isSelected ? Colors.green : Colors.transparent,
-                                  trailing: Text('Available Slots: ${controller.getAvailableSlots(_normalizeDate(controller.focusedDate.value), timeSlot)}'),
+                                  tileColor: isChosen ? MyColors.buttonPrimary : Colors.transparent,
+                                  trailing: Text(
+                                    'Available Slots: ${controller.getAvailableSlots(_normalizeDate(controller.focusedDate.value), timeSlot)}',
+                                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                      color: isChosen ? Colors.white : Colors.black, // Change text color based on selection
+                                    ),
+                                  ),
                                   onTap: () => controller.selectTimeSlot(timeSlot),
                                 );
+
+
                               }).toList(),
                             ],
-                          );
-                        }
+                          ),
+                        );
                       }),
                     ),
                   ],
                 ),
+                SizedBox(height: MySizes.spaceBtwItems),
                 Obx(() {
-                  if (controller.selectedDates.isEmpty) {
-                    return Center(child: Text("No Dates Selected"));
+                  final selectedDatesWithTimeSlots =
+                  controller.getSelectedDates();
+                  if (selectedDatesWithTimeSlots.isEmpty) {
+                    return Container(); // Return an empty container instead of a Center widget with text
                   } else {
                     return Container(
+                      width: 500,
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: MyColors.primaryColor),
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: controller.selectedDates.map((date) {
-                          TimeOfDay? selectedTime = controller.selectedTimeSlots[date];
+                        children: selectedDatesWithTimeSlots.map((date) {
+                          TimeOfDay? selectedTime =
+                          controller.selectedTimeSlots[date];
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: [
-                                Icon(Icons.calendar_today, color: Colors.blue),
+                                Icon(Icons.calendar_today,
+                                    color: MyColors.primaryColor),
                                 SizedBox(width: 8.0),
+                                Expanded(
+                                  child: Text(
+                                    "${DateFormat.yMMMMd().format(date)} - ${selectedTime != null ? selectedTime.format(context) : 'No Time Slot Selected'}",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.black),
+                                  ),
+                                ),
                                 Text(
-                                  "${DateFormat.yMMMMd().format(date)} - ${selectedTime != null ? selectedTime.format(context) : 'No Time Slot Selected'}",
-                                  style: TextStyle(fontSize: 16, color: Colors.black),
+                                  '\$${controller.pricePerSession.value}',
+                                  // Display price per session here
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black),
                                 ),
                               ],
                             ),
@@ -155,41 +198,39 @@ class BookingSessionScreen extends StatelessWidget {
                     );
                   }
                 }),
-                Obx(() {
-                  return Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text('Total Price: \$${controller.calculateTotalPrice()}'),
-                  );
-                }),
                 SizedBox(height: 16.0),
                 Center(
                   child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
+                    width: 400,
+                    height: 40,
                     child: ElevatedButton(
                       onPressed: () {
-                        if (controller.selectedDates.isEmpty || controller.selectedTimeSlots.isEmpty) {
-                          Get.snackbar("Error", "Please select at least one date and time.");
+                        if (controller.getSelectedDates().isEmpty) {
+                          Get.snackbar("Error",
+                              "Please select at least one date and time.");
                           return;
                         }
                         Get.to(
                           BookingCheckOutScreen(
-                            pickedDates: controller.selectedDates.toList(),
-                            pickedTimes: controller.selectedTimeSlots.values.toList(),
-                            price: controller.calculateTotalPrice(),
+                            pickedDates: controller.getSelectedDates(),
+                            pickedTimes:
+                            controller.selectedTimeSlots.values.toList(),
+                            price: controller.pricePerSession
+                                .value, // Pass the price per session
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: MyColors.primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28.0),
                         ),
                       ),
-                      child: Obx(() => Text(
-                        'Book a Session \$${controller.calculateTotalPrice()}',
-                        style: TextStyle(color: Colors.white, fontSize: 18.0),
-                      )),
+                      child: Text(
+                        'Book a Session \$${controller.pricePerSession.value}',
+                        // Show price per session
+                        style: TextStyle(color: Colors.white, fontSize: 16.0),
+                      ),
                     ),
                   ),
                 ),
@@ -204,83 +245,5 @@ class BookingSessionScreen extends StatelessWidget {
   // Helper method to normalize date (remove time part)
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
-  }
-}
-
-class BookingController extends GetxController {
-  var focusedDate = DateTime.now().obs;
-  var selectedDates = <DateTime>{}.obs;
-  var selectedTimeSlots = <DateTime, TimeOfDay>{}.obs;
-  var dateSpecificTimeSlots = <DateTime, List<TimeOfDay>>{}.obs;
-  var pricePerSession = 10.0.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
-  void updateSelectedDates(DateTime date) {
-    date = _normalizeDate(date);
-    focusedDate.value = date;
-    if (selectedDates.contains(date)) {
-      selectedDates.remove(date);
-      selectedTimeSlots.remove(date);
-      dateSpecificTimeSlots.remove(date);
-    } else {
-      selectedDates.add(date);
-      updateTimeSlots(date);
-    }
-  }
-
-  void updateTimeSlots(DateTime date) {
-    // Set different time slots for each date
-    dateSpecificTimeSlots[date] = [
-      TimeOfDay(hour: 10, minute: 30),
-      TimeOfDay(hour: 12, minute: 30),
-      TimeOfDay(hour: 13, minute: 40),
-      TimeOfDay(hour: 14, minute: 50),
-      TimeOfDay(hour: 16, minute: 10),
-      TimeOfDay(hour: 17, minute: 20),
-      TimeOfDay(hour: 18, minute: 30),
-    ];
-  }
-
-  List<TimeOfDay> getTimeSlotsForDate(DateTime date) {
-    return dateSpecificTimeSlots[date] ?? [];
-  }
-
-  void selectTimeSlot(TimeOfDay timeSlot) {
-    DateTime date = _normalizeDate(focusedDate.value);
-    if (selectedDates.contains(date)) {
-      selectedTimeSlots[date] = timeSlot;
-      update(); // Notify listeners to refresh the UI
-    }
-  }
-
-  int getAvailableSlots(DateTime date, TimeOfDay timeSlot) {
-    // Implement logic to return the number of available slots for a given time slot on a given date
-    return 4;
-  }
-
-  double calculateTotalPrice() {
-    return selectedTimeSlots.length * pricePerSession.value;
-  }
-
-  // Method to determine the color for each date
-  Color? getDayColor(DateTime date) {
-    if (_isSameDate(date, DateTime.now())) return Colors.blue; // Current date
-    if (selectedTimeSlots.containsKey(date)) return Colors.green; // Selected date with timeslot
-    if (selectedDates.contains(date) && !selectedTimeSlots.containsKey(date)) return Colors.yellow; // Selected date without timeslot
-    return null; // Default color for unselected dates (null means no color applied, keeping default)
-  }
-
-  // Helper method to normalize date (remove time part)
-  DateTime _normalizeDate(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
-
-  // Helper method to compare dates ignoring the time part
-  bool _isSameDate(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

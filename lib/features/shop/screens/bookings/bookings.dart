@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/all_user_bookings_list.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/booking_tabs.dart';
+import 'package:webedukid/utils/constants/colors.dart';
 
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
@@ -65,11 +66,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       Get.to(() => AllBookingsScreen());
                     },
                     style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(Colors.blue),
+                      foregroundColor: MaterialStateProperty.all(MyColors.primaryColor),
                     ),
                     child: Text(
                       'View All Bookings',
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(color: MyColors.primaryColor),
                     ),
                   ),
                 ),

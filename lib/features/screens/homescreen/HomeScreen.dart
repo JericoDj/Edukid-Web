@@ -124,7 +124,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             child: Text('Book a Session',
-                                style: TextStyle(color: Colors.white)),
+                                style: TextStyle(color: MyColors.white)),
                           ),
                         ),
                       ],

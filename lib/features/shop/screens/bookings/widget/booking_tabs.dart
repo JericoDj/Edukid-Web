@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:webedukid/utils/constants/colors.dart';
 
 import '../../../../bookings/widgets/bookings_list.dart';
 
@@ -58,14 +59,14 @@ class MyTabBookingBar extends StatelessWidget {
                     Icon(
                       tabs[index].icon,
                       color:
-                      index == selectedIndex ? Colors.blue : Colors.grey,
+                      index == selectedIndex ? MyColors.primaryColor : Colors.grey,
                     ),
                     SizedBox(height: 5),
                     Text(
                       tabs[index].label,
                       style: TextStyle(
                         color: index == selectedIndex
-                            ? Colors.blue
+                            ? MyColors.primaryColor
                             : Colors.grey,
                         fontWeight: FontWeight.bold,
                       ),
