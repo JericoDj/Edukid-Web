@@ -1,15 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/all_user_bookings_list.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/booking_tabs.dart';
 import 'package:webedukid/utils/constants/colors.dart';
+import 'package:webedukid/utils/constants/sizes.dart';
 
 import '../../../../utils/constants/enums.dart';
-import '../../../../utils/constants/sizes.dart';
-
 import '../../../bookings/widgets/bookings_list.dart';
-import '../../../screens/homescreen/widgets/promo_slider.dart';
 import '../../controller/bookings/booking_order_controller.dart';
 import '../../models/booking_orders_model.dart';
 
@@ -35,13 +32,12 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(MySizes.defaultspace), // Add padding here
+        padding: const EdgeInsets.all(MySizes.defaultspace),
         child: Column(
           children: [
             const SizedBox(height: 10),
             Stack(
               children: [
-                // Center MyTabBookingBar
                 Align(
                   alignment: Alignment.center,
                   child: MyTabBookingBar(
@@ -57,7 +53,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
                     selectedIndex: _selectedIndex,
                   ),
                 ),
-                // Align "View All Bookings" button to the right
                 Positioned(
                   right: 0,
                   child: TextButton(
@@ -66,7 +61,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       Get.to(() => AllBookingsScreen());
                     },
                     style: ButtonStyle(
-                      foregroundColor: MaterialStateProperty.all(MyColors.primaryColor),
+                      foregroundColor:
+                      MaterialStateProperty.all(MyColors.primaryColor),
                     ),
                     child: Text(
                       'View All Bookings',
@@ -76,78 +72,73 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Expanded(
-              child: FutureBuilder<List<BookingOrderModel>>(
-                future: _bookingOrderController.fetchUserBookings(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else {
-                    final List<BookingOrderModel>? bookings = snapshot.data;
-                    if (bookings != null && bookings.isNotEmpty) {
-                      // Filter bookings based on selected tab
-                      List<BookingOrderModel> filteredBookings;
-                      switch (_selectedIndex) {
-                        case 0:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.processing)
-                              .toList();
-                          break;
-                        case 1:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.scheduled)
-                              .toList();
-                          break;
-                        case 2:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.ongoing)
-                              .toList();
-                          break;
-                        case 3:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.completed)
-                              .toList();
-                          break;
-                        case 4:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.rescheduled)
-                              .toList();
-                          break;
-                        case 5:
-                          filteredBookings = bookings
-                              .where((booking) =>
-                          booking.status == OrderStatus.cancelled)
-                              .toList();
-                          break;
-                        default:
-                          filteredBookings = [];
-                          break;
-                      }
-
-                      return Center(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: 600), // Set the maximum width
-                          child: MyBookingsList(bookings: filteredBookings),
-                        ),
-                      );
-                    } else {
-                      return Center(child: Text('No bookings found.'));
-                    }
-                  }
-                },
+              child: BookingsListScreen(
+                status: _getOrderStatusForSelectedIndex(_selectedIndex), title: '',
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  OrderStatus _getOrderStatusForSelectedIndex(int index) {
+    switch (index) {
+      case 0:
+        return OrderStatus.processing;
+      case 1:
+        return OrderStatus.scheduled;
+      case 2:
+        return OrderStatus.ongoing;
+      case 3:
+        return OrderStatus.completed;
+      case 4:
+        return OrderStatus.rescheduled;
+      case 5:
+        return OrderStatus.cancelled;
+      default:
+        return OrderStatus.processing;
+    }
+  }
+}
+
+class BookingsListScreen extends StatelessWidget {
+  final OrderStatus status;
+
+  const BookingsListScreen({Key? key, required this.status, required String title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final BookingOrderController _bookingOrderController =
+        BookingOrderController.instance;
+
+    return FutureBuilder<List<BookingOrderModel>>(
+      future: _bookingOrderController.fetchUserBookings(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          final List<BookingOrderModel>? bookings = snapshot.data;
+          if (bookings != null && bookings.isNotEmpty) {
+            final filteredBookings = bookings
+                .where((booking) => booking.status == status)
+                .toList();
+
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 600),
+                child: MyBookingsList(bookings: filteredBookings),
+              ),
+            );
+          } else {
+            return Center(child: Text('No bookings found.'));
+          }
+        }
+      },
     );
   }
 }

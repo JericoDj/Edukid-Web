@@ -4,6 +4,12 @@ import 'package:iconsax/iconsax.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'common/widgets/customShapes/containers/search_container.dart';
+import 'features/bookings/status/processing.dart';
+import 'features/bookings/status/scheduled.dart';
+import 'features/bookings/status/ongoing.dart';
+import 'features/bookings/status/completed.dart';
+import 'features/bookings/status/rescheduled.dart';
+import 'features/bookings/status/cancelled.dart';
 import 'features/screens/gamesscreen/games screen.dart';
 import 'features/screens/homescreen/HomeScreen.dart';
 import 'features/screens/navigation_controller.dart';
@@ -53,7 +59,6 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     Get.lazyPut(() => NavigationController());
@@ -62,7 +67,13 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     final Map<String, Widget Function()> screens = {
       'home': () => HomeScreen(),
       'store': () => StoreScreen(),
-      'bookings': () => BookingsScreen(),
+      'bookings': () => BookingsScreen(), // Main bookings screen
+      'processingBookings': () => ProcessingBookingsScreen(),
+      'scheduledBookings': () => ScheduledBookingsScreen(),
+      'ongoingBookings': () => OngoingBookingsScreen(),
+      'completedBookings': () => CompletedBookingsScreen(),
+      'rescheduledBookings': () => RescheduledBookingsScreen(),
+      'cancelledBookings': () => CancelledBookingsScreen(),
       'order': () => OrderScreen(),
       'cart': () => CartScreen(),
       'bookingSession': () => BookingSessionScreen(),
@@ -174,8 +185,53 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
             color: navigationController.currentScreen.value == screenKey ? Colors.yellow : Colors.white,
           ),
         ),
-        onPressed: () => navigationController.navigateTo(screenKey),
+        onPressed: () {
+          _handleBookingScreenNavigation(screenKey);
+        },
       );
     });
+  }
+
+  void _handleBookingScreenNavigation(String screenKey) {
+    final NavigationController navigationController = Get.find();
+
+    switch (screenKey) {
+      case 'home':
+        navigationController.currentScreen.value = 'home';
+        break;
+      case 'store':
+        navigationController.currentScreen.value = 'store';
+        break;
+      case 'order':
+        navigationController.currentScreen.value = 'order';
+        break;
+      case 'games':
+        navigationController.currentScreen.value = 'games';
+        break;
+      case 'bookings':
+        navigationController.currentScreen.value = 'bookings';
+        break;
+      case 'processingBookings':
+        navigationController.currentScreen.value = 'processingBookings';
+        break;
+      case 'scheduledBookings':
+        navigationController.currentScreen.value = 'scheduledBookings';
+        break;
+      case 'ongoingBookings':
+        navigationController.currentScreen.value = 'ongoingBookings';
+        break;
+      case 'completedBookings':
+        navigationController.currentScreen.value = 'completedBookings';
+        break;
+      case 'rescheduledBookings':
+        navigationController.currentScreen.value = 'rescheduledBookings';
+        break;
+      case 'cancelledBookings':
+        navigationController.currentScreen.value = 'cancelledBookings';
+        break;
+      default:
+        navigationController.currentScreen.value = 'home'; // Or any default screen
+        break;
+    }
   }
 }
