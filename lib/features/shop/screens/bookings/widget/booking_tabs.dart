@@ -2,8 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 
-import '../../../../bookings/widgets/bookings_list.dart';
-
 class TabData {
   final String label;
   final IconData icon;
@@ -18,7 +16,7 @@ class MyTabContentView extends StatelessWidget {
   const MyTabContentView({
     Key? key,
     required this.content,
-    required this.selectedIndex, required MyBookingsList child,
+    required this.selectedIndex,
   }) : super(key: key);
 
   @override

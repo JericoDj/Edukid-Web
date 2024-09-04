@@ -9,7 +9,7 @@ class BookingController extends GetxController {
   var refocusFlag = false.obs; // Track whether the date is being refocused
   var selectedTimeSlots = <DateTime, TimeOfDay>{}.obs;
   var dateSpecificTimeSlots = <DateTime, List<TimeOfDay>>{}.obs;
-  var pricePerSession = 10.0.obs;
+  var pricePerSession = 1.0.obs;
 
   @override
   void onInit() {

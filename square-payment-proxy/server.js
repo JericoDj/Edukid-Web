@@ -1,7 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-require('dotenv').config({ path: '.env.sandbox' }); // Load environment variables from .env.sandbox
+require('dotenv').config(); // Load environment variables from .env (production)
 
 const app = express();
 const port = 3000;
@@ -22,7 +22,7 @@ app.post('/create-customer', async (req, res) => {
   try {
     // Create a customer profile with Square
     console.log('Creating customer with Square...');
-    const createCustomerResponse = await axios.post('https://connect.squareupsandbox.com/v2/customers', {
+    const createCustomerResponse = await axios.post('https://connect.squareup.com/v2/customers', {
       given_name: firstName,
       family_name: lastName,
       email_address: email,
@@ -38,7 +38,7 @@ app.post('/create-customer', async (req, res) => {
 
     // Save the payment method for this customer
     console.log('Saving card for customer:', customerId);
-    const createCardResponse = await axios.post(`https://connect.squareupsandbox.com/v2/customers/${customerId}/cards`, {
+    const createCardResponse = await axios.post(`https://connect.squareup.com/v2/customers/${customerId}/cards`, {
       card_nonce: nonce,
       billing_address: billingAddress, // Use the billing address sent from the client
       cardholder_name: `${firstName} ${lastName}`,
@@ -72,7 +72,7 @@ app.post('/charge-customer', async (req, res) => {
   try {
     // Charge the customer using their stored card
     console.log('Charging customer:', customerId, 'using card:', cardId);
-    const chargeResponse = await axios.post('https://connect.squareupsandbox.com/v2/payments', {
+    const chargeResponse = await axios.post('https://connect.squareup.com/v2/payments', {
       customer_id: customerId,
       source_id: cardId, // Corrected to use card ID as the source ID
       amount_money: {
@@ -108,7 +108,7 @@ app.post('/process-payment', async (req, res) => {
   try {
     // Make the request to Square's payment API
     console.log('Processing one-time payment...');
-    const response = await axios.post('https://connect.squareupsandbox.com/v2/payments', {
+    const response = await axios.post('https://connect.squareup.com/v2/payments', {
       source_id: sourceId,
       idempotency_key: idempotencyKey,
       amount_money,

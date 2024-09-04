@@ -18,7 +18,7 @@ Future<bool> chargeCustomer(String customerId, String cardId, double amount) asy
       body: jsonEncode(<String, dynamic>{
         'customerId': customerId,
         'cardId': cardId, // Use cardId for specifying which card to charge
-        'amount': (amount * 100).round(), // Convert to cents
+        'amount': (amount).round(), // Convert to cents
       }),
     );
 

@@ -6,7 +6,12 @@ import 'package:webedukid/utils/constants/colors.dart';
 import 'package:webedukid/utils/constants/sizes.dart';
 
 import '../../../../utils/constants/enums.dart';
-import '../../../bookings/widgets/bookings_list.dart';
+import '../../../bookings/status/cancelled.dart';
+import '../../../bookings/status/completed.dart';
+import '../../../bookings/status/ongoing.dart';
+import '../../../bookings/status/processing.dart';
+import '../../../bookings/status/rescheduled.dart';
+import '../../../bookings/status/scheduled.dart';
 import '../../controller/bookings/booking_order_controller.dart';
 import '../../models/booking_orders_model.dart';
 
@@ -74,9 +79,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: BookingsListScreen(
-                status: _getOrderStatusForSelectedIndex(_selectedIndex), title: '',
-              ),
+              child: _getScreenForSelectedIndex(_selectedIndex),
             ),
           ],
         ),
@@ -84,61 +87,22 @@ class _BookingsScreenState extends State<BookingsScreen> {
     );
   }
 
-  OrderStatus _getOrderStatusForSelectedIndex(int index) {
+  Widget _getScreenForSelectedIndex(int index) {
     switch (index) {
       case 0:
-        return OrderStatus.processing;
+        return const ProcessingBookingsScreen();
       case 1:
-        return OrderStatus.scheduled;
+        return const ScheduledBookingsScreen();
       case 2:
-        return OrderStatus.ongoing;
+        return const OngoingBookingsScreen();
       case 3:
-        return OrderStatus.completed;
+        return const CompletedBookingsScreen();
       case 4:
-        return OrderStatus.rescheduled;
+        return const RescheduledBookingsScreen();
       case 5:
-        return OrderStatus.cancelled;
+        return const CancelledBookingsScreen();
       default:
-        return OrderStatus.processing;
+        return const ProcessingBookingsScreen(); // Default to processing if index is out of range
     }
-  }
-}
-
-class BookingsListScreen extends StatelessWidget {
-  final OrderStatus status;
-
-  const BookingsListScreen({Key? key, required this.status, required String title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final BookingOrderController _bookingOrderController =
-        BookingOrderController.instance;
-
-    return FutureBuilder<List<BookingOrderModel>>(
-      future: _bookingOrderController.fetchUserBookings(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          final List<BookingOrderModel>? bookings = snapshot.data;
-          if (bookings != null && bookings.isNotEmpty) {
-            final filteredBookings = bookings
-                .where((booking) => booking.status == status)
-                .toList();
-
-            return Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 600),
-                child: MyBookingsList(bookings: filteredBookings),
-              ),
-            );
-          } else {
-            return Center(child: Text('No bookings found.'));
-          }
-        }
-      },
-    );
   }
 }
