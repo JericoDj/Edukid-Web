@@ -5,13 +5,14 @@ class MyPricingCalculator {
   static double calculateTotalPrice(double subTotal, String location) {
     double taxRate = getTaxRateForLocation(location);
     double taxAmount = subTotal * taxRate;
-    
+
     double shippingCost = getShippingCost(location);
 
     double totalPrice = subTotal + taxAmount + shippingCost;
-    return totalPrice;
-  }
 
+    // Return the totalPrice rounded to 2 decimal places
+    return double.parse(totalPrice.toStringAsFixed(2));
+  }
   /// Calculate shipping cost
   static String calculateShippingCost(double subTotal, String location) {
     double shippingCost = getShippingCost(location);

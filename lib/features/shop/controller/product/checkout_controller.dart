@@ -11,8 +11,9 @@ import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../screens/checkout/widgets/payment_tile.dart';
 import 'dart:html' as html; // Only for Flutter Web
+import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 
-class CheckoutController extends GetxController {
+class   CheckoutController extends GetxController {
   static CheckoutController get instance => Get.find();
   final Rx<PaymentMethodModel> selectedPaymentMethod = PaymentMethodModel.empty().obs;
 
@@ -21,6 +22,17 @@ class CheckoutController extends GetxController {
     selectedPaymentMethod.value = PaymentMethodModel(name: 'GCash', image: MyImages.gCash);
     super.onInit();
   }
+
+  /// Select PayPal as the payment method without initiating the payment yet
+  void selectPayPal() {
+    selectedPaymentMethod.value = PaymentMethodModel(
+      name: 'PayPal',
+      image: MyImages.maya,
+      nonce: null, // Since we are not processing the payment yet, set nonce to null
+    );
+    print("PayPal selected as payment method.");
+  }
+
 
   /// Method to open the payment page in a new window (Web)
   void openPaymentPage() {
@@ -154,7 +166,7 @@ class CheckoutController extends GetxController {
                 paymentMethod: PaymentMethodModel(name: 'GooglePay', image: MyImages.googleLogo),
                 onTap: () {
                   selectedPaymentMethod.value = PaymentMethodModel(name: 'GooglePay', image: MyImages.googleLogo);
-                  Get.back();
+                  Get.back(); // Return to the previous screen after selecting Google Pay
                 },
               ),
               const SizedBox(height: MySizes.spaceBtwItems / 2),
@@ -164,7 +176,7 @@ class CheckoutController extends GetxController {
                 paymentMethod: PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay),
                 onTap: () {
                   selectedPaymentMethod.value = PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay);
-                  Get.back();
+                  Get.back(); // Return to the previous screen after selecting Apple Pay
                 },
               ),
               const SizedBox(height: MySizes.spaceBtwItems / 2),
@@ -173,18 +185,16 @@ class CheckoutController extends GetxController {
               MyPaymentTile(
                 paymentMethod: PaymentMethodModel(name: 'Saved Card', image: MyImages.masterCard),
                 onTap: () async {
+                  // Code for fetching saved card details from Firebase
                   Map<String, String?> savedDetails = await _retrieveCustomerDetailsFromFirebase();
-
                   if (savedDetails['customerId'] != null && savedDetails['cardId'] != null) {
-                    print("Retrieved saved customer details: ${savedDetails['customerId']}, ${savedDetails['cardId']}");
                     selectedPaymentMethod.value = PaymentMethodModel(
                       name: 'Saved Card',
                       image: MyImages.masterCard,
-                      nonce: savedDetails['customerId'], // Use the customer ID
+                      nonce: savedDetails['customerId'],
                     );
-                    Get.back();
+                    Get.back(); // Return to the previous screen after selecting saved card
                   } else {
-                    print("No saved customer details found.");
                     Get.snackbar('Error', 'No saved customer details found.', snackPosition: SnackPosition.BOTTOM);
                   }
                 },
@@ -196,9 +206,19 @@ class CheckoutController extends GetxController {
                 paymentMethod: PaymentMethodModel(name: 'Add Credit/Debit Card', image: MyImages.maya),
                 onTap: () {
                   openPaymentPage(); // Open the payment page using the web SDK
+                  Get.back(); // Return to the previous screen after selecting Credit/Debit Card
                 },
               ),
               const SizedBox(height: MySizes.spaceBtwSections),
+
+              // Add PayPal Payment Tile
+              MyPaymentTile(
+                paymentMethod: PaymentMethodModel(name: 'PayPal', image: MyImages.maya), // PayPal Image
+                onTap: () {
+                  selectPayPal();  // Just mark PayPal as selected
+                  Get.back();  // Return to the previous screen
+                },
+              ),
             ],
           ),
         ),

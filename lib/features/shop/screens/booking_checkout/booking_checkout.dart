@@ -45,7 +45,7 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
 
   void calculateSubTotal() {
     setState(() {
-      subTotal = widget.pickedDates.length * 10; // Calculate the subtotal
+      subTotal = widget.pickedDates.length * 1; // Calculate the subtotal
     });
     print('Subtotal: \$${subTotal.toStringAsFixed(2)}'); // Print the subtotal
   }
