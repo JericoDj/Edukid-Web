@@ -18,7 +18,6 @@ class MyBillingPaymentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure the CheckoutController is instantiated
     final controller = Get.find<CheckoutController>();
     final dark = MyHelperFunctions.isDarkMode(context);
 
@@ -30,7 +29,7 @@ class MyBillingPaymentSection extends StatelessWidget {
         MySectionHeading(
           title: 'Payment Method',
           buttonTitle: 'Change',
-          onPressed: () => controller.selectPaymentMethod(context),
+          onPressed: () => controller.selectPaymentMethod(context),  // Select payment method here
         ),
         SizedBox(height: MySizes.spaceBtwItems / 2,),
         Obx(
