@@ -30,6 +30,10 @@ import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 class BookingOrderController extends GetxController {
   static BookingOrderController get instance => Get.find();
 
+
+  // Observable list of bookings
+  final RxList<BookingOrderModel> bookings = <BookingOrderModel>[].obs;
+
   late final List<DateTime> pickedDates;
   late final List<TimeOfDay?> pickedTimes;
 
@@ -59,11 +63,17 @@ class BookingOrderController extends GetxController {
     }
   }
 
+  /// Start the loader as soon as processOrder starts
   void processOrder(double totalAmount, List<DateTime> pickedDates, List<TimeOfDay?> pickedTimes) async {
     try {
+      // Start the loader at the beginning of the process
       MyFullScreenLoader.openLoadingDialog('Processing your order', MyImages.loaders);
+
       final userId = AuthenticationRepository.instance.authUser?.uid;
-      if (userId == null || userId.isEmpty) return;
+      if (userId == null || userId.isEmpty) {
+        MyLoaders.errorSnackBar(title: 'User Error', message: 'User not authenticated');
+        return;
+      }
 
       List<PickedDateTimeModel> pickedDateTimeModels = [];
       for (int i = 0; i < pickedDates.length; i++) {
@@ -92,34 +102,38 @@ class BookingOrderController extends GetxController {
           _saveBooking(totalAmount, pickedDateTimeModels, selectedPaymentMethod.name);
         } else {
           MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'There was an error processing your payment.');
+          MyFullScreenLoader.stopLoading();
         }
       } else {
         MyLoaders.errorSnackBar(title: 'Payment Error', message: 'No saved customer or card information found.');
+        MyFullScreenLoader.stopLoading();
       }
     } catch (e) {
       MyLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
-    } finally {
       MyFullScreenLoader.stopLoading();
     }
   }
 
   void _saveBooking(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels, String paymentMethod) {
-    final booking = BookingOrderModel(
-      id: UniqueKeyGenerator.generateUniqueKey(),
-      userId: AuthenticationRepository.instance.authUser!.uid,
-      status: OrderStatus.processing,
-      totalAmount: totalAmount,
-      orderDate: DateTime.now(),
-      paymentMethod: paymentMethod,
-      address: addressController.selectedAddress.value,
-      deliveryDate: DateTime.now(),
-      booking: [],
-      pickedDateTime: pickedDateTimeModels,
-    );
+    try {
+      final booking = BookingOrderModel(
+        id: UniqueKeyGenerator.generateUniqueKey(),
+        userId: AuthenticationRepository.instance.authUser!.uid,
+        status: OrderStatus.processing,
+        totalAmount: totalAmount,
+        orderDate: DateTime.now(),
+        paymentMethod: paymentMethod,
+        address: addressController.selectedAddress.value,
+        deliveryDate: DateTime.now(),
+        booking: [],
+        pickedDateTime: pickedDateTimeModels,
+      );
 
-    bookingOrderRepository.saveBooking(booking);
-    MyLoaders.successSnackBar(title: 'Booking Confirmed', message: 'Your booking has been successfully confirmed!');
-
+      bookingOrderRepository.saveBooking(booking);
+      MyLoaders.successSnackBar(title: 'Booking Confirmed', message: 'Your booking has been successfully confirmed!');
+    } finally {
+      MyFullScreenLoader.stopLoading();  // Stop loader after saving the booking
+    }
   }
 
   /// PayPal payment process for mobile and web
@@ -174,8 +188,6 @@ class BookingOrderController extends GetxController {
     final String createOrderEndpoint = "http://localhost:3000/create_order";
 
     try {
-      MyFullScreenLoader.openLoadingDialog('Processing your order', MyImages.loaders);
-
       final response = await http.post(
         Uri.parse(createOrderEndpoint),
         headers: {'Content-Type': 'application/json'},
@@ -199,16 +211,18 @@ class BookingOrderController extends GetxController {
           });
         } else {
           MyLoaders.errorSnackBar(title: 'Error', message: 'Invalid PayPal response: missing approval link or order ID.');
+          MyFullScreenLoader.stopLoading();
         }
       } else {
         MyLoaders.errorSnackBar(title: 'Error', message: 'Error creating PayPal order.');
+        MyFullScreenLoader.stopLoading();
       }
     } catch (e) {
       MyLoaders.errorSnackBar(title: 'Error', message: 'An error occurred while processing your payment.');
-    } finally {
       MyFullScreenLoader.stopLoading();
     }
   }
+
   Future<void> _checkOrderStatus(String orderID, double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
     final String statusEndpoint = "http://localhost:3000/order_status/$orderID";
 
@@ -230,9 +244,10 @@ class BookingOrderController extends GetxController {
       }
     } catch (e) {
       MyLoaders.errorSnackBar(title: 'Error', message: 'An error occurred while checking payment status.');
+    } finally {
+      MyFullScreenLoader.stopLoading();
     }
   }
-
 
   Future<String?> _retrieveSavedCustomerId() async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -288,11 +303,13 @@ class BookingOrderController extends GetxController {
 
   void _handlePayPalError() {
     MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'There was an error processing your PayPal payment.');
+    MyFullScreenLoader.stopLoading();
     Navigator.pop(Get.context!);
   }
 
   void _handlePayPalCancel() {
     Get.snackbar("Payment Cancelled", "You cancelled the PayPal payment.", snackPosition: SnackPosition.BOTTOM);
+    MyFullScreenLoader.stopLoading();
     Navigator.pop(Get.context!);
   }
 }
