@@ -185,7 +185,7 @@ class BookingOrderController extends GetxController {
 
   /// Removed capture order request from Flutter client
   void _processPayPalPaymentWeb(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
-    final String createOrderEndpoint = "http://localhost:3000/create_order";
+    final String createOrderEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/create_order";
 
     try {
       final response = await http.post(
@@ -224,7 +224,8 @@ class BookingOrderController extends GetxController {
   }
 
   Future<void> _checkOrderStatus(String orderID, double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
-    final String statusEndpoint = "http://localhost:3000/order_status/$orderID";
+    final String statusEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/order_status/$orderID";
+
 
     try {
       final response = await http.get(Uri.parse(statusEndpoint));

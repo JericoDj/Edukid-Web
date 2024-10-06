@@ -24,7 +24,7 @@ let orderStatus = {}; // Global object to store status of each order (could be s
 app.post('/create_order', (req, res) => {
   const price = req.body.price || req.body.amount;
   const description = req.body.description || 'No description provided';
-  const intent = req.body.intent || 'CAPTURE';
+  const in  tent = req.body.intent || 'CAPTURE';
 
   if (!price) {
     return res.status(400).json({ error: 'Price is required' });
