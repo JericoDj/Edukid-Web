@@ -37,16 +37,14 @@ class MyBrandCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ///Icon
-             Center(
-               child: Flexible(
-                child: MyCircularImage(
-                  isNetworkImage: true,
+             Flexible(
+              child: MyCircularImage(
+                isNetworkImage: true,
 
-                  image: brand.image,
-                  backgroundColor: Colors.transparent,
-                ),
-                           ),
-             ),
+                image: brand.image,
+                backgroundColor: Colors.transparent,
+              ),
+                         ),
 
             /// Text
             Expanded(
@@ -66,6 +64,7 @@ class MyBrandCard extends StatelessWidget {
                 ],
               ),
             )
+
           ],
         ),
       ),

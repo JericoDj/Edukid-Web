@@ -10,10 +10,10 @@ import '../models/product_model.dart';
 class BrandController extends GetxController {
   static BrandController get instance => Get.find();
 
-  RxBool isLoading = true.obs;
-  final RxList<BrandModel> featuredBrands = <BrandModel>[].obs;
-  final RxList<BrandModel> allBrands = <BrandModel>[].obs;
-  final brandRepository = Get.put(BrandRepository());
+      RxBool isLoading = true.obs;
+      final RxList<BrandModel> featuredBrands = <BrandModel>[].obs;
+      final RxList<BrandModel> allBrands = <BrandModel>[].obs;
+      final brandRepository = Get.put(BrandRepository());
 
   @override
   void onInit() {

@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
-
+import 'package:intl/intl.dart';
 import '../../../../../common/widgets/customShapes/containers/rounded_container.dart';
 import '../../../../../common/widgets/loaders/animation_loader.dart';
 import '../../../../../navigation_Bar.dart';
@@ -30,7 +28,7 @@ class MyOrderListItems extends StatelessWidget {
           animation: MyImages.loaders,
           showAction: true,
           actionText: 'Let\'s fill it',
-          onActionPressed: () => Get.off(() =>  NavigationBarMenu()),
+          onActionPressed: () => Get.off(() => NavigationBarMenu()),
         );
 
         /// Helper Function: Handle Loader, No Record, OR ERROR Message
@@ -54,7 +52,7 @@ class MyOrderListItems extends StatelessWidget {
             borderColor: MyColors.primaryColor, // Set border color here
             child: Column(
               children: [
-                /// row 1
+                /// Row 1 - Icon, Status & Date
                 Row(
                   children: [
                     /// 1 Icon
@@ -62,28 +60,18 @@ class MyOrderListItems extends StatelessWidget {
                     const SizedBox(width: MySizes.spaceBtwItems / 2),
 
                     /// 2 Status & Date
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${orders[index].id}',
-                            style: Theme.of(context).textTheme.bodyLarge!.apply(
-                              color: MyColors.primaryColor,
-                            ),
-                          ),
-                          Text('${orders[index].orderDate}',
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                        ],
+                    Text(
+                      'Date: ${orders[index].orderDate != null ? MyHelperFunctions.getFormattedDate(orders[index].orderDate!) : 'N/A'}',
+                      style: TextStyle(
+                        color: dark ? MyColors.grey : MyColors.darkGrey,
                       ),
                     ),
 
                     /// 3 - Icon
                     IconButton(
                       onPressed: () {},
-                      icon: const Icon(Iconsax.arrow_right_34,
+                      icon: const Icon(
+                        Iconsax.arrow_right_34,
                         size: MySizes.iconSm,
                       ),
                     ),
@@ -93,7 +81,7 @@ class MyOrderListItems extends StatelessWidget {
                   height: MySizes.spaceBtwItems,
                 ),
 
-                /// row 2
+                /// Row 2 - Icon, Delivery Date
                 Row(
                   children: [
                     Expanded(
@@ -103,27 +91,11 @@ class MyOrderListItems extends StatelessWidget {
                           const Icon(Iconsax.tag),
                           const SizedBox(width: MySizes.spaceBtwItems / 2),
 
-                          /// 2 Status & Date
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${orders[index].status}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .apply(
-                                    color: MyColors.primaryColor,
-                                  ),
-                                ),
-                                Text('${orders[index].id}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall,
-                                ),
-                              ],
+                          /// 2 Order ID
+                          Text(
+                            'Order ID: ${orders[index].id}',
+                            style: TextStyle(
+                              color: dark ? MyColors.grey : MyColors.darkGrey,
                             ),
                           ),
                         ],
@@ -136,27 +108,11 @@ class MyOrderListItems extends StatelessWidget {
                           const Icon(Iconsax.calendar),
                           const SizedBox(width: MySizes.spaceBtwItems / 2),
 
-                          /// 2 Status & Date
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${orders[index].paymentMethod}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge!
-                                      .apply(
-                                    color: MyColors.primaryColor,
-                                  ),
-                                ),
-                                Text('${orders[index].deliveryDate}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall,
-                                ),
-                              ],
+                          /// 2 Delivery Date
+                          Text(
+                            'Delivery: ${orders[index].deliveryDate != null ? MyHelperFunctions.getFormattedDate(orders[index].deliveryDate!) : 'N/A'}',
+                            style: TextStyle(
+                              color: dark ? MyColors.grey : MyColors.darkGrey,
                             ),
                           ),
                         ],

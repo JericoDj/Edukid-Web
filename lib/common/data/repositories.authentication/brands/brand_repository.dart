@@ -43,6 +43,7 @@ class BrandRepository extends GetxController {
       // Query to get all documents where categoryId matches the provided categoryId
       QuerySnapshot brandCategoryQuery = await _db.collection('BrandCategory')
           .where('categoryId', isEqualTo: categoryId)
+
           .get();
 
       // Print the result
@@ -55,7 +56,7 @@ class BrandRepository extends GetxController {
 
       // Query to get all documents where the brand Id is in the list of brandIds, FieldPath.documentId to query documents in Collection
       final brandsQuery = await _db.collection('Brands').where(
-          FieldPath.documentId, whereIn: brandIds).limit(2).get();
+          FieldPath.documentId, whereIn: brandIds).get();
 
 
       // Extract brand names or other relevant data from the documents

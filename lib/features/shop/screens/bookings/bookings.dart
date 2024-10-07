@@ -51,7 +51,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
           child: Column(
             children: [
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Calendar with booking dates and colors
                   Obx(() {
@@ -70,7 +71,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              // Stack with tabs and "View All Bookings" button
+              // can you put here a color of guide for the calendar. orange for processing,
+
+              const SizedBox(height: 10),
               Stack(
                 children: [
                   Align(

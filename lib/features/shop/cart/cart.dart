@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:webedukid/features/shop/cart/widgets/my_cart_items_listview.dart';
-
 import '../../../common/widgets/appbar.dart';
 import '../../../common/widgets/loaders/animation_loader.dart';
+import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/image_strings.dart';
 import '../../../utils/constants/sizes.dart';
+import '../../screens/navigation_controller.dart';  // Import NavigationController
 import '../controller/product/cart_controller.dart';
-import '../screens/checkout/checkout.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -16,32 +16,12 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = CartController.instance;
+    final navigationController = Get.find<NavigationController>();  // Get NavigationController instance
+
     return SizedBox(
       child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(kToolbarHeight), // Set the height of the AppBar
-          child: Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 16.0), // Add some top padding for spacing
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Get.back(),
-                  ),
-                  Text(
-                    'Cart',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
         body: Obx(() {
-          /// Nothing Found Widget
+          // Display message if the cart is empty
           final emptyWidget = MyAnimationLoaderWidget(
             text: 'Whoops! Cart is EMPTY.',
             animation: MyImages.loaders,
@@ -56,8 +36,8 @@ class CartScreen extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.all(MySizes.defaultspace),
 
-                    ///Items in cart
-                    child: SizedBox(width: 500,child: MyCartItemsListView()),
+                    // Items in the cart
+                    child: SizedBox(width: 500, child: MyCartItemsListView()),
                   ),
                 ),
               ),
@@ -65,15 +45,31 @@ class CartScreen extends StatelessWidget {
           }
         }),
 
-        /// checkout button
+        // Checkout button
         bottomNavigationBar: controller.cartItems.isEmpty
             ? SizedBox()
             : Padding(
           padding: EdgeInsets.all(MySizes.defaultspace),
-          child: ElevatedButton(
-            onPressed: () => Get.to(() => CheckOutScreen()),
-            child: Obx(() =>
-                Text('Check Out \$${controller.totalCartPrice.value}')),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(600, 10, 600, 10),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MyColors.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28.0),
+                ),
+              ),
+              onPressed: () => navigationController.goToCheckoutScreen(),  // Navigate to Checkout
+              child: Obx(
+                    () => Text(
+                  'Check Out \$${controller.totalCartPrice.value}',  // Display total price
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

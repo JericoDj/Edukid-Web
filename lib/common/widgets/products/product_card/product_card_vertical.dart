@@ -1,11 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:webedukid/common/widgets/products/product_card/product_card_add_to_cart_button.dart';
-
 import '../../../../features/shop/controller/product/product_controller.dart';
 import '../../../../features/shop/models/product_model.dart';
-import '../../../../features/shop/screens/product_detail/product_detail.dart';
+import '../../../../features/screens/navigation_controller.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
@@ -19,20 +17,22 @@ import '../../texts/product_title_text.dart';
 import '../favorite_icon/favorite_icon.dart';
 
 class MyProductCardVertical extends StatelessWidget {
-  const MyProductCardVertical({Key? key, required this.product})
-      : super(key: key);
+  const MyProductCardVertical({Key? key, required this.product}) : super(key: key);
 
   final ProductModel product;
 
   @override
   Widget build(BuildContext context) {
     final controller = ProductController.instance;
-    final salePercentage =
-        controller.calculateSalePercentage(product.price, product.salePrice);
+    final salePercentage = controller.calculateSalePercentage(product.price, product.salePrice);
     final dark = MyHelperFunctions.isDarkMode(context);
 
     return GestureDetector(
-      onTap: () => Get.to(() => ProductDetailScreen(product: product)),
+      onTap: () {
+        // Use the NavigationController to navigate to the ProductDetailScreen
+        final navigationController = Get.find<NavigationController>();
+        navigationController.navigateTo('productDetail', product: product);  // Pass the product to the navigation controller
+      },
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(1),
@@ -57,25 +57,20 @@ class MyProductCardVertical extends StatelessWidget {
                     isNetworkImage: true,
                     backgroundColor: Colors.transparent,
                   ),
-
                   /// sale tag
                   if (salePercentage != null)
                     Positioned(
                       top: 12,
                       child: MyRoundedContainer(
                         radius: MySizes.sm,
-                        backgroundColor:
-                            MyColors.secondaryColor.withOpacity(0.8),
+                        backgroundColor: MyColors.secondaryColor.withOpacity(0.8),
                         padding: const EdgeInsets.symmetric(
                           horizontal: MySizes.sm,
                           vertical: MySizes.xs,
                         ),
                         child: Text(
                           '$salePercentage%',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelLarge!
-                              .apply(color: MyColors.black),
+                          style: Theme.of(context).textTheme.labelLarge!.apply(color: MyColors.black),
                         ),
                       ),
                     ),
@@ -106,32 +101,25 @@ class MyProductCardVertical extends StatelessWidget {
                   Flexible(
                     child: Column(
                       children: [
-                        if (product.productType ==
-                                ProductType.single.toString() &&
-                            product.salePrice > 0)
+                        if (product.productType == ProductType.single.toString() && product.salePrice > 0)
                           Padding(
                             padding: EdgeInsets.only(left: MySizes.sm),
                             child: Text(
                               product.price.toString(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium!
-                                  .apply(
-                                      decoration: TextDecoration.lineThrough),
+                              style: Theme.of(context).textTheme.labelMedium!.apply(
+                                decoration: TextDecoration.lineThrough,
+                              ),
                             ),
                           ),
                         Padding(
                           padding: EdgeInsets.only(left: MySizes.sm),
-                          child: MyProductPriceText(
-                            price: controller.getProductPrice(product),
-                          ),
+                          child: MyProductPriceText(price: controller.getProductPrice(product)),
                         ),
                       ],
                     ),
                   ),
-
                   /// add to cart button
-                  ProductCardAddToCartButton(product: product,),
+                  ProductCardAddToCartButton(product: product),
                 ],
               ),
             ],

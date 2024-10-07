@@ -77,7 +77,10 @@ class MyProductMetaData extends StatelessWidget {
               ),
             ),
           ],
+
+
         ),
+
         const SizedBox(height: MySizes.spaceBtwItems / 1.5),
 
         /// Title
@@ -87,8 +90,7 @@ class MyProductMetaData extends StatelessWidget {
         /// Stock Status
         Row(
           children: [
-            const MyProductTitleText(title: 'Status'),
-            const SizedBox(width: MySizes.spaceBtwItems),
+
             Text(
               controller.getProductStockStatus(product.stock),
               style: Theme.of(context).textTheme.titleMedium,

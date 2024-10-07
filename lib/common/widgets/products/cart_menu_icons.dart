@@ -33,7 +33,7 @@ class MyCartIcon extends StatelessWidget {
         Positioned(
           right: 0,
           child: Container(
-            width: 18,
+            width: 1,
             height: 18,
             decoration: BoxDecoration(
               color: MyColors.black.withOpacity(0.6),

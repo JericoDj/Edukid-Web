@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:webedukid/features/shop/screens/store/widgets/category_brands.dart';
 
 import '../../../../common/widgets/layouts/grid_layout.dart';
@@ -24,64 +22,69 @@ class MyCategoryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = CategoryController.instance;
 
-
     return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(MySizes.defaultspace),
+          child: Column(
+            children: [
+              // Display brands related to the category
+              CategoryBrands(category: category),
 
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(MySizes.defaultspace),
-            child: Column(
-              /// brands
-              children: [
-                CategoryBrands(category: category),
+              /// Products below the box
+              FutureBuilder(
+                future: controller.getCategoryProducts(categoryId: category.id),
+                builder: (context, snapshot) {
+                  // Handle the loading, error, and empty state
+                  final response = MyCloudHelperFunctions.checkMultiRecordState(
+                    snapshot: snapshot,
+                    loader: const MyVerticalProductShimmer(),
+                  );
+                  if (response != null) return response;
 
-                /// products below the box
-                /// 1
-                /// category ID value is the ID  of the category
-                /// you can remove this if you want
-                FutureBuilder(
+                  // Data is available - now display the products
+                  final products = snapshot.data!;
 
-                    future:
-                        controller.getCategoryProducts(categoryId: category.id),
+                  // List of products
+                  return Column(
+                    children: [
+                      MySectionHeading(
+                        title: 'You might like',
+                        onPressed: () => Get.to(AllProductsScreen(
+                          title: category.name,
+                          futureMethod: controller.getCategoryProducts(
+                              categoryId: category.id, limit: -1),
+                        )),
+                      ),
+                      const SizedBox(height: MySizes.spaceBtwItems),
 
-                    builder: (context, snapshot) {
-                      /// Helper Function: Handle Loader, No Record, OR ERROR Message
-                      final response =
-                          MyCloudHelperFunctions.checkMultiRecordState(
-                              snapshot: snapshot,
-                              loader: const MyVerticalProductShimmer());
-                      if (response != null) return response;
+                      // Use ListView.builder to display products with ListTile
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          final product = products[index];
+                          final title = product.title; // Assuming title field
+                          final level = product.level; // Assuming level field
 
-                      /// Record Found!
-                      final products = snapshot.data!;
-
-
-                      /// this is the items shown below
-                      return Column(
-
-                        children: [
-                          MySectionHeading(
-                            title: 'You might like',
-                            onPressed: () => Get.to(AllProductsScreen(
-                              title: category.name,
-                              futureMethod: controller.getCategoryProducts(
-                                  categoryId: category.id, limit: -1),
-                            )),
-                          ),
-                          const SizedBox(height: MySizes.spaceBtwItems),
-                          MyGridLayoutWidget(
-                              mainAxisExtent: 350,
-                              itemCount: products.length,
-                              itemBuilder: (_, index) => MyProductCardVertical(
-                                  product: products[index]))
-                        ],
-                      );
-                    })
-              ],
-            ),
+                          // Return a ListTile for each product
+                          return ListTile(
+                            title: Text(title ?? 'No Title'),
+                            subtitle: Text('Level: ${level ?? 'Unknown Level'}'),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
-        ]);
+        ),
+      ],
+    );
   }
 }

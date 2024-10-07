@@ -56,7 +56,7 @@ class MyBrandShowCase extends StatelessWidget {
     return Flexible(
       fit: FlexFit.tight,
       flex: 5,
-      /// imgae of the item
+      /// image of the item
       child: MyRoundedContainer(
         width: 10,
 

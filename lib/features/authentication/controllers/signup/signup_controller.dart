@@ -11,8 +11,6 @@ import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/network manager/network_manager.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../models/user_model.dart';
-import '../../../screens/signup/widgets/verifyemailscreen.dart';
-
 
 class SignupController extends GetxController {
   static SignupController get instance => Get.find();

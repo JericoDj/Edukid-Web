@@ -19,13 +19,16 @@ import 'features/shop/cart/cart.dart';
 import 'features/shop/controller/product/product_controller.dart';
 import 'features/shop/screens/account_privacy/account_privacy_screen.dart';
 import 'features/shop/screens/bookings/bookings.dart';
+import 'features/shop/screens/checkout/checkout.dart';
 import 'features/shop/screens/coupons/coupons_screen.dart';
 import 'features/shop/screens/order/order.dart';
+import 'features/shop/screens/product_detail/product_detail.dart';
 import 'features/shop/screens/store/store.dart';
 import 'features/shop/screens/bookings/booking_session.dart';
 import 'features/shop/screens/all_products/all_products.dart';
 import 'features/shop/screens/wishlist/wishlist.dart';
-import 'features/screens/profilescreen/widgets/change_name.dart'; // Import Change Name screen
+import 'features/screens/profilescreen/widgets/change_name.dart';
+import 'features/shop/models/product_model.dart';
 
 // Use a GlobalKey to manage the state of NavigationBarMenu
 final GlobalKey<NavigationBarMenuState> navigationBarKey = GlobalKey<NavigationBarMenuState>();
@@ -41,14 +44,12 @@ class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
 class NavigationBarMenuState extends State<NavigationBarMenu> {
   bool _isDrawerOpen = false;
   bool _isEditProfileDrawerOpen = false;
-  bool _isChangeNameDrawerOpen = false; // Secondary drawer state
 
   void toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
       if (!_isDrawerOpen) {
         _isEditProfileDrawerOpen = false;
-        _isChangeNameDrawerOpen = false;
       }
     });
   }
@@ -67,6 +68,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     final Map<String, Widget Function()> screens = {
       'home': () => HomeScreen(),
       'store': () => StoreScreen(),
+      'checkout': () => CheckOutScreen(), // Add Checkout Screen to screen map
       'bookings': () => BookingsScreen(), // Main bookings screen
       'processingBookings': () => ProcessingBookingsScreen(),
       'scheduledBookings': () => ScheduledBookingsScreen(),
@@ -74,6 +76,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'completedBookings': () => CompletedBookingsScreen(),
       'rescheduledBookings': () => RescheduledBookingsScreen(),
       'cancelledBookings': () => CancelledBookingsScreen(),
+
       'order': () => OrderScreen(),
       'cart': () => CartScreen(),
       'bookingSession': () => BookingSessionScreen(),
@@ -90,6 +93,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'wishlist': () => WishlistScreen(),
       'coupon': () => CouponScreen(),
       'accountPrivacy': () => AccountPrivacyScreen(),
+      'productDetail': () => ProductDetailScreen(product: navigationController.selectedProduct!), // Use the selected product
     };
 
     return Scaffold(
@@ -171,7 +175,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     );
   }
 
-  Widget _buildNavButton(String screenKey, IconData icon, String label) {
+  Widget _buildNavButton(String screenKey, IconData icon, String label, {ProductModel? product}) {
     final NavigationController navigationController = Get.find();
     return Obx(() {
       return TextButton.icon(
@@ -186,7 +190,11 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           ),
         ),
         onPressed: () {
-          _handleBookingScreenNavigation(screenKey);
+          if (product != null) {
+            navigationController.navigateTo('productDetail', product: product);
+          } else {
+            _handleBookingScreenNavigation(screenKey);
+          }
         },
       );
     });
@@ -210,24 +218,6 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
         break;
       case 'bookings':
         navigationController.currentScreen.value = 'bookings';
-        break;
-      case 'processingBookings':
-        navigationController.currentScreen.value = 'processingBookings';
-        break;
-      case 'scheduledBookings':
-        navigationController.currentScreen.value = 'scheduledBookings';
-        break;
-      case 'ongoingBookings':
-        navigationController.currentScreen.value = 'ongoingBookings';
-        break;
-      case 'completedBookings':
-        navigationController.currentScreen.value = 'completedBookings';
-        break;
-      case 'rescheduledBookings':
-        navigationController.currentScreen.value = 'rescheduledBookings';
-        break;
-      case 'cancelledBookings':
-        navigationController.currentScreen.value = 'cancelledBookings';
         break;
       default:
         navigationController.currentScreen.value = 'home'; // Or any default screen

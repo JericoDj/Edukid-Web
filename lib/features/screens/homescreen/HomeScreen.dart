@@ -95,7 +95,7 @@ class HomeScreen extends StatelessWidget {
                               side: WidgetStateProperty.all<BorderSide>(
                                 BorderSide(color: MyColors.primaryColor),
                               ),
-                              shape: MaterialStateProperty.all<
+                              shape: WidgetStateProperty.all<
                                   RoundedRectangleBorder>(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20.0),

@@ -36,7 +36,7 @@ class MyBottomAddToCart extends StatelessWidget {
       ),
       child: Obx(
             () => Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               children: [
@@ -72,6 +72,7 @@ class MyBottomAddToCart extends StatelessWidget {
                 ),
               ],
             ),
+            SizedBox(width: 20,),
             ElevatedButton(
               onPressed: controller.initialProductCount.value < 1
                   ? null
