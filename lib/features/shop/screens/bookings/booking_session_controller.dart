@@ -1,37 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 
 class BookingController extends GetxController {
   var focusedDate = DateTime.now().obs;
   var chosenDate = DateTime.now().obs;
-  var refocusFlag = false.obs; // Track whether the date is being refocused
+  var refocusFlag = false.obs;
   var selectedTimeSlots = <DateTime, TimeOfDay>{}.obs;
   var dateSpecificTimeSlots = <DateTime, List<TimeOfDay>>{}.obs;
   var pricePerSession = 1.0.obs;
+  var bookedDates = <DateTime>[].obs;
+  var loading = true.obs; // Add this to track loading state
 
   @override
   void onInit() {
     super.onInit();
+    fetchUserBookedDates();
+  }
+
+  Future<void> fetchUserBookedDates() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        print('User not authenticated.');
+        loading.value = false;
+        return;
+      }
+
+      // Fetch all documents under the user's 'Bookings' subcollection
+      final result = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .collection('Bookings')
+          .get();
+
+      print('Total documents found in Bookings for user $userId: ${result.docs.length}');
+
+      // Extract dates from 'pickedDateTime'
+      final dates = result.docs.expand((doc) {
+        final data = doc.data();
+        final pickedDateTimeList = data['pickedDateTime'];
+
+        // Ensure it's a list and iterate over each item in the list
+        if (pickedDateTimeList != null && pickedDateTimeList is List) {
+          return pickedDateTimeList.map((item) {
+            final pickedDate = item['pickedDate'];
+            if (pickedDate != null && pickedDate is Timestamp) {
+              final date = pickedDate.toDate();
+              return DateTime(date.year, date.month, date.day);
+            }
+            return null;
+          }).whereType<DateTime>();
+        }
+        return <DateTime>[];
+      }).toList();
+
+      bookedDates.assignAll(dates);
+
+      // Print the fetched dates for verification
+      print('Fetched bookings for user $userId: ${bookedDates.length} dates');
+      for (var date in bookedDates) {
+        print('Booked date: ${DateFormat.yMMMMd().format(date)}');
+      }
+
+    } catch (e) {
+      print('Error fetching booked dates: $e');
+    } finally {
+      loading.value = false; // Set loading to false after data is fetched
+    }
   }
 
   void updateChosenDate(DateTime date) {
     date = _normalizeDate(date);
 
-    // Check if the chosen date is the same as the selected date and has a timeslot
-    if (_isSameDate(chosenDate.value, date) && selectedTimeSlots.containsKey(date)) {
+    if (_isSameDate(chosenDate.value, date) &&
+        selectedTimeSlots.containsKey(date)) {
       if (refocusFlag.value) {
-        // Deselect the date and remove associated time slots
         selectedTimeSlots.remove(date);
         dateSpecificTimeSlots.remove(date);
 
-        // Reset focus and color
-        focusedDate.value = DateTime.now();  // Change focus to a valid date within range
+        focusedDate.value = DateTime.now();
         refocusFlag.value = false;
-
-        chosenDate.value = DateTime(1900);  // Use a placeholder date to remove selection
-        focusedDate.refresh();  // Trigger UI update after deselection
+        chosenDate.value = DateTime(1900);
+        focusedDate.refresh();
       } else {
         refocusFlag.value = true;
       }
@@ -41,10 +95,10 @@ class BookingController extends GetxController {
       if (!selectedTimeSlots.containsKey(date)) {
         updateTimeSlots(date);
       }
-      focusedDate.value = date;  // Keep the focus on the new date until deselected
+      focusedDate.value = date;
     }
 
-    focusedDate.refresh();  // Ensure the UI is refreshed after all operations
+    focusedDate.refresh();
   }
 
   List<DateTime> getSelectedDates() {
@@ -71,7 +125,7 @@ class BookingController extends GetxController {
     DateTime date = _normalizeDate(focusedDate.value);
     if (chosenDate.value == date) {
       selectedTimeSlots[date] = timeSlot;
-      focusedDate.refresh(); // This will trigger the UI update without changing the value
+      focusedDate.refresh();
     }
   }
 
@@ -84,19 +138,25 @@ class BookingController extends GetxController {
   }
 
   Color getDayColor(DateTime date) {
-    if (_isSameDate(date, focusedDate.value)) {
-      if (selectedTimeSlots.containsKey(date)) {
+    final normalizedDate = _normalizeDate(date);
+    if (isDateBooked(normalizedDate)) {
+      return Colors.blue; // Color for booked dates
+    }
+    if (_isSameDate(normalizedDate, focusedDate.value)) {
+      if (selectedTimeSlots.containsKey(normalizedDate)) {
         return MyColors.buttonPrimary;
       } else {
         return MyColors.buttonTertiary;
       }
     }
-
-    if (selectedTimeSlots.containsKey(date)) {
+    if (selectedTimeSlots.containsKey(normalizedDate)) {
       return MyColors.buttonPrimary;
     }
-
     return Colors.white;
+  }
+
+  bool isDateBooked(DateTime date) {
+    return bookedDates.contains(date);
   }
 
   DateTime _normalizeDate(DateTime date) {
