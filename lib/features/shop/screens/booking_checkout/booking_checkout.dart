@@ -35,7 +35,8 @@ class BookingCheckOutScreen extends StatefulWidget {
 }
 
 class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
-  double subTotal = 0; // Initialize subtotal
+  double subTotal = 0;
+  double discount = 0; // Add a discount state
 
   @override
   void initState() {
@@ -45,14 +46,23 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
 
   void calculateSubTotal() {
     setState(() {
-      subTotal = widget.pickedDates.length * 1; // Calculate the subtotal
+      subTotal = widget.pickedDates.length * widget.price; // Calculate the subtotal
     });
     print('Subtotal: \$${subTotal.toStringAsFixed(2)}'); // Print the subtotal
   }
 
+  // Callback for handling discount applied
+  void _onDiscountApplied(double discountValue) {
+    setState(() {
+      discount = discountValue; // Update the discount value
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final totalAmount = MyPricingCalculator.calculateTotalPrice(subTotal, 'US');
+    // Subtract the discount from the subtotal to get the final total amount
+    final discountedSubTotal = subTotal - (subTotal * discount / 100);
+    final totalAmount = MyPricingCalculator.calculateTotalPrice(discountedSubTotal, 'US');
     final dark = MyHelperFunctions.isDarkMode(context);
 
     return Align(
@@ -77,22 +87,25 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
                   BookingDetails(widget: widget),
 
                   const SizedBox(height: 16.0),
-                  MyCouponCode(),
+
+                  /// Coupon Code Section with discount callback
+                  MyCouponCode(onDiscountApplied: _onDiscountApplied), // Pass the callback here
                   const SizedBox(height: 16.0),
+
                   MyRoundedContainer(
                     showBorder: true,
                     padding: EdgeInsets.all(16.0),
                     backgroundColor: dark ? Colors.grey[900]! : Colors.white,
                     child: Column(
                       children: [
-                        MyBookingBillingAmountSection(subTotal: subTotal),
+                        /// Pass the discount to billing section
+                        MyBookingBillingAmountSection(subTotal: subTotal, discount: discount),
                         SizedBox(height: 16.0),
                         Divider(),
                         SizedBox(height: 16.0),
                         MyBillingPaymentSection(),
                         SizedBox(height: 16.0),
                         MyBillingAddressSection(),
-
                       ],
                     ),
                   )
@@ -101,7 +114,6 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
             ),
           ),
 
-
           /// checkout button
           bottomNavigationBar: Padding(
             padding: EdgeInsets.all(16.0),
@@ -109,7 +121,7 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
               onPressed: subTotal > 0
                   ? () {
                 final controller = Get.put(BookingOrderController());
-                controller.processOrder(totalAmount,widget.pickedDates, widget.pickedTimes);
+                controller.processOrder(totalAmount, widget.pickedDates, widget.pickedTimes);
               }
                   : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
               child: Text('Checkout \$$totalAmount'),
@@ -120,4 +132,3 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
     );
   }
 }
-

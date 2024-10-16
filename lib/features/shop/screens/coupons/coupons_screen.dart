@@ -37,13 +37,23 @@ class CouponScreen extends StatelessWidget {
                 itemCount: couponController.coupons.length,
                 itemBuilder: (context, index) {
                   Map<String, dynamic> couponData = couponController.coupons[index];
+
+                  // Handle null values by providing defaults or checking for null
+                  String code = couponData['code'] ?? 'No code available'; // Default if null
+                  double? discount = couponData['discount']?.toDouble(); // Use null-aware operator
+                  Timestamp? expiryTimestamp = couponData['expiryDate']; // Check for null
+
+                  // Ensure expiry date is not null
+                  DateTime expiryDate = expiryTimestamp != null
+                      ? DateTime.fromMillisecondsSinceEpoch(expiryTimestamp.millisecondsSinceEpoch)
+                      : DateTime.now(); // Default to now if null
+
                   Coupon coupon = Coupon(
-                    code: couponData['code'],
-                    discount: couponData['discount'].toDouble(), // Convert int to double
-                    expiryDate: DateTime.fromMillisecondsSinceEpoch(
-                      couponData['expiryDate'].millisecondsSinceEpoch,
-                    ),
+                    code: code,
+                    discount: discount, // Allow nullable discount
+                    expiryDate: expiryDate,
                   );
+
                   return Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Center(
@@ -61,8 +71,9 @@ class CouponScreen extends StatelessWidget {
 
   Widget _buildCouponCard(BuildContext context, Coupon coupon) {
     return ConstrainedBox(
-
-      constraints: BoxConstraints(maxWidth: 600,), // Set a smaller maximum width for the card
+      constraints: BoxConstraints(
+        maxWidth: 600,
+      ), // Set a smaller maximum width for the card
       child: Card(
         elevation: 3.0,
         shape: RoundedRectangleBorder(
@@ -80,7 +91,7 @@ class CouponScreen extends StatelessWidget {
               ),
               SizedBox(height: 10.0),
               Text(
-                'Discount: ${coupon.discount}%',
+                'Discount: ${coupon.discount != null ? '${coupon.discount}%' : 'No discount available'}',
                 style: TextStyle(fontSize: 14.0),
               ),
               SizedBox(height: 5.0),
