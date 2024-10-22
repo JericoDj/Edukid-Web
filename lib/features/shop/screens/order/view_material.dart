@@ -1,51 +1,77 @@
-import 'dart:ui_web';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
-import 'dart:html' as html; // Dart HTML package for web
-import 'package:flutter_web_plugins/flutter_web_plugins.dart'; // For web plugins
+import 'dart:ui_web' as ui; // Import platformViewRegistry from dart:ui_web
 
-class ViewMaterial extends StatelessWidget {
-  final String pdfUrl; // The PDF URL to embed
+class ViewMaterial extends StatefulWidget {
+  final String pdfUrl;
+  final VoidCallback onClose;
+  final bool isInteractive;
 
-  ViewMaterial({Key? key, required this.pdfUrl}) : super(key: key);
+  ViewMaterial({
+    Key? key,
+    required this.pdfUrl,
+    required this.onClose,
+    required this.isInteractive
+  }) : super(key: key);
+
+  @override
+  _ViewMaterialState createState() => _ViewMaterialState();
+}
+
+class _ViewMaterialState extends State<ViewMaterial> {
+  late bool isInteractive;
+  String? viewId;
+
+  @override
+  void initState() {
+    super.initState();
+    isInteractive = widget.isInteractive;
+    _registerIframe();
+  }
+
+  @override
+  void didUpdateWidget(covariant ViewMaterial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isInteractive != widget.isInteractive || oldWidget.pdfUrl != widget.pdfUrl) {
+      setState(() {
+        isInteractive = widget.isInteractive;
+        _registerIframe();  // Re-register the iframe with the updated size or new URL
+      });
+    }
+  }
+
+  void _registerIframe() {
+    viewId = 'pdf-iframe-${DateTime.now().millisecondsSinceEpoch}';  // Use unique ID to ensure it refreshes
+    ui.platformViewRegistry.registerViewFactory(
+      viewId!,
+          (int viewId) => html.IFrameElement()
+        ..src = widget.pdfUrl
+        ..style.border = 'none'
+        ..style.height = isInteractive ? '100%' : '600px'  // Dynamically adjust height
+        ..style.width = isInteractive ? '100%' : '74%',    // Dynamically adjust width
+    );
+  }
+
+  @override
+  void dispose() {
+    // Perform clean-up when navigating away
+    viewId = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      // If the platform is web, use iframe for PDF display
-      String viewId = 'pdf-iframe-${pdfUrl.hashCode}';
-
-      // Register the view factory for the iframe
-      platformViewRegistry.registerViewFactory(
-        viewId,
-            (int viewId) => html.IFrameElement()
-          ..src = pdfUrl
-          ..style.border = 'none'
-          ..width = '100%'
-          ..height = '100%',
-      );
-
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('View Material'),
-          backgroundColor: Colors.teal,
-        ),
-        body: Center(
-          child: HtmlElementView(viewType: viewId), // Embed iframe using HtmlElementView
-        ),
-      );
-    } else {
-      // If the platform is not web, show an unsupported message or alternative logic
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('View Material'),
-          backgroundColor: Colors.teal,
-        ),
-        body: Center(
-          child: Text('PDF viewing is only supported on web for now.'),
-        ),
-      );
-    }
+    return Scaffold(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !isInteractive,
+              child: viewId != null ? HtmlElementView(viewType: viewId!) : Container(), // Ensure the iframe is registered
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

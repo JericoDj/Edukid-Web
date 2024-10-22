@@ -1,3 +1,6 @@
+import 'dart:io'; // For mobile platforms (iOS/Android)
+import 'dart:typed_data'; // Used to handle web-based image data
+import 'dart:html' as html; // For web file picking in Flutter web
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +16,7 @@ import '../../../utils/network manager/network_manager.dart';
 import '../../../utils/popups/full_screen_loader.dart';
 import '../../authentication/login/login.dart';
 import '../../models/user_model.dart';
-import '../../screens/signup/widgets/re_authenticate_user_login_form.dart';
+import 'package:flutter/foundation.dart'; // For platform detection (kIsWeb)
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
@@ -49,25 +52,23 @@ class UserController extends GetxController {
     try {
       await fetchUserRecord();
 
-      if (user.value.id.isEmpty) {
-        if (userCredentials != null) {
-          final nameParts = UserModel.nameParts(userCredentials.user!.displayName ?? '');
-          final username = UserModel.generateUsername(userCredentials.user!.displayName ?? '');
+      if (user.value.id.isEmpty && userCredentials != null) {
+        final nameParts = UserModel.nameParts(userCredentials.user!.displayName ?? '');
+        final username = UserModel.generateUsername(userCredentials.user!.displayName ?? '');
 
-          final newUser = UserModel(
-            id: userCredentials.user!.uid,
-            firstName: nameParts[0],
-            lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
-            username: username,
-            email: userCredentials.user!.email ?? '',
-            phoneNumber: userCredentials.user!.phoneNumber ?? '',
-            profilePicture: userCredentials.user!.photoURL ?? '',
-            gender: '', // Optional field, can be set later
-            birthday: '', // Optional field, can be set later
-          );
+        final newUser = UserModel(
+          id: userCredentials.user!.uid,
+          firstName: nameParts[0],
+          lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+          username: username,
+          email: userCredentials.user!.email ?? '',
+          phoneNumber: userCredentials.user!.phoneNumber ?? '',
+          profilePicture: userCredentials.user!.photoURL ?? '',
+          gender: '',
+          birthday: '',
+        );
 
-          await userRepository.saveUserRecord(newUser);
-        }
+        await userRepository.saveUserRecord(newUser);
       }
     } catch (e) {
       MyLoaders.warningSnackBar(
@@ -77,55 +78,208 @@ class UserController extends GetxController {
     }
   }
 
+  // Methods for image picking (gallery and camera)
+  Future<void> pickImageFromGallery() async {
+    try {
+      final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        await _uploadToFirebaseStorage(File(image.path));
+      }
+    } catch (e) {
+      MyLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to pick image from gallery',
+      );
+    }
+  }
+
+  Future<void> pickImageFromCamera() async {
+    try {
+      final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (image != null) {
+        await _uploadToFirebaseStorage(File(image.path));
+      }
+    } catch (e) {
+      MyLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to pick image from camera',
+      );
+    }
+  }
+
+  // Method to upload a profile picture
+  Future<void> uploadUserProfilePicture() async {
+    try {
+      MyFullScreenLoader.openLoadingDialog('We are updating your profile picture...', MyImages.loaders);
+      imageUploading.value = true;
+
+      final isConnected = await NetworkManager.instance.isConnected();
+      if (!isConnected) {
+        MyFullScreenLoader.stopLoading();
+        MyLoaders.errorSnackBar(
+          title: 'No Internet Connection',
+          message: 'Please check your network connection.',
+        );
+        return;
+      }
+
+      if (kIsWeb) {
+        final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+        uploadInput.accept = 'image/*'; // Accept only images
+        uploadInput.click();
+
+        uploadInput.onChange.listen((event) async {
+          final html.File? file = uploadInput.files?.first;
+          if (file != null) {
+            final reader = html.FileReader();
+            reader.readAsArrayBuffer(file);
+
+            reader.onLoadEnd.listen((event) async {
+              final Uint8List? imageData = reader.result as Uint8List?;
+              if (imageData != null) {
+                // Upload to Firebase Storage
+                final imageUrl = await _uploadToFirebaseStorage(imageData, file.name);
+                await _updateProfilePictureUrl(imageUrl);
+              }
+            });
+          }
+        });
+      } else {
+        final XFile? image = await ImagePicker().pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 70,
+          maxHeight: 512,
+          maxWidth: 512,
+        );
+
+        if (image != null) {
+          final imageUrl = await _uploadToFirebaseStorage(File(image.path));
+          await _updateProfilePictureUrl(imageUrl);
+        } else {
+          MyFullScreenLoader.stopLoading();
+          MyLoaders.warningSnackBar(
+            title: 'Cancelled',
+            message: 'Profile picture update cancelled.',
+          );
+        }
+      }
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.errorSnackBar(
+        title: 'Error Uploading Image',
+        message: 'Failed to upload profile picture. Error: $e',
+      );
+    } finally {
+      imageUploading.value = false;
+      user.refresh(); // Manually trigger UI refresh
+    }
+  }
+
+  Future<String> _uploadToFirebaseStorage(dynamic imageFile, [String? fileName]) async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (userId.isEmpty) throw Exception("User ID is not available");
+
+      final storagePath = 'Users/Images/Profile/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final ref = FirebaseStorage.instance.ref(storagePath);
+
+      if (kIsWeb && imageFile is Uint8List) {
+        await ref.putData(imageFile);
+      } else if (imageFile is File) {
+        await ref.putFile(imageFile);
+      }
+
+      return await ref.getDownloadURL();
+    } catch (e) {
+      throw Exception('Error uploading to Firebase: $e');
+    }
+  }
+
+  Future<void> _updateProfilePictureUrl(String imageUrl) async {
+    try {
+      await userRepository.updateSingleField({'ProfilePicture': imageUrl});
+      user.update((user) {
+        user?.profilePicture = imageUrl;
+      });
+      MyFullScreenLoader.stopLoading();
+      Get.back(); // Close the dialog
+      MyLoaders.successSnackBar(
+        title: 'Profile Picture Updated',
+        message: 'Your profile picture has been successfully updated!',
+      );
+    } catch (e) {
+      MyFullScreenLoader.stopLoading();
+      MyLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Failed to update profile picture URL. Error: $e',
+      );
+    }
+  }
+
+  // Delete account with confirmation dialog
   void deleteAccountWarningPopup() {
     Get.defaultDialog(
-      contentPadding: const EdgeInsets.all(MySizes.md),
+      contentPadding: const EdgeInsets.all(16),
       title: 'Delete Account',
-      middleText: 'Are you sure you want to delete your account permanently? This action is not reversible and all of your data will be removed permanently.',
+      middleText: 'Are you sure you want to delete your account permanently? This action is not reversible, and all your data will be removed permanently.',
       confirm: ElevatedButton(
-        onPressed: () async => deleteUserAccount(),
+        onPressed: () async {
+          await deleteUserAccount();
+          Get.back(); // Close the dialog after confirmation
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           side: const BorderSide(color: Colors.red),
         ),
         child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: MySizes.lg),
+          padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text('Delete'),
         ),
       ),
       cancel: OutlinedButton(
         child: const Text('Cancel'),
-        onPressed: () => Navigator.of(Get.overlayContext!).pop(),
+        onPressed: () => Get.back(),
       ),
     );
   }
 
-  void deleteUserAccount() async {
+  Future<void> deleteUserAccount() async {
     try {
-      MyFullScreenLoader.openLoadingDialog('Processing', MyImages.loaders);
-      final auth = AuthenticationRepository.instance;
-      final provider = auth.authUser!.providerData.map((e) => e.providerId).first;
+      MyFullScreenLoader.openLoadingDialog('Deleting Account...', MyImages.loaders);
 
-      if (provider == 'google.com') {
-        await auth.signInWithGoogle();
-        await auth.deleteAccount();
-        MyFullScreenLoader.stopLoading();
-        Get.offAll(() => const LoginScreen());
-      } else if (provider == 'password') {
-        MyFullScreenLoader.stopLoading();
-        Get.to(() => const ReAuthLoginForm());
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("No user found to delete.");
       }
+
+      // Delete user account from Firebase Authentication
+      await user.delete();
+
+      // Optionally, delete user data from Firestore
+      await userRepository.removeUserRecord(user.uid);
+
+      MyFullScreenLoader.stopLoading();
+      Get.offAll(() => const LoginScreen());
+
+      MyLoaders.successSnackBar(
+        title: 'Account Deleted',
+        message: 'Your account has been successfully deleted.',
+      );
     } catch (e) {
       MyFullScreenLoader.stopLoading();
-      MyLoaders.warningSnackBar(title: 'Oh Snap!', message: e.toString());
+      MyLoaders.errorSnackBar(
+        title: 'Account Deletion Failed',
+        message: e.toString(),
+      );
     }
   }
 
+  // Re-authenticate user
   Future<void> reAuthenticateEmailAndPasswordUser() async {
     try {
-      MyFullScreenLoader.openLoadingDialog('Processing', MyImages.loaders);
-      final isConnected = await NetworkManager.instance.isConnected();
+      MyFullScreenLoader.openLoadingDialog('Re-authenticating...', MyImages.loaders);
 
+      final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
         MyFullScreenLoader.stopLoading();
         return;
@@ -136,86 +290,23 @@ class UserController extends GetxController {
         return;
       }
 
-      await AuthenticationRepository.instance
-          .ReAuthenticateWithEmailAndPassword(
+      await AuthenticationRepository.instance.ReAuthenticateWithEmailAndPassword(
         verifyEmail.text.trim(),
         verifyPassword.text.trim(),
       );
 
-      await AuthenticationRepository.instance.deleteAccount();
-
       MyFullScreenLoader.stopLoading();
-      Get.offAll(() => const LoginScreen());
+      // Add logic to navigate or refresh after successful re-authentication
     } catch (e) {
       MyFullScreenLoader.stopLoading();
-      MyLoaders.warningSnackBar(title: 'Oh Snap!', message: e.toString());
-    }
-  }
-
-  Future<void> uploadUserProfilePicture() async {
-    try {
-      final image = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-        maxHeight: 512,
-        maxWidth: 512,
-      );
-
-      if (image != null) {
-        imageUploading.value = true;
-
-        // Get the old profile picture URL
-        final oldProfilePictureUrl = user.value.profilePicture;
-
-        // Call the private method to delete old profile picture from Firebase Storage
-        await _deleteOldProfilePicture(oldProfilePictureUrl);
-
-        // Upload the new profile picture
-        final imageUrl = await userRepository.uploadImage(
-          'Users/Images/Profile/',
-          image,
-        );
-
-        // Update the document with the new profile picture URL
-        final json = {'ProfilePicture': imageUrl};
-        await userRepository.updateSingleField(json);
-
-        user.value.profilePicture = imageUrl;
-        MyLoaders.successSnackBar(
-          title: 'Congratulations',
-          message: 'Your Profile Image has been updated!',
-        );
-      }
-    } catch (e) {
       MyLoaders.errorSnackBar(
-          title: 'Oh Snap', message: 'Something went wrong $e');
-    } finally {
-      imageUploading.value = false;
+        title: 'Re-authentication Failed',
+        message: e.toString(),
+      );
     }
   }
 
-  Future<void> _deleteOldProfilePicture(String oldProfilePictureUrl) async {
-    if (oldProfilePictureUrl.isNotEmpty && oldProfilePictureUrl != MyImages.accountGIF) {
-      try {
-        final fileNameWithQuery = oldProfilePictureUrl.split('/').last;
-
-        // Remove query parameters to get the actual filename
-        final fileName = Uri.parse(fileNameWithQuery).pathSegments.last;
-
-        // Remove leading 'Users/Images/Profile/' from the filename if present
-        final cleanFileName = fileName.replaceFirst('Users/Images/Profile/', '');
-
-        // Reference to the old profile picture in Firebase Storage
-        final storageReference = FirebaseStorage.instance.ref('Users/Images/Profile/$cleanFileName');
-
-        // Delete the old profile picture from Firebase Storage
-        await storageReference.delete();
-      } catch (e) {
-        print('Error deleting old profile picture from Firebase Storage: $e');
-      }
-    }
-  }
-
+  // Methods to update gender and birthday
   Future<void> updateGender(String gender) async {
     try {
       MyFullScreenLoader.openLoadingDialog('Updating Gender...', MyImages.loaders);
@@ -229,7 +320,6 @@ class UserController extends GetxController {
       final json = {'Gender': gender};
       await userRepository.updateSingleField(json);
 
-      // Update the userController's reactive user model
       user.update((user) {
         user?.gender = gender;
       });
@@ -261,7 +351,6 @@ class UserController extends GetxController {
       final json = {'Birthday': birthday};
       await userRepository.updateSingleField(json);
 
-      // Update the userController's reactive user model
       user.update((user) {
         user?.birthday = birthday;
       });

@@ -6,7 +6,7 @@ class MyGridLayoutWidget extends StatelessWidget {
   const MyGridLayoutWidget({
     super.key,
     required this.itemCount,
-    this.mainAxisExtent = 320,
+    this.mainAxisExtent = 120,
     required this.itemBuilder,
   });
 
