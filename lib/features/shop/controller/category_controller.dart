@@ -13,6 +13,7 @@ class CategoryController extends GetxController {
   final isLoading = false.obs;
   RxList<CategoryModel> allCategories = <CategoryModel>[].obs;
   RxList<CategoryModel> featuredCategories = <CategoryModel>[].obs;
+  var selectedCategory = Rxn<CategoryModel>();  // Observable to store selected category
 
   // Repositories
   final _categoryRepository = Get.put(CategoryRepository());
@@ -44,6 +45,11 @@ class CategoryController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // Setter method to update the selected category
+  void setSelectedCategory(CategoryModel category) {
+    selectedCategory.value = category;
   }
 
   // Fetch sub-categories based on a parent category ID

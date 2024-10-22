@@ -67,6 +67,7 @@ dependencies:
   dio: ^5.7.0  # To download the PDF
   path_provider: ^2.1.4  # To save the downloaded file to a temporary location
   flutter_html_iframe: ^3.0.0-beta.2
+  syncfusion_flutter_pdfviewer: ^27.1.55
 
 
 

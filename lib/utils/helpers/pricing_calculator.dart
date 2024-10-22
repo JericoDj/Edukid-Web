@@ -35,7 +35,7 @@ class MyPricingCalculator {
   static double getShippingCost(String location) {
     // Lookup the shipping cost for the given location using a shipping rate API.
     // Calculate the shipping cost based on various factors like distance, weight, etc.
-    return 0.99; // Example shipping cost of $5
+    return 0.00; // Example shipping cost of $5
   }
 
 /// -- Sum all cart values and return the total amount

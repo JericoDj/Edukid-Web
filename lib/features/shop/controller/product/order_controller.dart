@@ -58,6 +58,7 @@ class OrderController extends GetxController {
   }
 
   /// Processes the order using PayPal or card payment
+  /// Processes the order using PayPal or card payment
   void processOrder(double totalAmount) async {
     try {
       // Start Loader
@@ -69,7 +70,16 @@ class OrderController extends GetxController {
         return;
       }
 
+      // Retrieve the selected payment method
       final selectedPaymentMethod = checkoutController.selectedPaymentMethod.value;
+
+      // Bypass payment if totalAmount is 0 and save the order directly
+      if (totalAmount == 0) {
+        _saveOrderAndClearCart(userId, totalAmount);
+        return;
+      }
+
+      // Proceed with PayPal or card payment
       if (selectedPaymentMethod.name == 'PayPal') {
         _processPayPalPayment(totalAmount);
         return;
@@ -100,6 +110,7 @@ class OrderController extends GetxController {
       MyFullScreenLoader.stopLoading();
     }
   }
+
 
   /// PayPal payment process for mobile and web
   void _processPayPalPayment(double totalAmount) {

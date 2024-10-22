@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
+import 'package:webedukid/features/shop/screens/order/all_orders_screen.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'common/widgets/customShapes/containers/search_container.dart';
 import 'features/bookings/status/processing.dart';
@@ -17,6 +18,7 @@ import 'features/screens/personalization/screens/address/address.dart';
 import 'features/screens/profilescreen/settings.dart';
 import 'features/shop/cart/cart.dart';
 import 'features/shop/controller/product/product_controller.dart';
+import 'features/shop/models/category_model.dart';
 import 'features/shop/screens/account_privacy/account_privacy_screen.dart';
 import 'features/shop/screens/bookings/bookings.dart';
 import 'features/shop/screens/checkout/checkout.dart';
@@ -29,6 +31,8 @@ import 'features/shop/screens/all_products/all_products.dart';
 import 'features/shop/screens/wishlist/wishlist.dart';
 import 'features/screens/profilescreen/widgets/change_name.dart';
 import 'features/shop/models/product_model.dart';
+import 'features/shop/screens/sub_category/sub_category.dart';
+import 'features/shop/controller/category_controller.dart';
 
 // Use a GlobalKey to manage the state of NavigationBarMenu
 final GlobalKey<NavigationBarMenuState> navigationBarKey = GlobalKey<NavigationBarMenuState>();
@@ -44,15 +48,19 @@ class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
 class NavigationBarMenuState extends State<NavigationBarMenu> {
   bool _isDrawerOpen = false;
   bool _isEditProfileDrawerOpen = false;
+  bool isInteractive = true; // Control for pointerEvents based on drawer state
 
   void toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
+      isInteractive = !_isDrawerOpen; // Toggle pointerEvents when drawer is toggled
+      print('isInteractive: $isInteractive'); // Print the current state of isInteractive
       if (!_isDrawerOpen) {
         _isEditProfileDrawerOpen = false;
       }
     });
   }
+
 
   void toggleEditProfileDrawer() {
     setState(() {
@@ -65,20 +73,28 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     Get.lazyPut(() => NavigationController());
     final NavigationController navigationController = Get.find();
 
+    // Define screens map once, without duplicates
     final Map<String, Widget Function()> screens = {
       'home': () => HomeScreen(),
       'store': () => StoreScreen(),
-      'checkout': () => CheckOutScreen(), // Add Checkout Screen to screen map
-      'bookings': () => BookingsScreen(), // Main bookings screen
+      'checkout': () => CheckOutScreen(),
+      'bookings': () => BookingsScreen(),
+      'subcategories': () {
+        final CategoryModel? category = Get.find<CategoryController>().selectedCategory.value;
+        if (category == null) {
+          return Center(child: Text("No category selected"));
+        }
+        return SubCategoriesScreen(category: category);
+      },
       'processingBookings': () => ProcessingBookingsScreen(),
       'scheduledBookings': () => ScheduledBookingsScreen(),
       'ongoingBookings': () => OngoingBookingsScreen(),
       'completedBookings': () => CompletedBookingsScreen(),
       'rescheduledBookings': () => RescheduledBookingsScreen(),
       'cancelledBookings': () => CancelledBookingsScreen(),
-
-      'order': () => OrderScreen(),
+      'order': () => OrderScreen(isInteractive: isInteractive), // Pass isInteractive here
       'cart': () => CartScreen(),
+      'allOrders': () => AllOrdersScreen(isInteractive: isInteractive),
       'bookingSession': () => BookingSessionScreen(),
       'allProducts': () {
         Get.lazyPut(() => ProductController());
@@ -93,7 +109,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'wishlist': () => WishlistScreen(),
       'coupon': () => CouponScreen(),
       'accountPrivacy': () => AccountPrivacyScreen(),
-      'productDetail': () => ProductDetailScreen(product: navigationController.selectedProduct!), // Use the selected product
+      'productDetail': () => ProductDetailScreen(product: navigationController.selectedProduct!),
     };
 
     return Scaffold(
@@ -105,7 +121,9 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: Image.asset('assets/EdukidLogo.jpg', height: 50),
+              child: GestureDetector(
+                  onTap: () => navigationController.navigateTo('home'),
+                  child: Image.asset('assets/EdukidLogo.jpg', height: 50)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -115,7 +133,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
                   _buildNavButton('home', Iconsax.home, 'Home'),
                   _buildNavButton('store', Iconsax.shop, 'Store'),
                   _buildNavButton('bookings', Iconsax.task, 'Bookings'),
-                  _buildNavButton('order', Iconsax.note, 'Worksheets'),
+                  _buildNavButton('order', Iconsax.note, 'Worksheets'), // Worksheets button
                   _buildNavButton('games', Iconsax.game, 'Games'),
                 ],
               ),
@@ -144,7 +162,13 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       ),
       body: Stack(
         children: [
-          Obx(() => screens[navigationController.currentScreen.value]!()),
+          Obx(() {
+            // Ensure screen exists in the map to avoid null errors
+            final screenBuilder = screens[navigationController.currentScreen.value];
+            return screenBuilder != null
+                ? screenBuilder()
+                : Center(child: Text('Screen not found'));
+          }),
           if (_isDrawerOpen)
             SettingsScreen(
               isOpen: _isDrawerOpen,
@@ -152,7 +176,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
               onEditProfile: toggleEditProfileDrawer,
               onUserAddress: () => navigationController.navigateTo('userAddress'),
               onCart: () => navigationController.navigateTo('cart'),
-              onOrder: () => navigationController.navigateTo('order'),
+              onOrder: () => navigationController.navigateTo('allOrders'),
               onWishlist: () => navigationController.navigateTo('wishlist'),
               onCoupon: () => navigationController.navigateTo('coupon'),
               onAccountPrivacy: () => navigationController.navigateTo('accountPrivacy'),
@@ -175,7 +199,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     );
   }
 
-  Widget _buildNavButton(String screenKey, IconData icon, String label, {ProductModel? product}) {
+  Widget _buildNavButton(String screenKey, IconData icon, String label, {ProductModel? product, CategoryModel? category}) {
     final NavigationController navigationController = Get.find();
     return Obx(() {
       return TextButton.icon(
@@ -190,7 +214,9 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           ),
         ),
         onPressed: () {
-          if (product != null) {
+          if (category != null) {
+            navigationController.navigateToSubCategories(category);
+          } else if (product != null) {
             navigationController.navigateTo('productDetail', product: product);
           } else {
             _handleBookingScreenNavigation(screenKey);
@@ -203,25 +229,10 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
   void _handleBookingScreenNavigation(String screenKey) {
     final NavigationController navigationController = Get.find();
 
-    switch (screenKey) {
-      case 'home':
-        navigationController.currentScreen.value = 'home';
-        break;
-      case 'store':
-        navigationController.currentScreen.value = 'store';
-        break;
-      case 'order':
-        navigationController.currentScreen.value = 'order';
-        break;
-      case 'games':
-        navigationController.currentScreen.value = 'games';
-        break;
-      case 'bookings':
-        navigationController.currentScreen.value = 'bookings';
-        break;
-      default:
-        navigationController.currentScreen.value = 'home'; // Or any default screen
-        break;
+    if (screenKey == 'order') {
+      navigationController.forceReloadScreen(screenKey); // Force reload when clicking on 'order'
+    } else {
+      navigationController.navigateTo(screenKey);
     }
   }
 }

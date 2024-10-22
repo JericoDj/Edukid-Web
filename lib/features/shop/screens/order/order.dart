@@ -3,19 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'view_material.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
-import 'view_material.dart';
+import 'my_materials.dart';
+import '../../models/product_model.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({Key? key}) : super(key: key);
+  final bool isInteractive;
+
+  const OrderScreen({Key? key, required this.isInteractive}) : super(key: key);
 
   @override
   _OrderScreenState createState() => _OrderScreenState();
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  String selectedGrade = '';
+  String selectedGrade = ''; // Grade selected by user
+  String? selectedPdfUrl;
+  bool showDefaultPage = true;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -27,14 +33,6 @@ class _OrderScreenState extends State<OrderScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'My Worksheets',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             const SizedBox(width: 20),
             _buildGradeBox(context, 'Grade 1'),
             const SizedBox(width: 5),
@@ -49,111 +47,128 @@ class _OrderScreenState extends State<OrderScreen> {
             _buildGradeBox(context, 'Grade 6'),
           ],
         ),
-        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: FutureBuilder<QuerySnapshot>(
-                future: _firestore
-                    .collection('Users')
-                    .doc(_auth.currentUser?.uid)
-                    .collection('Orders')
-                    .get(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No orders found'));
-                  }
-
-                  final orders = snapshot.data!.docs;
-
-                  return Container(
-                    width: 800,
-                    child: GridView.builder(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      shrinkWrap: true,
-                      gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                        mainAxisExtent: 400,
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 50,
-                        childAspectRatio: 1,
-                      ),
-                      itemCount: orders.length,
-                      itemBuilder: (context, index) {
-                        var order = orders[index];
-                        var items = List.from(order['items']);
-                        return FutureBuilder(
-                          future: _fetchMatchingProducts(items),
-                          builder: (context,
-                              AsyncSnapshot<List<Widget>> productSnapshot) {
-                            if (productSnapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(child: CircularProgressIndicator());
-                            }
-                            if (!productSnapshot.hasData ||
-                                productSnapshot.data!.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-
-                            return Column(
-                              children: productSnapshot.data!,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          SizedBox(height: MySizes.spaceBtwItems),
+          Expanded(
+            child: showDefaultPage
+                ? MyMaterialsPage(isInteractive: widget.isInteractive)
+                : (selectedPdfUrl != null
+                ? ViewMaterial(
+              pdfUrl: selectedPdfUrl!,
+              onClose: _closePdfView,
+              isInteractive: widget.isInteractive,
+            )
+                : Align(
+              alignment: Alignment.topCenter,
+              child: _buildOrderList(),
+            )),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildGradeBox(BuildContext context, String gradeName) {
-    final isSelected = selectedGrade == gradeName;
+    final bool isSelected = selectedGrade == gradeName;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           selectedGrade = gradeName;
+          selectedPdfUrl = null;
+          showDefaultPage = false;
         });
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.2)
-              : MyColors.white,
-          borderRadius: BorderRadius.circular(8.0),
+          color: MyColors.primaryColor,
+          borderRadius: BorderRadius.circular(12.0),
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : MyColors.primaryColor.withOpacity(0.8),
-            width: 2.0,
+            color: isSelected ? Colors.yellow : MyColors.white,
+            width: 1.5,
           ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
-        child: Text(
-          gradeName,
-          style: TextStyle(
-            color: isSelected
-                ? MyColors.primaryColor
-                : MyColors.primaryColor.withOpacity(0.8),
-            fontSize: 10.0,
+        padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+        child: Center(
+          child: Text(
+            gradeName,
+            style: TextStyle(
+              color: isSelected ? Colors.yellow : MyColors.white,
+              fontSize: 14.0,
+              fontWeight: FontWeight.normal,
+              letterSpacing: 1.2,
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOrderList() {
+    return FutureBuilder<QuerySnapshot>(
+      future: _firestore
+          .collection('Users')
+          .doc(_auth.currentUser?.uid)
+          .collection('Orders')
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Text(
+              'No materials found',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+          );
+        }
+
+        final orders = snapshot.data!.docs;
+
+        return Container(
+          width: 1000,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 0.7,
+              mainAxisSpacing: 0,
+              crossAxisSpacing: 0,
+            ),
+            itemCount: orders.length,
+            itemBuilder: (context, index) {
+              var order = orders[index];
+              var items = List.from(order['items']);
+
+              return FutureBuilder(
+                future: _fetchMatchingProducts(items),
+                builder: (context, AsyncSnapshot<List<Widget>> productSnapshot) {
+                  if (productSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (!productSnapshot.hasData ||
+                      productSnapshot.data!.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: productSnapshot.data!,
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -166,22 +181,21 @@ class _OrderScreenState extends State<OrderScreen> {
       var productQuery = await _firestore
           .collection('Products')
           .where('Title', isEqualTo: title)
+          .where('Level', isEqualTo: selectedGrade)
           .get();
 
       for (var product in productQuery.docs) {
-        var productLevel = product['Level'];
         var productType = product['ProductType'];
 
-        if (productLevel == selectedGrade) {
-          if (productType == 'ProductType.single') {
-            matchingWidgets.add(_buildSingleProductWidget(product));
-          } else if (productType == 'ProductType.variable') {
-            var matchedVariation = await _fetchMatchingVariation(
-                item['selectedVariation'], product);
-            if (matchedVariation != null) {
-              matchingWidgets
-                  .add(_buildVariableProductWidget(matchedVariation));
-            }
+        if (productType == 'ProductType.single') {
+          matchingWidgets.add(_buildSingleProductWidget(
+              product as DocumentSnapshot<Map<String, dynamic>>)); // Casting here
+        } else if (productType == 'ProductType.variable') {
+          var matchedVariation =
+          await _fetchMatchingVariation(item['selectedVariation'], product);
+          if (matchedVariation != null) {
+            matchingWidgets
+                .add(_buildVariableProductWidget(matchedVariation));
           }
         }
       }
@@ -190,71 +204,247 @@ class _OrderScreenState extends State<OrderScreen> {
   }
 
   /// Widget for Single Product Type
-  Widget _buildSingleProductWidget(DocumentSnapshot product) {
+  Widget _buildSingleProductWidget(
+      DocumentSnapshot<Map<String, dynamic>> product) {
     String pdfUrl = product['PDF'] ?? ''; // PDF location for single products
 
-    return Container(
-      height: 400,
-      width: 200,
-      color: Colors.amber.withOpacity(0.3),
-      child: Card(
-        elevation: 5,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Image.network(
-                product['Thumbnail'],
-                fit: BoxFit.contain,
-                width: double.infinity,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product['Title'],
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-
-                  /// View PDF button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (pdfUrl.isNotEmpty) {
-                        Get.to(() => ViewMaterial(pdfUrl: pdfUrl));
-                      } else {
-                        Get.snackbar('Error', 'PDF not found');
-                      }
-                    },
-                    child: Text('View PDF'),
-                  ),
-
-                  /// Download PDF button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (pdfUrl.isNotEmpty) {
-                        _downloadPdf(pdfUrl, product['Title']);
-                      } else {
-                        Get.snackbar('Error', 'PDF not found');
-                      }
-                    },
-                    child: Text('Download PDF'),
-                  ),
-                ],
-              ),
+    return GestureDetector(
+      onTap: () {
+        // The GestureDetector now follows the first button's functionality
+        if (pdfUrl.isNotEmpty) {
+          setState(() {
+            selectedPdfUrl = pdfUrl;
+          });
+        } else {
+          Get.snackbar('Error', 'PDF not found');
+        }
+      }, // Gesture opens the PDF within the app
+      child: Container(
+        width: 280,
+        height: 360,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
             ),
           ],
+        ),
+        child: Card(
+          elevation: 10,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 180,
+                child: Image.network(
+                  product['Thumbnail'],
+                  fit: BoxFit.fill,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      product['Title'],
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems/2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          setState(() {
+                            selectedPdfUrl = pdfUrl;
+                          });
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: Text('View PDF'),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems / 2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          _openInNewTab(pdfUrl);
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.green,
+                      ),
+                      child: Text('View in New Tab'),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems/2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          _downloadPdf(pdfUrl, product['Title']);
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.red,
+                      ),
+                      child: Text('Download PDF'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Widget for Variable Product Type
+  Widget _buildVariableProductWidget(Map<String, dynamic> variation) {
+    String pdfUrl = variation['PDF'] ?? '';
+
+    return GestureDetector(
+      onTap: () {
+        if (pdfUrl.isNotEmpty) {
+          setState(() {
+            selectedPdfUrl = pdfUrl;
+          });
+        } else {
+          Get.snackbar('Error', 'PDF not found');
+        }
+      }, // Gesture opens the PDF within the app
+      child: Container(
+        height: 360,
+        width: 280,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Card(
+          elevation: 10,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 150,
+                child: Image.network(
+                  variation['Image'],
+                  fit: BoxFit.scaleDown,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      variation['Title'],
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      variation['SubTitle'],
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems/2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          setState(() {
+                            selectedPdfUrl = pdfUrl;
+                          });
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: Text('View PDF'),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems/2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          _openInNewTab(pdfUrl);
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.green,
+                      ),
+                      child: Text('View in New Tab'),
+                    ),
+                    SizedBox(height: MySizes.spaceBtwItems/2),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (pdfUrl.isNotEmpty) {
+                          _downloadPdf(pdfUrl, variation['Title']);
+                        } else {
+                          Get.snackbar('Error', 'PDF not found');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.red,
+                      ),
+                      child: Text('Download PDF'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openInNewTab(String pdfUrl) {
+    html.window.open(pdfUrl, '_blank');
+  }
+
+  void _downloadPdf(String pdfUrl, String title) {
+    final xhr = html.HttpRequest();
+    xhr.responseType = "blob";
+    xhr.open("GET", pdfUrl);
+    xhr.onLoad.listen((event) {
+      final blob = xhr.response;
+      final anchorElement = html.AnchorElement(
+        href: html.Url.createObjectUrlFromBlob(blob),
+      )
+        ..setAttribute('download', '$title.pdf')
+        ..click();
+      html.Url.revokeObjectUrl(anchorElement.href!);
+    });
+    xhr.send();
+  }
+
   Future<Map<String, dynamic>?> _fetchMatchingVariation(
-      Map selectedVariation, DocumentSnapshot product) async {
+      Map selectedVariation, DocumentSnapshot<Map<String, dynamic>> product) async {
     var chapter = selectedVariation['Chapter'];
     var part = selectedVariation['Part'];
 
@@ -269,99 +459,9 @@ class _OrderScreenState extends State<OrderScreen> {
     return null;
   }
 
-  /// Widget for Variable Product
-  Widget _buildVariableProductWidget(Map<String, dynamic> variation) {
-    String pdfUrl =
-        variation['PDF'] ?? ''; // PDF location for variable products
-
-    return Container(
-      height: 400,
-      width: 200,
-      child: Card(
-        elevation: 5,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(8)),
-                child: Image.network(
-                  variation['Image'],
-                  fit: BoxFit.fill,
-                  width: double.infinity,
-                  height: 200,
-                  alignment: Alignment.center,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    variation['Title'],
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    variation['SubTitle'],
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-
-                  /// View PDF button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (pdfUrl.isNotEmpty) {
-                        Get.to(() => ViewMaterial(pdfUrl: pdfUrl));
-                      } else {
-                        Get.snackbar('Error', 'PDF not found');
-                      }
-                    },
-                    child: Text('View PDF'),
-                  ),
-
-                  /// Download PDF button
-                  ElevatedButton(
-                    onPressed: () {
-                      if (pdfUrl.isNotEmpty) {
-                        _downloadPdf(
-                            pdfUrl, variation['Title'], variation['SubTitle']);
-                      } else {
-                        Get.snackbar('Error', 'PDF not found');
-                      }
-                    },
-                    child: Text('Download PDF'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Function to download PDF using XHR (for web)
-  void _downloadPdf(String pdfUrl, String title, [String? subtitle]) {
-    // Construct the file name using the title and optional subtitle
-    String fileName = subtitle != null && subtitle.isNotEmpty
-        ? '$title-$subtitle.pdf'
-        : '$title.pdf';
-
-    final xhr = html.HttpRequest();
-    xhr.responseType = "blob"; // Get the file as a blob
-    xhr.open("GET", pdfUrl);
-    xhr.onLoad.listen((event) {
-      final blob = xhr.response;
-      final anchorElement = html.AnchorElement(
-          href: html.Url.createObjectUrlFromBlob(blob))
-        ..setAttribute('download', fileName) // Use the dynamic file name
-        ..click();
-      html.Url.revokeObjectUrl(anchorElement.href!); // Clean up after download
+  void _closePdfView() {
+    setState(() {
+      selectedPdfUrl = null;
     });
-    xhr.send();
   }
 }

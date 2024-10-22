@@ -90,7 +90,7 @@ class MyProductCardVertical extends StatelessWidget {
                   children: [
                     MyProductTitleText(title: product.title, smallSize: true),
                     SizedBox(height: MySizes.spaceBtwItems / 2),
-                    MyBrandTitleText(title: product.brand!.name),
+                    MyBrandTitleText(title: product.brand!.name,color: Colors.green,),
                   ],
                 ),
               ),

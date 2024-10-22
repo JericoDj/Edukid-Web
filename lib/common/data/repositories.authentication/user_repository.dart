@@ -91,6 +91,7 @@ class UserRepository extends GetxController {
     }
   }
 
+  /// Function to get email from Firestore.
   Future<String?> getEmailFromFirestore(String email) async {
     try {
       final querySnapshot = await _db
@@ -157,7 +158,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to update any Fields in specific Users Collection
+  /// Function to update any fields in specific Users Collection.
   Future<void> updateSingleField(Map<String, dynamic> json) async {
     try {
       await _db.collection("Users").doc(AuthenticationRepository.instance.authUser?.uid).update(json);

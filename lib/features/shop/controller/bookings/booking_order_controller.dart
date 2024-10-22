@@ -88,6 +88,14 @@ class BookingOrderController extends GetxController {
       }
 
       final selectedPaymentMethod = checkoutController.selectedPaymentMethod.value;
+
+      // Bypass payment process if the totalAmount is 0
+      if (totalAmount == 0) {
+        _saveBooking(totalAmount, pickedDateTimeModels, selectedPaymentMethod.name);
+        return;
+      }
+
+      // Continue with PayPal or saved card logic if totalAmount is greater than 0
       if (selectedPaymentMethod.name == 'PayPal') {
         _processPayPalPayment(totalAmount, pickedDateTimeModels);
         return;
@@ -113,6 +121,7 @@ class BookingOrderController extends GetxController {
       MyFullScreenLoader.stopLoading();
     }
   }
+
 
   void _saveBooking(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels, String paymentMethod) {
     try {
