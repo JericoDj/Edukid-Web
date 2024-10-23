@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayPal Vaulting - Approve Agreement</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=AUcSIsOjCP7B4fPuxWzeSEi6NSYBGspr-pxMblGXts6D01cmrc19NgB8DR7UhHUSDp71AO3XpL8S77Uh"></script>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          padding: 50px;
+        }
+        #paypal-button-container {
+          margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Set Up PayPal for Future Payments</h1>
+<p>Click the button below to set up your PayPal account for future payments.</p>
+
+<!-- Container for PayPal button -->
+<div id="paypal-button-container"></div>
+
+<script>
+    // Fetch billing agreement approval URL from your server
+    async function fetchApprovalUrl() {
+      try {
+        // Request to your server to create a billing agreement
+        const response = await fetch('http://localhost:3000/create-billing-agreement', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            planId: 'P-2XH348931Y387074JM3MWHAQ', // Replace with your actual plan ID
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.links.find(link => link.rel === 'approval_url').href; // Extract the approval URL
+        } else {
+          throw new Error('Failed to create billing agreement');
+        }
+      } catch (error) {
+        console.error('Error fetching approval URL:', error);
+      }
+    }
+
+    // Initialize PayPal Buttons
+    paypal.Buttons({
+      createSubscription: async function (data, actions) {
+        // Call your server to get approval URL
+        const approvalUrl = await fetchApprovalUrl();
+
+        if (approvalUrl) {
+          // Redirect the customer to PayPal to approve the agreement
+          window.location.href = approvalUrl;
+        }
+      },
+      onApprove: function (data, actions) {
+        // Called when the payment is approved
+        console.log('Payment approved! Billing Agreement ID:', data.subscriptionID);
+
+        // Pass the billing agreement ID back to your Flutter app
+        window.opener.postMessage(JSON.stringify({
+          billingAgreementId: data.subscriptionID,
+        }), '*');
+
+        // Close this window
+        window.close();
+      },
+      onCancel: function () {
+        console.log('Payment cancelled by the user.');
+      },
+      onError: function (err) {
+        console.error('Error during payment process:', err);
+      }
+    }).render('#paypal-button-container');
+</script>
+</body>
+</html>
