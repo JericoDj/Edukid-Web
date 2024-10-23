@@ -17,6 +17,8 @@ class ProductModel {
   String? description;
   String? categoryId;
   String? level; // Added 'level' field
+  String? chapter; // Add 'chapter' field
+  String? part; // Add 'part' field
   List<String>? images;
   String productType;
   List<ProductAttributeModel>? productAttributes;

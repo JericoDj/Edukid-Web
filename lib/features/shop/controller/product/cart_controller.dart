@@ -1,13 +1,10 @@
 import 'dart:async';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:webedukid/features/shop/controller/product/variation_controller.dart';
-
 import '../../../../common/widgets/loaders/loaders.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/local_storage/storage_utility.dart';
@@ -18,7 +15,7 @@ import 'package:collection/collection.dart';
 class CartController extends GetxController {
   static CartController get instance => Get.find();
 
-// Variables
+  // Variables
   RxInt noOfCartItems = 0.obs;
   RxDouble totalCartPrice = 0.0.obs;
   RxInt productQuantityInCart = 0.obs;
@@ -30,9 +27,26 @@ class CartController extends GetxController {
     loadCartItems();
   }
 
-  /// Add items in the cart
-  void addToCart(ProductModel product) {
-    // Quantity Check
+  /// Add items to the cart with a limit of 1 per product
+  void addToCart(ProductModel product) async {
+    // First, check if the user has already purchased the product
+    bool isAlreadyPurchased = await _checkIfAlreadyPurchased(product);
+    if (isAlreadyPurchased) {
+      MyLoaders.warningSnackBar(
+        message: 'You have already purchased this product.',
+        title: 'Product Already Purchased',
+      );
+      return; // Exit if already purchased
+    }
+
+    // Check if the product is already in the cart
+    bool isAlreadyInCart = _isAlreadyInCart(product);
+    if (isAlreadyInCart) {
+      MyLoaders.customToast(message: 'You can only purchase 1 copy of this eBook.');
+      return; // Exit if product is already in the cart
+    }
+
+    // Quantity Check (Ensure that only 1 copy can be added)
     if (productQuantityInCart.value < 1) {
       MyLoaders.customToast(message: 'Select Quantity');
       return;
@@ -60,30 +74,17 @@ class CartController extends GetxController {
       }
     }
 
-    // Convert the Product Model to a CartItemModel with the given quantity
-    final selectedCartItem =
-        convertToCartItem(product, productQuantityInCart.value);
+    // Convert the Product Model to a CartItemModel with the given quantity (1 only)
+    final selectedCartItem = convertToCartItem(product, 1);
 
-    // Check if a similar item already exists in the cart
-    int index = cartItems.indexWhere((cartItem) =>
-        cartItem.productId == selectedCartItem.productId &&
-        cartItem.variationId == selectedCartItem.variationId &&
-        _isSameAttributes(
-            cartItem.selectedVariation, selectedCartItem.selectedVariation));
-
-    if (index >= 0) {
-      // Similar item found, update its quantity
-      cartItems[index].quantity += selectedCartItem.quantity;
-    } else {
-      // No similar item found, add the new item to the cart
-      cartItems.add(selectedCartItem);
-    }
+    // Add the new item to the cart (since we already checked there isn't any in the cart)
+    cartItems.add(selectedCartItem);
 
     updateCart();
     MyLoaders.customToast(message: 'Your Product has been added to the Cart.');
   }
 
-// Helper method to check if two attribute maps are the same
+  // Helper method to check if two attribute maps are the same
   bool _isSameAttributes(
       Map<String, dynamic>? attributes1, Map<String, dynamic>? attributes2) {
     if (attributes1 == null && attributes2 == null) {
@@ -95,23 +96,73 @@ class CartController extends GetxController {
     return MapEquality().equals(attributes1, attributes2);
   }
 
-  void addOneToCart(CartItemModel item) {
-    int index = cartItems.indexWhere(
-          (cartItem) =>
-      cartItem.productId == item.productId &&
-          cartItem.variationId == item.variationId &&
-          mapEquals(cartItem.selectedVariation, item.selectedVariation),
-    );
+  // Check if the product has already been purchased
+  Future<bool> _checkIfAlreadyPurchased(ProductModel product) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false; // If user is not logged in, no previous purchases
 
-    if (index >= 0) {
-      cartItems[index].quantity += 1;
-    } else {
-      cartItems.add(item);
+    final userOrders = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .collection('Orders');
+
+    final querySnapshot = await userOrders.get();
+
+    for (var doc in querySnapshot.docs) {
+      final orderData = doc.data();
+      final List<dynamic>? items = orderData['items'];
+
+      if (items != null) {
+        for (var item in items) {
+          final String title = item['title'] ?? '';
+          final Map<String, dynamic>? selectedVariation = item['selectedVariation'];
+
+          if (title == product.title) {
+            if (product.productType == ProductType.single.toString()) {
+              // For single product, check by title only
+              return true;
+            } else if (product.productType == ProductType.variable.toString() && selectedVariation != null) {
+              // For variable product, check by title and selected variations
+              final String? chapter = selectedVariation['Chapter'];
+              final String? part = selectedVariation['Part'];
+
+              if (chapter == variationController.selectedVariation.value.attributeValues['Chapter'] &&
+                  part == variationController.selectedVariation.value.attributeValues['Part']) {
+                return true;
+              }
+            }
+          }
+        }
+      }
     }
-
-    updateCart();
+    return false;
   }
 
+  // Check if the product is already in the cart
+  bool _isAlreadyInCart(ProductModel product) {
+    for (var cartItem in cartItems) {
+      if (cartItem.productId == product.id) {
+        // If product type is variable, check for variation as well
+        if (product.productType == ProductType.variable.toString()) {
+          final selectedVariation = variationController.selectedVariation.value;
+          if (_isSameAttributes(cartItem.selectedVariation, selectedVariation.attributeValues)) {
+            return true;
+          }
+        } else {
+          // If product type is single, check by productId only
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Method to add one more of an item in the cart (This will now respect the 1 item limit)
+  void addOneToCart(CartItemModel item) {
+    MyLoaders.customToast(message: 'You can only purchase 1 copy of this eBook.');
+  }
+
+  // Method to remove one quantity of an item from the cart
   void removeOneFromCart(CartItemModel item) {
     int index = cartItems.indexWhere(
           (cartItem) =>
@@ -132,6 +183,7 @@ class CartController extends GetxController {
     updateCart();
   }
 
+  // Show a dialog to confirm removal of an item from the cart
   void removeFromCartDialog(int index) {
     Completer<bool?> completer = Completer<bool?>();
 
@@ -168,14 +220,11 @@ class CartController extends GetxController {
     });
   }
 
-  ///Initialize already added Item's Count in the cart.
+  ///Initialize the product quantity for items already in the cart
   void updateAlreadyAddedProductCount(ProductModel product) {
-// If product has no variations then calculate cartEntries and display total number.
-// Else make default entries to 0 and show cart Entries when variation is selected.
     if (product.productType == ProductType.single.toString()) {
       productQuantityInCart.value = getProductQuantityInCart(product.id);
     } else {
-// Get selected Variation if any...
       final variationId = variationController.selectedVariation.value.id;
       if (variationId.isNotEmpty) {
         productQuantityInCart.value =
@@ -196,11 +245,11 @@ class CartController extends GetxController {
     final isVariation = variation.id.isNotEmpty;
     final price = isVariation
         ? variation.salePrice > 0.0
-            ? variation.salePrice
-            : variation.price
+        ? variation.salePrice
+        : variation.price
         : product.salePrice > 0.0
-            ? product.salePrice
-            : product.price;
+        ? product.salePrice
+        : product.price;
 
     return CartItemModel(
       productId: product.id,
@@ -221,6 +270,7 @@ class CartController extends GetxController {
     cartItems.refresh();
   }
 
+  // Calculate the total price and number of items in the cart
   void updateCartTotals() {
     double calculatedTotalPrice = 0.0;
     int calculatedNoOfItems = 0;
@@ -233,14 +283,16 @@ class CartController extends GetxController {
     noOfCartItems.value = calculatedNoOfItems;
   }
 
+  // Save the cart items to local storage
   void saveCartItems() {
     final cartItemStrings = cartItems.map((item) => item.toJson()).toList();
     MyStorageUtility().saveData('cartItems', cartItemStrings);
   }
 
+  // Load the cart items from local storage
   void loadCartItems() {
     final cartItemStrings =
-        MyStorageUtility().readData<List<dynamic>>('cartItems');
+    MyStorageUtility().readData<List<dynamic>>('cartItems');
     if (cartItemStrings != null) {
       cartItems.assignAll(cartItemStrings
           .map((item) => CartItemModel.fromJson(item as Map<String, dynamic>)));
@@ -257,20 +309,21 @@ class CartController extends GetxController {
 
   int getVariationQuantityInCart(String productId, String variationId) {
     final foundItem = cartItems.firstWhere(
-      (item) => item.productId == productId && item.variationId == variationId,
+          (item) => item.productId == productId && item.variationId == variationId,
       orElse: () => CartItemModel.empty(),
     );
 
     return foundItem.quantity;
   }
 
-  // Add this method to remove an item from the cart
+  // Method to remove an item from the cart
   void removeFromCart(int index) {
     cartItems.removeAt(index);
     updateCart();
     MyLoaders.customToast(message: 'Product removed from the Cart.');
   }
 
+  // Method to clear the cart
   void clearCart() {
     productQuantityInCart.value = 0;
     cartItems.clear();

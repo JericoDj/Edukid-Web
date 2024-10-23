@@ -91,7 +91,7 @@ class EditProfileScreen extends StatelessWidget {
             color: MyColors.white,
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(MySizes.defaultspace),
+                padding: const EdgeInsets.all(MySizes.spaceBtwItems),
                 child: Column(
                   children: [
                     /// Profile Picture
@@ -118,6 +118,7 @@ class EditProfileScreen extends StatelessWidget {
 
                           // TextButton for changing the profile picture
                           TextButton(
+
                             onPressed: () async {
                               var picture = await Get.dialog(
                                 const ChangeProfilePictureDialog(), // Open the ChangeProfilePictureDialog
@@ -126,7 +127,7 @@ class EditProfileScreen extends StatelessWidget {
                                 await controller.uploadUserProfilePicture(); // Upload the selected profile picture
                               }
                             },
-                            child: const Text('Change Profile Picture'),
+                            child: const Text('Change Profile Picture',style: TextStyle(color: MyColors.primaryColor),),
                           ),
                         ],
                       );

@@ -14,7 +14,6 @@ import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/helpers/helper_functions.dart';
 import '../../../controller/product/variation_controller.dart';
 import '../../../models/product_model.dart';
-
 class MyProductAttributes extends StatelessWidget {
   const MyProductAttributes({super.key, required this.product});
 
@@ -24,8 +23,9 @@ class MyProductAttributes extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = MyHelperFunctions.isDarkMode(context);
     final controller = Get.put(VariationController());
+
     return Obx(
-      () => Column(
+          () => Column(
         children: [
           /// selected attribute pricing and description
           if (controller.selectedVariation.value.id.isNotEmpty)
@@ -56,7 +56,7 @@ class MyProductAttributes extends StatelessWidget {
                                     .textTheme
                                     .titleSmall!
                                     .apply(
-                                        decoration: TextDecoration.lineThrough),
+                                    decoration: TextDecoration.lineThrough),
                               ), // Text
                             const SizedBox(width: MySizes.spaceBtwItems),
 
@@ -96,52 +96,51 @@ class MyProductAttributes extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: product.productAttributes!
                 .map((attribute) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MySectionHeading(
-                        title: attribute.name ?? '',
-                        showActionButton: false,
-                      ),
-                      SizedBox(
-                        height: MySizes.spaceBtwItems / 2,
-                      ),
-                      Obx(() {
-                        // Print variations for debugging
-                        print(
-                            "Selected Variation: ${controller.selectedVariation.value}");
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MySectionHeading(
+                  title: attribute.name ?? '',
+                  showActionButton: false,
+                ),
+                SizedBox(
+                  height: MySizes.spaceBtwItems / 2,
+                ),
+                Obx(() {
+                  // Print selected variation and selected attributes for debugging
+                  print("Selected Variation: ${controller.selectedVariation.value}");
+                  print("Selected Attributes: ${controller.selectedAttributes}");
 
-                        return Wrap(
-                          spacing: 8,
-                          children: attribute.values!.map(
-                            (attributeValue) {
-                              final isSelected = controller
-                                      .selectedAttributes[attribute.name] ==
-                                  attributeValue;
-                              final available = controller
-                                  .getAttributesAvailabilityInVariation(
-                                      product.productVariations!,
-                                      attribute.name!)
-                                  .contains(attributeValue);
-                              return MyChoiceChip(
-                                  text: attributeValue,
-                                  selected: isSelected,
-                                  onSelected: available
-                                      ? (selected) {
-                                          if (selected && available) {
-                                            controller.onAttributeSelected(
-                                                product,
-                                                attribute.name ?? '',
-                                                attributeValue);
-                                          }
-                                        }
-                                      : null);
-                            },
-                          ).toList(),
-                        );
-                      }),
-                    ],
-                  ),
-                )
+                  return Wrap(
+                    spacing: 8,
+                    children: attribute.values!.map(
+                          (attributeValue) {
+                        final isSelected = controller
+                            .selectedAttributes[attribute.name] ==
+                            attributeValue;
+                        final available = controller
+                            .getAttributesAvailabilityInVariation(
+                            product.productVariations!,
+                            attribute.name!)
+                            .contains(attributeValue);
+                        return MyChoiceChip(
+                            text: attributeValue,
+                            selected: isSelected,
+                            onSelected: available
+                                ? (selected) {
+                              if (selected && available) {
+                                controller.onAttributeSelected(
+                                    product,
+                                    attribute.name ?? '',
+                                    attributeValue);
+                              }
+                            }
+                                : null);
+                      },
+                    ).toList(),
+                  );
+                }),
+              ],
+            ))
                 .toList(),
           )
         ],

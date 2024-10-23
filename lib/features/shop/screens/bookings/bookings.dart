@@ -100,7 +100,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       },
                       style: ButtonStyle(
                         foregroundColor:
-                        MaterialStateProperty.all(MyColors.primaryColor),
+                        WidgetStateProperty.all(MyColors.primaryColor),
                       ),
                       child: Text(
                         'View All Bookings',

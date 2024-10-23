@@ -239,6 +239,7 @@ class HomeScreen extends StatelessWidget {
             /// Worksheets Heading
             MySectionHeading(
               title: 'Worksheets',
+              buttonTitle: 'View All',
               onPressed: () {
                 navigationController.navigateTo(
                     'allProducts'); // Navigate to AllProductsScreen with its controller

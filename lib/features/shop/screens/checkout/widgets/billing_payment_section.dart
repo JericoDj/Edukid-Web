@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -28,10 +27,29 @@ class MyBillingPaymentSection extends StatelessWidget {
       children: [
         MySectionHeading(
           title: 'Payment Method',
-          buttonTitle: 'Change',
-          onPressed: () => controller.selectPaymentMethod(context),  // Select payment method here
+          buttonTitle: '', // Removed the buttonTitle from here
+          onPressed: null,  // Disabled this, we'll handle the button in the TextButton below
         ),
-        SizedBox(height: MySizes.spaceBtwItems / 2,),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Payment Method',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            TextButton(
+              onPressed: () => controller.selectPaymentMethod(context),
+              child: Text(
+                'Change',
+                style: TextStyle(
+                  color: MyColors.primaryColor, // Change button color
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: MySizes.spaceBtwItems / 2),
         Obx(
               () => Row(
             children: [
@@ -40,13 +58,19 @@ class MyBillingPaymentSection extends StatelessWidget {
                 height: 35,
                 backgroundColor: dark ? MyColors.light : MyColors.white,
                 padding: EdgeInsets.all(MySizes.sm),
-                child: Image(image: AssetImage(controller.selectedPaymentMethod.value.image), fit: BoxFit.contain),
+                child: Image(
+                  image: AssetImage(controller.selectedPaymentMethod.value.image),
+                  fit: BoxFit.contain,
+                ),
               ),
-              SizedBox(width: MySizes.spaceBtwItems / 2,),
-              Text(controller.selectedPaymentMethod.value.name, style: Theme.of(context).textTheme.bodyLarge,)
+              SizedBox(width: MySizes.spaceBtwItems / 2),
+              Text(
+                controller.selectedPaymentMethod.value.name,
+                style: Theme.of(context).textTheme.bodyLarge,
+              )
             ],
           ),
-        )
+        ),
       ],
     );
   }

@@ -59,11 +59,13 @@ class MyUserProfileTile extends StatelessWidget {
                 .headlineSmall!
                 .apply(color: MyColors.white)),
       ),
-      subtitle: Text(controller.user.value.email,
-          style: Theme.of(context)
-              .textTheme
-              .bodyMedium!
-              .apply(color: MyColors.white)),
+      subtitle: Obx(
+        ()=> Text(controller.user.value.email,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .apply(color: MyColors.white)),
+      ),
       trailing: IconButton(
           onPressed: onPressed,
           icon: const Icon(Iconsax.edit, color: MyColors.white)),

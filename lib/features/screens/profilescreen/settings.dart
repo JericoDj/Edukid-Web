@@ -82,32 +82,32 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: MySizes.spaceBtwItems),
                     MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
+                      icon: Icons.home,
                       title: 'My Addresses',
                       subTitle: 'Set shopping delivery address',
                       onTap: onUserAddress,
                     ),
                     MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
+                      icon: Icons.card_travel,
                       title: 'My Cart',
                       subTitle: 'Add, remove products and move to checkout',
                       onTap: onCart,
                     ),
                     MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
+                      icon: Icons.book,
                       title: 'My Orders',
                       subTitle: 'In-progress and Completed Orders',
                       onTap: onOrder,
                     ),
 
                     MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
+                      icon: Icons.discount,
                       title: 'My Coupons',
                       subTitle: 'List of all coupons',
                       onTap: onCoupon,
                     ),
                     MySettingsMenuTile(
-                      icon: Iconsax.safe_home,
+                      icon: Icons.lock,
                       title: 'Account Privacy',
                       subTitle: 'Manage data usage and connected accounts',
                       onTap: onAccountPrivacy,
@@ -123,9 +123,22 @@ class SettingsScreen extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () {
                           AuthenticationRepository.instance.logout();
+                          // Your onPressed action
                         },
-                        child: const Text('Logout'),
-                      ),
+                        child: Text('Logout'),
+                        style: ButtonStyle(
+                          side: WidgetStateProperty.all(
+                            BorderSide(color: Colors.teal, width: 1.5), // Set your border color and width here
+                          ),
+                          foregroundColor: WidgetStateProperty.all(Colors.teal), // Text color
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30), // Adjust the border radius as needed
+                            ),
+                          ),
+                        ),
+                      )
+
                     ),
                     const SizedBox(height: MySizes.spaceBtwSections * 2),
                   ],

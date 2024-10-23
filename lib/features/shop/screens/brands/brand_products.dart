@@ -19,10 +19,6 @@ class BrandProducts extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = BrandController.instance;
     return Scaffold(
-      appBar: MyAppBar(
-        showBackArrow: true,
-        title: Text(brand.name),
-      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(MySizes.defaultspace),
         child: Column(

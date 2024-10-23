@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:webedukid/utils/constants/colors.dart';
 
 
 class MySectionHeading extends StatelessWidget {
@@ -25,7 +26,7 @@ class MySectionHeading extends StatelessWidget {
 
       if(showActionButton)TextButton(
           onPressed: onPressed,
-          child: Text(buttonTitle)),
+          child: Text(buttonTitle,style: TextStyle(color: MyColors.primaryColor),)),
     ]);
   }
 }

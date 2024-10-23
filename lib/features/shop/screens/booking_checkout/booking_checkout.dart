@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pay/pay.dart';
 import 'package:webedukid/features/shop/screens/booking_checkout/widgets/booking_billing_amount_section.dart';
 import 'package:webedukid/features/shop/screens/booking_checkout/widgets/booking_details.dart';
+import 'package:webedukid/utils/constants/colors.dart';
 
 
 import '../../../../common/widgets/appbar.dart';
@@ -93,6 +94,8 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
                   const SizedBox(height: 16.0),
 
                   MyRoundedContainer(
+                    borderColor: MyColors.primaryColor,
+
                     showBorder: true,
                     padding: EdgeInsets.all(16.0),
                     backgroundColor: dark ? Colors.grey[900]! : Colors.white,
@@ -124,7 +127,7 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
                 controller.processOrder(totalAmount, widget.pickedDates, widget.pickedTimes);
               }
                   : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
-              child: Text('Checkout \$$totalAmount'),
+              child: Text('Checkout \$$totalAmount',style: TextStyle(color: MyColors.primaryColor),),
             ),
           ),
         ),

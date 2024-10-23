@@ -26,10 +26,6 @@ class AllProductsScreen extends StatelessWidget {
     final controller = Get.put(AllProductsController());
 
     return Scaffold(
-      appBar: MyAppBar(
-        title: Text(title),
-        showBackArrow: true,
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(MySizes.defaultspace),

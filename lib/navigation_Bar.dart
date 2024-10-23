@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/editprofile.dart';
+import 'package:webedukid/features/shop/screens/brands/brand_products.dart';
 import 'package:webedukid/features/shop/screens/order/all_orders_screen.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'common/widgets/customShapes/containers/search_container.dart';
@@ -61,7 +62,6 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     });
   }
 
-
   void toggleEditProfileDrawer() {
     setState(() {
       _isEditProfileDrawerOpen = !_isEditProfileDrawerOpen;
@@ -79,6 +79,16 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'store': () => StoreScreen(),
       'checkout': () => CheckOutScreen(),
       'bookings': () => BookingsScreen(),
+      'brandProducts': () {
+        final brand = navigationController.selectedBrand;
+        if (brand != null) {
+          return BrandProducts(brand: brand);
+        } else {
+          return Center(child: Text("No brand selected"));
+        }
+      },
+
+
       'subcategories': () {
         final CategoryModel? category = Get.find<CategoryController>().selectedCategory.value;
         if (category == null) {

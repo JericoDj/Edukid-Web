@@ -58,6 +58,7 @@ class MyCouponCodeState extends State<MyCouponCode> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MyRoundedContainer(
+          borderColor: MyColors.primaryColor,
           showBorder: true,
           backgroundColor: dark ? MyColors.dark : MyColors.white,
           padding: const EdgeInsets.only(

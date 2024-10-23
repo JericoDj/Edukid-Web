@@ -102,8 +102,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           return MyBrandCard(
                             showBorder: true,
                             brand: brand,
-                            onTap: () =>
-                                Get.to(() => BrandProducts(brand: brand)),
+                            onTap: () {
+                              // Navigate using the navigationController to the Brand Products page
+                              navigationController.navigateTo('brandProducts', brand: brand);
+                            },
                           );
                         },
                       ),
