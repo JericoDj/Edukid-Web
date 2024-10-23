@@ -56,7 +56,7 @@ class CategoryController extends GetxController {
   Future<List<CategoryModel>> getSubCategories(String categoryId) async {
     try {
       final subCategories = await _categoryRepository.getSubCategories(categoryId);
-      return subCategories ?? []; // Return empty list if null
+      return subCategories; // Return empty list if null
     } catch (e) {
       // Show an error message and return an empty list
       MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
