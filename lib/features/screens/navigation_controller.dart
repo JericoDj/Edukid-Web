@@ -7,7 +7,10 @@ import '../shop/models/category_model.dart';
 import '../shop/models/brand_model.dart'; // Add BrandModel import
 
 class NavigationController extends GetxController {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
   var currentScreen = 'home'.obs;  // Default to the home screen
 
   // Store product for detail navigation

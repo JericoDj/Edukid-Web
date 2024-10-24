@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
+<<<<<<< HEAD
 import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/home_categories.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/promo_slider.dart';
 import 'package:webedukid/features/shop/screens/bookings/booking_session.dart';
+=======
+import 'package:webedukid/features/screens/homescreen/widgets/home_categories.dart';
+import 'package:webedukid/features/screens/homescreen/widgets/promo_slider.dart';
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
 import '../../../common/widgets/layouts/grid_layout.dart';
 import '../../../common/widgets/products/product_card/product_card_vertical.dart';
@@ -24,12 +29,18 @@ class HomeScreen extends StatelessWidget {
     final NavigationController navigationController = Get.find(); // Get the NavigationController
     final ProductController controller = Get.put(ProductController()); // Initialize the ProductController
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     // Ensure the selected category is cleared when returning to the HomeScreen
     navigationController.clearSelectedCategory(); // Clear the selection
 
     return Scaffold(
+<<<<<<< HEAD
       appBar: CustomAppBar(currentScreen: 'home',),
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -223,9 +234,13 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   width: 200,
                   child: ElevatedButton(
+<<<<<<< HEAD
                     onPressed: () {
                       Get.to(() => BookingSessionScreen());
                     },
+=======
+                    onPressed: () => navigationController.navigateTo('bookingSession'),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(MyColors.primaryColor),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
