@@ -20,17 +20,12 @@ class MySearchContainer extends StatelessWidget {
   final String text;
   final IconData? icon;
   final bool showBackround, showBorder;
-<<<<<<< HEAD
   final Function(String)? onTap; // Function that takes a String input
-=======
-  final VoidCallback? onTap;
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
   final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final dark = MyHelperFunctions.isDarkMode(context);
-<<<<<<< HEAD
     final TextEditingController searchController = TextEditingController(); // Controller for the TextField
 
     return GestureDetector(
@@ -42,13 +37,6 @@ class MySearchContainer extends StatelessWidget {
       child: Padding(
         // Adjust this padding value to move the search bar down
         padding: const EdgeInsets.only(top: 30, bottom: 30),
-=======
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        // Adjust this padding value to move the search bar down
-        padding: const EdgeInsets.only(top: 25, bottom: 25),
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
         child: Container(
           height: 45,
           width: MyDeviceUtils.getScreenWidth(context),
@@ -65,7 +53,6 @@ class MySearchContainer extends StatelessWidget {
           child: Row(
             children: [
               Icon(icon, color: MyColors.darkerGrey),
-<<<<<<< HEAD
               const SizedBox(width: MySizes.spaceBtwItems),
               Expanded(
                 child: TextField(
@@ -84,12 +71,6 @@ class MySearchContainer extends StatelessWidget {
                   },
                 ),
               ),
-=======
-              const SizedBox(
-                width: MySizes.spaceBtwItems,
-              ),
-              Text(text, style: Theme.of(context).textTheme.bodySmall),
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
             ],
           ),
         ),

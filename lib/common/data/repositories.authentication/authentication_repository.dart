@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import 'dart:io' if (dart.library.html) 'dart:html'; // Conditional import for platform-specific code
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,29 +5,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-=======
-import 'dart:io'
-    if (dart.library.html) 'dart:html'; // Conditional import for platform-specific code
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/basic.dart';
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:webedukid/common/data/repositories.authentication/user_repository.dart';
 
 import '../../../features/authentication/login/login.dart';
-<<<<<<< HEAD
 import '../../../features/screens/homescreen/HomeScreen.dart';
 import '../../../features/screens/navigation_controller.dart';
-=======
-import '../../../features/authentication/login/login.dart';
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import '../../../features/screens/onboarding/onboarding.dart';
 import '../../../features/screens/signup/widgets/verifyemailscreen.dart';
 import '../../../navigation_Bar.dart';
@@ -53,10 +37,7 @@ class AuthenticationRepository extends GetxController {
 
   @override
   void onReady() {
-<<<<<<< HEAD
     Get.lazyPut(()=>NavigationController());
-=======
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     // This will only work on mobile; consider removing for web
     // FlutterNativeSplash.remove();
     screenRedirect();
@@ -65,7 +46,6 @@ class AuthenticationRepository extends GetxController {
   void screenRedirect() async {
     final user = _auth.currentUser;
 
-<<<<<<< HEAD
     // Always show the navigation bar first, regardless of authentication status
 
 
@@ -78,54 +58,16 @@ class AuthenticationRepository extends GetxController {
         // If the email is not verified, show verification screen
         final userEmail = user.email ?? noUser; // Use noUser if email is null
         Get.to(() => SizedBox(child: VerifyEmailScreen(email: userEmail)));
-=======
-    if (user != null) {
-      if (user.emailVerified) {
-        // Initialize User Specific Storage
-        await MyStorageUtility.init(user.uid);
-        Get.offAll(() =>  NavigationBarMenu());
-      } else {
-        final userEmail = user.email ?? noUser; // Use noUser if email is null
-        Get.offAll(() =>
-            SizedBox(
-              child: VerifyEmailScreen(
-                email: userEmail,
-              ),
-            ));
-      }
-    } else {
-      // Set user to noUser when it is null
-      if (kDebugMode) {
-        print('======== GET Storage Auth Repo =======');
-        print(deviceStorage.read('IsFirstTime'));
-      }
-
-      // If IsFirstTime is not set or is set to true, navigate to OnBoardingScreen
-      if (deviceStorage.read('IsFirstTime') != false) {
-        deviceStorage.write('IsFirstTime', true); // Set IsFirstTime to true
-        Get.offAll(const OnBoardingScreen());
-      } else {
-        Get.offAll(() => const LoginScreen());
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
       }
     }
   }
 
-<<<<<<< HEAD
 
 
   /// Sign in (email authentication)
   Future<UserCredential> loginWithEmailAndPassword(String email, String password) async {
     try {
       return await _auth.signInWithEmailAndPassword(email: email, password: password);
-=======
-  /// Sign in (email authentication)
-  Future<UserCredential> loginWithEmailAndPassword(String email,
-      String password) async {
-    try {
-      return await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     } on FirebaseAuthException catch (e) {
       throw MyFirebaseAuthException(e.code).message;
     } on FirebaseException catch (e) {
@@ -140,17 +82,9 @@ class AuthenticationRepository extends GetxController {
   }
 
   /// Register (email authentication)
-<<<<<<< HEAD
   Future<UserCredential> registerWithEmailAndPassword(String email, String password) async {
     try {
       return await _auth.createUserWithEmailAndPassword(email: email, password: password);
-=======
-  Future<UserCredential> registerWithEmailAndPassword(String email,
-      String password) async {
-    try {
-      return await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     } on FirebaseAuthException catch (e) {
       throw MyFirebaseAuthException(e.code).message;
     } on FirebaseException catch (e) {
@@ -199,12 +133,7 @@ class AuthenticationRepository extends GetxController {
   }
 
   /// ReAuthenticate user (reauthenticate)
-<<<<<<< HEAD
   Future<void> ReAuthenticateWithEmailAndPassword(String email, String password) async {
-=======
-  Future<void> ReAuthenticateWithEmailAndPassword(String email,
-      String password) async {
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     try {
       AuthCredential credential =
       EmailAuthProvider.credential(email: email, password: password);
@@ -276,10 +205,6 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
   /// Google Sign-In (google authentication)
   Future<UserCredential> signInWithGoogle() async {
     try {
@@ -321,7 +246,6 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-<<<<<<< HEAD
 
 // Method to check authentication and return a widget or redirect
   Widget handleRestrictedContent(Widget Function() content) {
@@ -340,8 +264,3 @@ class AuthenticationRepository extends GetxController {
 
 
 
-=======
-}
-
-
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623

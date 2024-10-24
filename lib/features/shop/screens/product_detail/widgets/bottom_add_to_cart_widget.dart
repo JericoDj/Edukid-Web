@@ -1,27 +1,25 @@
-<<<<<<< HEAD
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-=======
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../../common/widgets/icons/my_circular_icon.dart';
 import '../../../../../utils/constants/colors.dart';
 import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/helpers/helper_functions.dart';
-<<<<<<< HEAD
+
 import '../../../../authentication/login/login.dart';
 import '../../../controller/product/cart_controller.dart';
 import '../../../models/product_model.dart';
 import '../../../../../common/data/repositories.authentication/authentication_repository.dart';
-=======
+
 import '../../../controller/product/cart_controller.dart';
 import '../../../models/product_model.dart';
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
+
 
 class MyBottomAddToCart extends StatelessWidget {
   const MyBottomAddToCart({super.key, required this.product});
@@ -86,7 +84,7 @@ class MyBottomAddToCart extends StatelessWidget {
             ),
             SizedBox(width: 20,),
             ElevatedButton(
-<<<<<<< HEAD
+
               onPressed: () {
                 // Check authentication before allowing to add to cart
                 if (AuthenticationRepository.instance.authUser != null) {
@@ -97,15 +95,14 @@ class MyBottomAddToCart extends StatelessWidget {
                   // Redirect to login screen if not authenticated
                   Get.to(() => const LoginScreen());
                 }
-=======
+
               onPressed: controller.initialProductCount.value < 1
                   ? null
                   : () {
                 // Use the initialProductCount when adding to the cart
                 controller.productQuantityInCart.value =
                     controller.initialProductCount.value;
-                controller.addToCart(product);
->>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
+};
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(MySizes.md),
