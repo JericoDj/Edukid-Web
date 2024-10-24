@@ -11,6 +11,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:webedukid/common/data/repositories.authentication/user_repository.dart';
 
 import '../../../features/authentication/login/login.dart';
+import '../../../features/screens/homescreen/HomeScreen.dart';
+import '../../../features/screens/navigation_controller.dart';
 import '../../../features/screens/onboarding/onboarding.dart';
 import '../../../features/screens/signup/widgets/verifyemailscreen.dart';
 import '../../../navigation_Bar.dart';
@@ -35,6 +37,7 @@ class AuthenticationRepository extends GetxController {
 
   @override
   void onReady() {
+    Get.lazyPut(()=>NavigationController());
     // This will only work on mobile; consider removing for web
     // FlutterNativeSplash.remove();
     screenRedirect();
@@ -44,7 +47,7 @@ class AuthenticationRepository extends GetxController {
     final user = _auth.currentUser;
 
     // Always show the navigation bar first, regardless of authentication status
-    Get.offAll(() => NavigationBarMenu());
+
 
     if (user != null) {
       // If the user is authenticated and email is verified

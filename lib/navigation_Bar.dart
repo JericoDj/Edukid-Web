@@ -37,9 +37,6 @@ import 'features/shop/screens/sub_category/sub_category.dart';
 import 'features/shop/controller/category_controller.dart';
 import 'package:webedukid/common/data/repositories.authentication/authentication_repository.dart';
 
-// Use a GlobalKey to manage the state of NavigationBarMenu
-final GlobalKey<NavigationBarMenuState> navigationBarKey = GlobalKey<NavigationBarMenuState>();
-
 class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
   @override
   NavigationBarMenuState createState() => NavigationBarMenuState();

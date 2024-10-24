@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
+import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/home_categories.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/promo_slider.dart';
+import 'package:webedukid/features/shop/screens/bookings/booking_session.dart';
 import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
 import '../../../common/widgets/layouts/grid_layout.dart';
 import '../../../common/widgets/products/product_card/product_card_vertical.dart';
@@ -22,10 +24,12 @@ class HomeScreen extends StatelessWidget {
     final NavigationController navigationController = Get.find(); // Get the NavigationController
     final ProductController controller = Get.put(ProductController()); // Initialize the ProductController
 
+
     // Ensure the selected category is cleared when returning to the HomeScreen
     navigationController.clearSelectedCategory(); // Clear the selection
 
     return Scaffold(
+      appBar: CustomAppBar(currentScreen: 'home',),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -219,7 +223,9 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   width: 200,
                   child: ElevatedButton(
-                    onPressed: () => navigationController.navigateTo('bookingSession'),
+                    onPressed: () {
+                      Get.to(() => BookingSessionScreen());
+                    },
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(MyColors.primaryColor),
                       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
