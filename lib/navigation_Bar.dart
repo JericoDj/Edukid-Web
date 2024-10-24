@@ -6,7 +6,10 @@ import 'package:webedukid/features/shop/screens/brands/brand_products.dart';
 import 'package:webedukid/features/shop/screens/order/all_orders_screen.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'common/widgets/customShapes/containers/search_container.dart';
+<<<<<<< HEAD
 import 'features/authentication/login/login.dart';
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import 'features/bookings/status/processing.dart';
 import 'features/bookings/status/scheduled.dart';
 import 'features/bookings/status/ongoing.dart';
@@ -35,7 +38,13 @@ import 'features/screens/profilescreen/widgets/change_name.dart';
 import 'features/shop/models/product_model.dart';
 import 'features/shop/screens/sub_category/sub_category.dart';
 import 'features/shop/controller/category_controller.dart';
+<<<<<<< HEAD
 import 'package:webedukid/common/data/repositories.authentication/authentication_repository.dart';
+=======
+
+// Use a GlobalKey to manage the state of NavigationBarMenu
+final GlobalKey<NavigationBarMenuState> navigationBarKey = GlobalKey<NavigationBarMenuState>();
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 
 class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
   @override
@@ -53,8 +62,13 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
   void toggleDrawer() {
     setState(() {
       _isDrawerOpen = !_isDrawerOpen;
+<<<<<<< HEAD
       isInteractive =
       !_isDrawerOpen; // Toggle pointerEvents when drawer is toggled
+=======
+      isInteractive = !_isDrawerOpen; // Toggle pointerEvents when drawer is toggled
+      print('isInteractive: $isInteractive'); // Print the current state of isInteractive
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
       if (!_isDrawerOpen) {
         _isEditProfileDrawerOpen = false;
       }
@@ -72,7 +86,11 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     Get.lazyPut(() => NavigationController());
     final NavigationController navigationController = Get.find();
 
+<<<<<<< HEAD
     // Define screens map once
+=======
+    // Define screens map once, without duplicates
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
     final Map<String, Widget Function()> screens = {
       'home': () => HomeScreen(),
       'store': () => StoreScreen(),
@@ -86,6 +104,11 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           return Center(child: Text("No brand selected"));
         }
       },
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
       'subcategories': () {
         final CategoryModel? category = Get.find<CategoryController>().selectedCategory.value;
         if (category == null) {
@@ -99,7 +122,11 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       'completedBookings': () => CompletedBookingsScreen(),
       'rescheduledBookings': () => RescheduledBookingsScreen(),
       'cancelledBookings': () => CancelledBookingsScreen(),
+<<<<<<< HEAD
       'order': () => OrderScreen(isInteractive: isInteractive),
+=======
+      'order': () => OrderScreen(isInteractive: isInteractive), // Pass isInteractive here
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
       'cart': () => CartScreen(),
       'allOrders': () => AllOrdersScreen(isInteractive: isInteractive),
       'bookingSession': () => BookingSessionScreen(),
@@ -140,8 +167,12 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
                   _buildNavButton('home', Iconsax.home, 'Home'),
                   _buildNavButton('store', Iconsax.shop, 'Store'),
                   _buildNavButton('bookings', Iconsax.task, 'Bookings'),
+<<<<<<< HEAD
                   _buildNavButton('order', Iconsax.note, 'Worksheets'),
                   // Worksheets button
+=======
+                  _buildNavButton('order', Iconsax.note, 'Worksheets'), // Worksheets button
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                   _buildNavButton('games', Iconsax.game, 'Games'),
                 ],
               ),
@@ -156,6 +187,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
               children: [
                 IconButton(
                   icon: const Icon(Iconsax.shopping_cart, color: Colors.white),
+<<<<<<< HEAD
                   onPressed: () {
                     // Handle navigation to cart with authentication check
                     _handleNavigationWithRestriction('cart', navigationController);
@@ -178,6 +210,17 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
               ],
             ),
 
+=======
+                  onPressed: () => navigationController.navigateTo('cart'),
+                ),
+                IconButton(
+                  icon: const Icon(Iconsax.user, color: Colors.white),
+                  onPressed: toggleDrawer,
+                ),
+                const SizedBox(width: 10)
+              ],
+            ),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
           ],
         ),
       ),
@@ -185,25 +228,40 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
         children: [
           Obx(() {
             // Ensure screen exists in the map to avoid null errors
+<<<<<<< HEAD
             final screenBuilder = screens[navigationController.currentScreen
                 .value];
             return screenBuilder != null
                 ? screenBuilder()
                 : SizedBox.shrink(); // Show loading indicator
+=======
+            final screenBuilder = screens[navigationController.currentScreen.value];
+            return screenBuilder != null
+                ? screenBuilder()
+                : Center(child: Text('Screen not found'));
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
           }),
           if (_isDrawerOpen)
             SettingsScreen(
               isOpen: _isDrawerOpen,
               onClose: toggleDrawer,
               onEditProfile: toggleEditProfileDrawer,
+<<<<<<< HEAD
               onUserAddress: () =>
                   navigationController.navigateTo('userAddress'),
+=======
+              onUserAddress: () => navigationController.navigateTo('userAddress'),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
               onCart: () => navigationController.navigateTo('cart'),
               onOrder: () => navigationController.navigateTo('allOrders'),
               onWishlist: () => navigationController.navigateTo('wishlist'),
               onCoupon: () => navigationController.navigateTo('coupon'),
+<<<<<<< HEAD
               onAccountPrivacy: () =>
                   navigationController.navigateTo('accountPrivacy'),
+=======
+              onAccountPrivacy: () => navigationController.navigateTo('accountPrivacy'),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
             ),
           if (_isEditProfileDrawerOpen)
             Positioned(
@@ -238,6 +296,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           ),
         ),
         onPressed: () {
+<<<<<<< HEAD
           if (navigationController.currentScreen.value == screenKey) {
             // If the same screen is clicked, clear the screen first
             navigationController.currentScreen.value = ''; // Clear the current screen
@@ -248,12 +307,21 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
           } else {
             // Call the function to handle the navigation and restriction logic
             _handleNavigationWithRestriction(screenKey, navigationController, product: product, category: category);
+=======
+          if (category != null) {
+            navigationController.navigateToSubCategories(category);
+          } else if (product != null) {
+            navigationController.navigateTo('productDetail', product: product);
+          } else {
+            _handleBookingScreenNavigation(screenKey);
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
           }
         },
       );
     });
   }
 
+<<<<<<< HEAD
 
 
 // New function to handle navigation and restriction
@@ -288,6 +356,8 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
 
 }
 
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
   void _handleBookingScreenNavigation(String screenKey) {
     final NavigationController navigationController = Get.find();
 
@@ -297,3 +367,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
       navigationController.navigateTo(screenKey);
     }
   }
+<<<<<<< HEAD
+=======
+}
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623

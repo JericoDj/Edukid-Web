@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+<<<<<<< HEAD
 import 'package:webedukid/common/data/repositories.authentication/authentication_repository.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'package:webedukid/utils/constants/sizes.dart';
 
 import '../../../authentication/login/login.dart';
+=======
+import 'package:webedukid/utils/constants/colors.dart';
+import 'package:webedukid/utils/constants/sizes.dart';
+
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import '../booking_checkout/booking_checkout.dart';
 import 'booking_session_controller.dart';
 
@@ -119,7 +125,12 @@ class BookingSessionScreen extends StatelessWidget {
                         child: Container(
                           height: 400,
                           decoration: BoxDecoration(
+<<<<<<< HEAD
                             border: Border.all(color: MyColors.primaryColor, width: 2.0),
+=======
+                            border: Border.all(
+                                color: MyColors.primaryColor, width: 2.0),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                             borderRadius: BorderRadius.circular(8.0),
                           ),
                           padding: EdgeInsets.all(8.0),
@@ -157,7 +168,13 @@ class BookingSessionScreen extends StatelessWidget {
                                   padding: EdgeInsets.all(8.0),
                                   child: Text(
                                     "Time Slots for ${DateFormat.yMMMMd().format(normalizedDate)}",
+<<<<<<< HEAD
                                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+=======
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                                   ),
                                 ),
                                 ...timeSlotsForDay.map((timeSlot) {
@@ -165,6 +182,7 @@ class BookingSessionScreen extends StatelessWidget {
                                   return ListTile(
                                     title: Text(
                                       '${timeSlot.format(context)}',
+<<<<<<< HEAD
                                       style: TextStyle(color: isChosen ? Colors.white : Colors.black),
                                     ),
                                     tileColor: isChosen ? MyColors.buttonPrimary : Colors.transparent,
@@ -172,6 +190,25 @@ class BookingSessionScreen extends StatelessWidget {
                                       'Available Slots: ${controller.getAvailableSlots(normalizedDate, timeSlot)}',
                                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                                         color: isChosen ? Colors.white : Colors.black,
+=======
+                                      style: TextStyle(
+                                          color: isChosen
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    tileColor: isChosen
+                                        ? MyColors.buttonPrimary
+                                        : Colors.transparent,
+                                    trailing: Text(
+                                      'Available Slots: ${controller.getAvailableSlots(normalizedDate, timeSlot)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                        color: isChosen
+                                            ? Colors.white
+                                            : Colors.black,
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                                       ),
                                     ),
                                     onTap: () => controller.selectTimeSlot(timeSlot),
@@ -182,6 +219,10 @@ class BookingSessionScreen extends StatelessWidget {
                           }),
                         ),
                       ),
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                     ],
                   ),
                   SizedBox(height: MySizes.spaceBtwItems),
@@ -210,7 +251,12 @@ class BookingSessionScreen extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       "${DateFormat.yMMMMd().format(date)} - ${selectedTime != null ? selectedTime.format(context) : 'No Time Slot Selected'}",
+<<<<<<< HEAD
                                       style: TextStyle(fontSize: 16, color: Colors.black),
+=======
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                                     ),
                                   ),
                                   Text(
@@ -235,6 +281,10 @@ class BookingSessionScreen extends StatelessWidget {
                     }
                   }),
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                   SizedBox(height: 16.0),
                   Center(
                     child: SizedBox(
@@ -243,6 +293,7 @@ class BookingSessionScreen extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           if (controller.getSelectedDates().isEmpty) {
+<<<<<<< HEAD
                             Get.snackbar("Error", "Please select at least one date and time.");
                             return;
                           }
@@ -256,6 +307,17 @@ class BookingSessionScreen extends StatelessWidget {
                             BookingCheckOutScreen(
                               pickedDates: controller.getSelectedDates(),
                               pickedTimes: controller.selectedTimeSlots.values.toList(),
+=======
+                            Get.snackbar("Error",
+                                "Please select at least one date and time.");
+                            return;
+                          }
+                          Get.to(
+                            BookingCheckOutScreen(
+                              pickedDates: controller.getSelectedDates(),
+                              pickedTimes: controller.selectedTimeSlots.values
+                                  .toList(),
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
                               price: controller.pricePerSession.value,
                             ),
                           );

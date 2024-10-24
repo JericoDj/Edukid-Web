@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+<<<<<<< HEAD
 import 'package:webedukid/custom_app_bar.dart';
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
 import 'package:webedukid/features/screens/navigation_controller.dart'; // Import the navigation controller
 import '../../../../common/widgets/appbar/tabbar.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
@@ -71,7 +74,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     return DefaultTabController(
       length: categories.length,
       child: Scaffold(
+<<<<<<< HEAD
         appBar: CustomAppBar(currentScreen: 'store',),
+=======
+>>>>>>> 8d9d7c4708cd91881283eb101aa12a4d80b10623
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
