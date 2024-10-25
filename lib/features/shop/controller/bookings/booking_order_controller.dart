@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 import 'package:intl/intl.dart';
@@ -29,7 +30,6 @@ import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 
 class BookingOrderController extends GetxController {
   static BookingOrderController get instance => Get.find();
-
 
   // Observable list of bookings
   final RxList<BookingOrderModel> bookings = <BookingOrderModel>[].obs;
@@ -64,14 +64,26 @@ class BookingOrderController extends GetxController {
   }
 
   /// Start the loader as soon as processOrder starts
-  void processOrder(double totalAmount, List<DateTime> pickedDates, List<TimeOfDay?> pickedTimes) async {
+  void processOrder(
+      double totalAmount,
+      List<DateTime> pickedDates,
+      List<TimeOfDay?> pickedTimes,
+      BuildContext context,
+      ) async {
+    final effectiveContext = context ?? Get.overlayContext;
+    if (effectiveContext == null) {
+      debugPrint("No context available to show loading dialog.");
+      return;
+    }
+
     try {
-      // Start the loader at the beginning of the process
-      MyFullScreenLoader.openLoadingDialog('Processing your order', MyImages.loaders);
+      MyFullScreenLoader.openLoadingDialog('Processing your order', MyImages.loaders, context: effectiveContext);
 
       final userId = AuthenticationRepository.instance.authUser?.uid;
       if (userId == null || userId.isEmpty) {
-        MyLoaders.errorSnackBar(title: 'User Error', message: 'User not authenticated');
+        MyLoaders.errorSnackBar(
+            title: 'User Error', message: 'User not authenticated');
+        MyFullScreenLoader.stopLoading();
         return;
       }
 
@@ -84,36 +96,45 @@ class BookingOrderController extends GetxController {
           pickedTimes[i]?.hour ?? 0,
           pickedTimes[i]?.minute ?? 0,
         );
-        pickedDateTimeModels.add(PickedDateTimeModel(pickedDate: pickedDates[i], pickedTime: pickedDateTime));
+        pickedDateTimeModels.add(PickedDateTimeModel(
+            pickedDate: pickedDates[i], pickedTime: pickedDateTime));
       }
 
-      final selectedPaymentMethod = checkoutController.selectedPaymentMethod.value;
+      final selectedPaymentMethod =
+          checkoutController.selectedPaymentMethod.value;
 
-      // Bypass payment process if the totalAmount is 0
       if (totalAmount == 0) {
-        _saveBooking(totalAmount, pickedDateTimeModels, selectedPaymentMethod.name);
+        _saveBooking(totalAmount, pickedDateTimeModels,
+            selectedPaymentMethod.name, context); // Pass context here
         return;
       }
 
-      // Continue with PayPal or saved card logic if totalAmount is greater than 0
       if (selectedPaymentMethod.name == 'PayPal') {
-        _processPayPalPayment(totalAmount, pickedDateTimeModels);
+        _processPayPalPayment(
+            totalAmount, pickedDateTimeModels, context); // Pass context
         return;
       }
 
+      // Handle saved card payment method if it’s not PayPal
       final String? savedCustomerId = await _retrieveSavedCustomerId();
       final String? savedCardId = await _retrieveSavedCardId();
 
       if (savedCustomerId != null && savedCardId != null) {
-        bool paymentSuccess = await chargeCustomer(savedCustomerId, savedCardId, totalAmount);
+        bool paymentSuccess =
+            await chargeCustomer(savedCustomerId, savedCardId, totalAmount);
         if (paymentSuccess) {
-          _saveBooking(totalAmount, pickedDateTimeModels, selectedPaymentMethod.name);
+          _saveBooking(totalAmount, pickedDateTimeModels,
+              selectedPaymentMethod.name, context); // Pass context here
         } else {
-          MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'There was an error processing your payment.');
+          MyLoaders.errorSnackBar(
+              title: 'Payment Failed',
+              message: 'There was an error processing your payment.');
           MyFullScreenLoader.stopLoading();
         }
       } else {
-        MyLoaders.errorSnackBar(title: 'Payment Error', message: 'No saved customer or card information found.');
+        MyLoaders.errorSnackBar(
+            title: 'Payment Error',
+            message: 'No saved customer or card information found.');
         MyFullScreenLoader.stopLoading();
       }
     } catch (e) {
@@ -122,8 +143,11 @@ class BookingOrderController extends GetxController {
     }
   }
 
-
-  void _saveBooking(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels, String paymentMethod) {
+  void _saveBooking(
+      double totalAmount,
+      List<PickedDateTimeModel> pickedDateTimeModels,
+      String paymentMethod,
+      BuildContext context) {
     try {
       final booking = BookingOrderModel(
         id: UniqueKeyGenerator.generateUniqueKey(),
@@ -139,16 +163,22 @@ class BookingOrderController extends GetxController {
       );
 
       bookingOrderRepository.saveBooking(booking);
-      MyLoaders.successSnackBar(title: 'Booking Confirmed', message: 'Your booking has been successfully confirmed!');
+      MyLoaders.successSnackBar(
+          title: 'Booking Confirmed',
+          message: 'Your booking has been successfully confirmed!');
+
+      // Navigate to order confirmation using GoRouter
+      context.push('/orderConfirmation');
     } finally {
-      MyFullScreenLoader.stopLoading();  // Stop loader after saving the booking
+      MyFullScreenLoader.stopLoading(); // Stop loader after saving the booking
     }
   }
 
   /// PayPal payment process for mobile and web
-  void _processPayPalPayment(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) {
+  void _processPayPalPayment(double totalAmount,
+      List<PickedDateTimeModel> pickedDateTimeModels, BuildContext context) {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      Navigator.of(Get.context!).push(MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) => PaypalCheckoutView(
           sandboxMode: true,
           clientId: "Your PayPal Client ID",
@@ -166,35 +196,45 @@ class BookingOrderController extends GetxController {
               },
               "description": "Booking for selected dates",
               "item_list": {
-                "items": pickedDateTimeModels.map((model) => {
-                  "name": "Booking on ${DateFormat('MM/dd/yyyy').format(model.pickedDate)}",
-                  "quantity": 1,
-                  "price": (totalAmount / pickedDateTimeModels.length).toStringAsFixed(2),
-                  "currency": "USD"
-                }).toList(),
+                "items": pickedDateTimeModels
+                    .map((model) => {
+                          "name":
+                              "Booking on ${DateFormat('MM/dd/yyyy').format(model.pickedDate)}",
+                          "quantity": 1,
+                          "price": (totalAmount / pickedDateTimeModels.length)
+                              .toStringAsFixed(2),
+                          "currency": "USD"
+                        })
+                    .toList(),
               }
             }
           ],
           note: "Contact us for any questions on your order.",
           onSuccess: (Map params) async {
-            _handlePayPalSuccess(totalAmount, pickedDateTimeModels);
+            _handlePayPalSuccess(
+                totalAmount, pickedDateTimeModels, context); // Pass context
           },
           onError: (error) {
-            _handlePayPalError();
+            _handlePayPalError(context); // Pass context to the method
           },
           onCancel: () {
-            _handlePayPalCancel();
+            _handlePayPalCancel(context); // Pass context to the method
           },
         ),
       ));
     } else if (kIsWeb) {
-      _processPayPalPaymentWeb(totalAmount, pickedDateTimeModels);
+      _processPayPalPaymentWeb(
+          totalAmount, pickedDateTimeModels, context); // Pass context
     }
   }
 
   /// Removed capture order request from Flutter client
-  void _processPayPalPaymentWeb(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
-    final String createOrderEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/create_order";
+  void _processPayPalPaymentWeb(
+      double totalAmount,
+      List<PickedDateTimeModel> pickedDateTimeModels,
+      BuildContext context) async {
+    final String createOrderEndpoint =
+        "https://us-central1-edukid-60f55.cloudfunctions.net/api/create_order";
 
     try {
       final response = await http.post(
@@ -209,32 +249,43 @@ class BookingOrderController extends GetxController {
         final orderID = responseData['id'];
 
         if (approvalLink != null && orderID != null) {
-          final html.WindowBase? popupWindow = html.window.open(approvalLink, '_blank');
+          final html.WindowBase? popupWindow =
+              html.window.open(approvalLink, '_blank');
 
-          // Monitor the popup window and check order status when it closes
           Timer.periodic(Duration(seconds: 1), (timer) async {
             if (popupWindow != null && popupWindow.closed!) {
               timer.cancel();
-              await _checkOrderStatus(orderID, totalAmount, pickedDateTimeModels);  // Pass totalAmount and pickedDateTimeModels
+              await _checkOrderStatus(orderID, totalAmount,
+                  pickedDateTimeModels, context); // Pass context here
             }
           });
         } else {
-          MyLoaders.errorSnackBar(title: 'Error', message: 'Invalid PayPal response: missing approval link or order ID.');
+          MyLoaders.errorSnackBar(
+              title: 'Error',
+              message:
+                  'Invalid PayPal response: missing approval link or order ID.');
           MyFullScreenLoader.stopLoading();
         }
       } else {
-        MyLoaders.errorSnackBar(title: 'Error', message: 'Error creating PayPal order.');
+        MyLoaders.errorSnackBar(
+            title: 'Error', message: 'Error creating PayPal order.');
         MyFullScreenLoader.stopLoading();
       }
     } catch (e) {
-      MyLoaders.errorSnackBar(title: 'Error', message: 'An error occurred while processing your payment.');
+      MyLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'An error occurred while processing your payment.');
       MyFullScreenLoader.stopLoading();
     }
   }
 
-  Future<void> _checkOrderStatus(String orderID, double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
-    final String statusEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/order_status/$orderID";
-
+  Future<void> _checkOrderStatus(
+      String orderID,
+      double totalAmount,
+      List<PickedDateTimeModel> pickedDateTimeModels,
+      BuildContext context) async {
+    final String statusEndpoint =
+        "https://us-central1-edukid-60f55.cloudfunctions.net/api/order_status/$orderID";
 
     try {
       final response = await http.get(Uri.parse(statusEndpoint));
@@ -242,18 +293,25 @@ class BookingOrderController extends GetxController {
       if (response.statusCode == 200) {
         final statusData = jsonDecode(response.body);
 
-        if (statusData['success'] == true && statusData['status'] == 'APPROVED') {
+        if (statusData['success'] == true &&
+            statusData['status'] == 'APPROVED') {
           // Payment was successful, save the booking
-          _saveBooking(totalAmount, pickedDateTimeModels, "PayPal");
-          MyLoaders.successSnackBar(title: 'Payment Success', message: 'Your payment was successful!');
+          _saveBooking(totalAmount, pickedDateTimeModels, "PayPal", context);
+          MyLoaders.successSnackBar(
+              title: 'Payment Success',
+              message: 'Your payment was successful!');
         } else {
-          MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'Payment was not successful.');
+          MyLoaders.errorSnackBar(
+              title: 'Payment Failed', message: 'Payment was not successful.');
         }
       } else {
-        MyLoaders.errorSnackBar(title: 'Error', message: 'Error checking payment status.');
+        MyLoaders.errorSnackBar(
+            title: 'Error', message: 'Error checking payment status.');
       }
     } catch (e) {
-      MyLoaders.errorSnackBar(title: 'Error', message: 'An error occurred while checking payment status.');
+      MyLoaders.errorSnackBar(
+          title: 'Error',
+          message: 'An error occurred while checking payment status.');
     } finally {
       MyFullScreenLoader.stopLoading();
     }
@@ -301,25 +359,41 @@ class BookingOrderController extends GetxController {
     }
   }
 
-  Future<bool> chargeCustomer(String customerId, String cardId, double totalAmount) async {
+  Future<bool> chargeCustomer(
+      String customerId, String cardId, double totalAmount) async {
     await Future.delayed(Duration(seconds: 2));
     return true;
   }
 
-  void _handlePayPalSuccess(double totalAmount, List<PickedDateTimeModel> pickedDateTimeModels) async {
-    _saveBooking(totalAmount, pickedDateTimeModels, "PayPal");
-    Navigator.pop(Get.context!);
+  void _handlePayPalSuccess(double totalAmount,
+      List<PickedDateTimeModel> pickedDateTimeModels, BuildContext context) {
+    _saveBooking(totalAmount, pickedDateTimeModels, "PayPal",
+        context); // Pass context for navigation
+    Navigator.pop(context);
   }
 
-  void _handlePayPalError() {
-    MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'There was an error processing your PayPal payment.');
+  void _handlePayPalError(BuildContext context) {
+    MyLoaders.errorSnackBar(
+      title: 'Payment Failed',
+      message: 'There was an error processing your PayPal payment.',
+    );
     MyFullScreenLoader.stopLoading();
-    Navigator.pop(Get.context!);
+    if (Navigator.of(context, rootNavigator: true).canPop()) {
+      Navigator.of(context, rootNavigator: true)
+          .pop(); // Close the loading dialog
+    }
   }
 
-  void _handlePayPalCancel() {
-    Get.snackbar("Payment Cancelled", "You cancelled the PayPal payment.", snackPosition: SnackPosition.BOTTOM);
+  void _handlePayPalCancel(BuildContext context) {
+    Get.snackbar(
+      "Payment Cancelled",
+      "You cancelled the PayPal payment.",
+      snackPosition: SnackPosition.BOTTOM,
+    );
     MyFullScreenLoader.stopLoading();
-    Navigator.pop(Get.context!);
+    if (Navigator.of(context, rootNavigator: true).canPop()) {
+      Navigator.of(context, rootNavigator: true)
+          .pop(); // Close the loading dialog
+    }
   }
 }

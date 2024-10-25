@@ -22,6 +22,7 @@ class UserController extends GetxController {
   static UserController get instance => Get.find();
 
   final profileLoading = false.obs;
+  // Initialize user with an empty UserModel instead of allowing null values
   Rx<UserModel> user = UserModel.empty().obs;
   final hidePassword = false.obs;
   final imageUploading = false.obs;
@@ -36,6 +37,7 @@ class UserController extends GetxController {
     fetchUserRecord();
   }
 
+  /// Fetch the user's record from the repository
   Future<void> fetchUserRecord() async {
     try {
       profileLoading.value = true;
@@ -48,6 +50,29 @@ class UserController extends GetxController {
     }
   }
 
+  /// Set the user data after login
+  void setUser(User? firebaseUser) {
+    if (firebaseUser != null) {
+      user.value = UserModel(
+        id: firebaseUser.uid,
+        firstName: '',
+        lastName: '',
+        username: firebaseUser.displayName ?? '',
+        email: firebaseUser.email ?? '',
+        phoneNumber: firebaseUser.phoneNumber ?? '',
+        profilePicture: firebaseUser.photoURL ?? '',
+        gender: '',
+        birthday: '',
+      );
+    }
+  }
+
+  /// Clear user data on logout
+  void clearUser() {
+    user.value = UserModel.empty(); // Set to empty user instance to indicate no user is logged in
+  }
+
+  /// Save user record to the database
   Future<void> saveUserRecord(UserCredential? userCredentials) async {
     try {
       await fetchUserRecord();
@@ -78,7 +103,7 @@ class UserController extends GetxController {
     }
   }
 
-  // Methods for image picking (gallery and camera)
+  /// Pick an image from the gallery and upload
   Future<void> pickImageFromGallery() async {
     try {
       final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -93,6 +118,7 @@ class UserController extends GetxController {
     }
   }
 
+  /// Pick an image from the camera and upload
   Future<void> pickImageFromCamera() async {
     try {
       final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
@@ -107,7 +133,7 @@ class UserController extends GetxController {
     }
   }
 
-  // Method to upload a profile picture
+  /// Upload profile picture to Firebase Storage
   Future<void> uploadUserProfilePicture() async {
     try {
       MyFullScreenLoader.openLoadingDialog('We are updating your profile picture...', MyImages.loaders);
@@ -137,7 +163,6 @@ class UserController extends GetxController {
             reader.onLoadEnd.listen((event) async {
               final Uint8List? imageData = reader.result as Uint8List?;
               if (imageData != null) {
-                // Upload to Firebase Storage
                 final imageUrl = await _uploadToFirebaseStorage(imageData, file.name);
                 await _updateProfilePictureUrl(imageUrl);
               }
@@ -175,6 +200,7 @@ class UserController extends GetxController {
     }
   }
 
+  /// Helper method to upload to Firebase Storage
   Future<String> _uploadToFirebaseStorage(dynamic imageFile, [String? fileName]) async {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -195,6 +221,7 @@ class UserController extends GetxController {
     }
   }
 
+  /// Update profile picture URL in Firestore
   Future<void> _updateProfilePictureUrl(String imageUrl) async {
     try {
       await userRepository.updateSingleField({'ProfilePicture': imageUrl});
@@ -216,7 +243,7 @@ class UserController extends GetxController {
     }
   }
 
-  // Delete account with confirmation dialog
+  /// Show a dialog to confirm account deletion
   void deleteAccountWarningPopup() {
     Get.defaultDialog(
       contentPadding: const EdgeInsets.all(16),
@@ -243,6 +270,7 @@ class UserController extends GetxController {
     );
   }
 
+  /// Delete the user account from Firebase
   Future<void> deleteUserAccount() async {
     try {
       MyFullScreenLoader.openLoadingDialog('Deleting Account...', MyImages.loaders);
@@ -252,10 +280,7 @@ class UserController extends GetxController {
         throw Exception("No user found to delete.");
       }
 
-      // Delete user account from Firebase Authentication
       await user.delete();
-
-      // Optionally, delete user data from Firestore
       await userRepository.removeUserRecord(user.uid);
 
       MyFullScreenLoader.stopLoading();
@@ -274,7 +299,7 @@ class UserController extends GetxController {
     }
   }
 
-  // Re-authenticate user
+  /// Re-authenticate the user with email and password
   Future<void> reAuthenticateEmailAndPasswordUser() async {
     try {
       MyFullScreenLoader.openLoadingDialog('Re-authenticating...', MyImages.loaders);
@@ -290,13 +315,12 @@ class UserController extends GetxController {
         return;
       }
 
-      await AuthenticationRepository.instance.ReAuthenticateWithEmailAndPassword(
+      await AuthenticationRepository.instance.reAuthenticateWithEmailAndPassword(
         verifyEmail.text.trim(),
         verifyPassword.text.trim(),
       );
 
       MyFullScreenLoader.stopLoading();
-      // Add logic to navigate or refresh after successful re-authentication
     } catch (e) {
       MyFullScreenLoader.stopLoading();
       MyLoaders.errorSnackBar(
@@ -306,7 +330,7 @@ class UserController extends GetxController {
     }
   }
 
-  // Methods to update gender and birthday
+  /// Update the user's gender
   Future<void> updateGender(String gender) async {
     try {
       MyFullScreenLoader.openLoadingDialog('Updating Gender...', MyImages.loaders);
@@ -338,6 +362,7 @@ class UserController extends GetxController {
     }
   }
 
+  /// Update the user's birthday
   Future<void> updateBirthday(String birthday) async {
     try {
       MyFullScreenLoader.openLoadingDialog('Updating Birthday...', MyImages.loaders);

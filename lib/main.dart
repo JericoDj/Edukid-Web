@@ -4,9 +4,11 @@ import 'package:get/get.dart'; // Import GetX
 import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webedukid/myapp.dart';
+import 'package:webedukid/try.dart';
 import 'package:webedukid/utils/local_storage/storage_utility.dart';
 
 
+import 'common/data/repositories.authentication/auth_controller.dart';
 import 'common/data/repositories.authentication/authentication_repository.dart';
 import 'features/screens/gamesscreen/games screen.dart';
 import 'features/screens/homescreen/HomeScreen.dart';
@@ -22,6 +24,7 @@ void main() async {
 
 
   WidgetsFlutterBinding.ensureInitialized();
+  Get.put(AuthController());
   await MyStorageUtility.init('your_bucket_name');
   await GetStorage.init();
 

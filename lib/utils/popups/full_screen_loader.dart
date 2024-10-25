@@ -7,28 +7,38 @@ import '../helpers/helper_functions.dart';
 
 /// A utility class for managing a full-screen loading dialog.
 class MyFullScreenLoader {
-  /// Open a full-screen loading dialog with a given text and animation. /// This method doesn't return anything.
+  /// Opens a full-screen loading dialog with a given text and animation.
+  /// This method doesn't return anything.
   ///
   /// Parameters:
-  ///text: The text to be displayed in the loading dialog.
+  /// - text: The text to be displayed in the loading dialog.
   /// - animation: The Lottie animation to be shown.
-  static void openLoadingDialog(String text, String animation) {
+  static void openLoadingDialog(String text, String animation,
+      {BuildContext? context}) {
+    // Fallback to provided context if overlayContext is null
+    final effectiveContext = Get.overlayContext ?? context;
+
+    if (effectiveContext == null) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        openLoadingDialog(text, animation, context: context);
+      });
+      return;
+    }
+
     showDialog(
-      context: Get.overlayContext!,
-      // Use Get.overlay Context for overlay dialogs
-      barrierDismissible: false,
-      // The dialog can't be dismissed by tapping outside it
+      context: effectiveContext,
+      barrierDismissible: false, // Prevent dismissal by tapping outside
       builder: (_) =>
-          PopScope(
-            canPop: false, // Disable popping with the back button
+          WillPopScope(
+            onWillPop: () async => false, // Disable back button
             child: Container(
-              color: MyHelperFunctions.isDarkMode(Get.context!)
-                  ? MyColors.dark
-                  : MyColors.white, width: double.infinity,
+              color: MyHelperFunctions.isDarkMode(effectiveContext) ? MyColors
+                  .dark : MyColors.white,
+              width: double.infinity,
               height: double.infinity,
               child: Column(
                 children: [
-                  const SizedBox (height: 0), // Adjust the spacing as needed
+                  const SizedBox(height: 0), // Adjust spacing if needed
                   MyAnimationLoaderWidget(text: text, animation: animation),
                 ],
               ),
@@ -36,7 +46,24 @@ class MyFullScreenLoader {
           ),
     );
   }
-  static stopLoading() {
-    Navigator.of(Get.overlayContext!).pop(); // close the dialing using the Navigator
+
+  /// Stops the loading dialog by closing it with Navigator.
+  /// Stops the loading dialog by closing it with Navigator.
+  static void stopLoading({BuildContext? context}) {
+    // Use either the provided context or Get.overlayContext if available
+    final effectiveContext = context ?? Get.overlayContext;
+
+    if (effectiveContext == null) {
+      debugPrint("Overlay context is null. Cannot close loading dialog.");
+      return;
+    }
+
+    // Only close if a dialog is open
+    if (Navigator.of(effectiveContext).canPop()) {
+      Navigator.of(effectiveContext).pop();
+    } else {
+      debugPrint("No dialog open to close.");
+    }
   }
+
 }

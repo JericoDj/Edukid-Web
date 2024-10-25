@@ -75,7 +75,7 @@ class MyLoginForm extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: MySizes.spaceBtwInputItems ), // Reduced spacing
+            const SizedBox(height: MySizes.spaceBtwInputItems), // Reduced spacing
 
             // Remember Me & Forget Password
             SizedBox(
@@ -92,22 +92,20 @@ class MyLoginForm extends StatelessWidget {
                   const Text("Remember Me", style: TextStyle(fontSize: 12)), // Smaller text size
                   const Spacer(),
                   TextButton(
-                    onPressed: () =>
-                        context.go('/forgotPassword'),
+                    onPressed: () => context.go('/forgotPassword'),
                     child: const Text("Forgot Password", style: TextStyle(fontSize: 12)), // Smaller text size
                   ),
                 ],
               ),
             ),
-            SizedBox(height: MySizes.spaceBtwItems / 2,),
+            SizedBox(height: MySizes.spaceBtwItems / 2),
 
             // Sign In Button
             SizedBox(
               width: 150,
               height: 40, // Reduced button height
               child: ElevatedButton(
-                onPressed: () =>
-                    controller.emailAndPasswordSignIn(),
+                onPressed: () => controller.emailAndPasswordSignIn(context), // Pass context here
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                 ),

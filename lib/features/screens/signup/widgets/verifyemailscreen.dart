@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,7 +20,7 @@ class VerifyEmailScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              AuthenticationRepository.instance.logout();
+              AuthenticationRepository.instance.logout(context); // Pass context here
               Get.to(() => const LoginScreen());
             },
             icon: const Icon(CupertinoIcons.clear),
@@ -35,17 +34,16 @@ class VerifyEmailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ///Image
+              /// Image
               Image.asset(
                 'assets/images/animations/mailSent.gif',
-                // Replace with your image path
                 height: 200.0,
                 width: 200.0,
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 20.0),
 
-              ///Title & Subtitle
+              /// Title & Subtitle
               const Text(
                 'Verify Your Email',
                 style: TextStyle(
@@ -71,7 +69,7 @@ class VerifyEmailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.checkEmailVerificationStatus(),
+                  onPressed: () => controller.checkEmailVerificationStatus(context), // Pass context here
                   child: const Text("Continue"),
                 ),
               ),

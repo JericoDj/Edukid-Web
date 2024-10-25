@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:get/get.dart';
-
-import '../../../../common/data/repositories.authentication/address/address_repository.dart';
 import '../../../../common/widgets/loaders/circular_loader.dart';
 import '../../../../common/widgets/loaders/loaders.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
-
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/helpers/cloud_helper_functions.dart';
-
-
 import '../../../../utils/network manager/network_manager.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../models/address_model.dart';
-import '../screens/address/add_new_address.dart';
+import '../../../../common/data/repositories.authentication/address/address_repository.dart';
 import '../screens/address/widgets/single_address.dart';
 
 class AddressController extends GetxController {
   static AddressController get instance => Get.find();
+
+  // Text Editing Controllers
   final name = TextEditingController();
   final phoneNumber = TextEditingController();
   final street = TextEditingController();
@@ -50,17 +48,13 @@ class AddressController extends GetxController {
       return [];
     }
   }
-
-  Future<void> selectAddress(AddressModel newSelectedAddress) async {
+  Future<void> selectAddress(BuildContext context, AddressModel newSelectedAddress) async {
     try {
-      Get.defaultDialog(
-        title: '',
-        onWillPop: () async {
-          return false;
-        },
+      // Show Loader Dialog
+      showDialog(
+        context: context, // Use the context passed as an argument
         barrierDismissible: false,
-        backgroundColor: Colors.transparent,
-        content: MyCircularLoader(),
+        builder: (_) => MyCircularLoader(),
       );
 
       // Clear the "selected" field
@@ -71,23 +65,86 @@ class AddressController extends GetxController {
         );
       }
 
-      // Assign selected address
+      // Assign new selected address
       newSelectedAddress.selectedAddress = true;
       selectedAddress.value = newSelectedAddress;
 
-      // Set the "selected" field to true for the newly selected address
+      // Update the new selected field to true
       await addressRepository.updateSelectedField(
         selectedAddress.value.id,
         true,
       );
 
-      Get.back();
+      // Close the loader
+      Navigator.pop(context);
     } catch (e) {
       MyLoaders.errorSnackBar(
         title: 'Error in Selection',
         message: e.toString(),
       );
     }
+  }
+
+
+  /// Show Modal Bottom Sheet at Checkout
+  Future<dynamic> selectNewAddressPopup(BuildContext context) {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      builder: (_) => SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(MySizes.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const MySectionHeading(
+                title: 'Select Address',
+                showActionButton: false,
+              ),
+              const SizedBox(height: MySizes.spaceBtwSections),
+              FutureBuilder(
+                future: getAllUserAddresses(),
+                builder: (_, snapshot) {
+                  final response = MyCloudHelperFunctions.checkMultiRecordState(
+                    snapshot: snapshot,
+                  );
+                  if (response != null) return response;
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (_, index) => MySingleAddress(
+                      address: snapshot.data![index],
+                      onTap: () async {
+                        await selectAddress(context, snapshot.data![index]);
+                        context.pop(); // Close the bottom sheet
+                      },
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: MySizes.defaultspace * 2),
+              // Add new address button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (context != null) {
+                        context.push('/addNewAddress'); // Ensure context is non-null
+                      } else {
+                        print("Context is null, cannot navigate.");
+                      }
+                    });
+                  },
+                  child: const Text('Add new address'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   /// Add new Address
@@ -129,7 +186,9 @@ class AddressController extends GetxController {
 
       // Update Selected Address Status
       address.id = id;
-      await selectAddress(address);
+      await selectAddress(Get.context!, address);
+
+
 
       // Remove Loader
       MyFullScreenLoader.stopLoading();
@@ -146,76 +205,19 @@ class AddressController extends GetxController {
       // Reset fields
       resetFormFields();
 
-      // Redirect
+      // Redirect or close screen
       Navigator.of(Get.context!).pop();
     } catch (e) {
       // Remove Loader
       MyFullScreenLoader.stopLoading();
       MyLoaders.errorSnackBar(
-        title: 'Address not found',
+        title: 'Error',
         message: e.toString(),
       );
     }
   }
 
-  /// Show Addresses Modal Bottom Sheet at Checkout
-  Future<dynamic> selectNewAddressPopup(BuildContext context) {
-    Get.lazyPut(() => AddressController());
-
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      context: context,
-      builder: (_) => SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(MySizes.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const MySectionHeading(
-                title: 'Select Address',
-                showActionButton: false,
-              ),
-              const SizedBox(height: MySizes.spaceBtwSections),
-              // Only wrap the FutureBuilder with a ListView in the SingleChildScrollView
-              FutureBuilder(
-                future: getAllUserAddresses(),
-                builder: (_, snapshot) {
-                  final response =
-                  MyCloudHelperFunctions.checkMultiRecordState(
-                    snapshot: snapshot,
-                  );
-                  if (response != null) return response;
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (_, index) => MySingleAddress(
-                      address: snapshot.data![index],
-                      onTap: () async {
-                        await selectAddress(snapshot.data![index]);
-                        Get.back();
-                      },
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: MySizes.defaultspace * 2),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () =>
-                      Get.to(() => const AddNewAddressScreen()),
-                  child: const Text('Add new address'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Function to reset form fields
+  /// Reset form fields
   void resetFormFields() {
     name.clear();
     phoneNumber.clear();

@@ -239,9 +239,15 @@ class BookingSessionScreen extends StatelessWidget {
                           }
 
                           if (AuthenticationRepository.instance.authUser == null) {
+                            debugPrint("User is not authenticated, redirecting to login.");
                             context.go('/login');
                             return;
                           }
+
+                          debugPrint("Navigating to bookingCheckout with:");
+                          debugPrint("Picked Dates: ${controller.getSelectedDates()}");
+                          debugPrint("Picked Times: ${controller.selectedTimeSlots.values.toList()}");
+                          debugPrint("Price: ${controller.pricePerSession.value}");
 
                           context.go(
                             '/bookingCheckout',
@@ -262,7 +268,8 @@ class BookingSessionScreen extends StatelessWidget {
                           'Book a Session \$${controller.pricePerSession.value}',
                           style: const TextStyle(color: Colors.white, fontSize: 16.0),
                         ),
-                      ),
+                      )
+
                     ),
                   ),
                 ],

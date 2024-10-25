@@ -73,7 +73,7 @@ class UserAddressScreen extends StatelessWidget {
                             itemCount: addresses.length,
                             itemBuilder: (__, index) => MySingleAddress(
                               address: addresses[index],
-                              onTap: () => controller.selectAddress(addresses[index]),
+                              onTap: () => controller.selectAddress(context, addresses[index]), // Pass context here
                             ),
                           );
                         },

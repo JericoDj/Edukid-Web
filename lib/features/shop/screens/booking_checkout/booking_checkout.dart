@@ -15,7 +15,10 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../../../utils/helpers/pricing_calculator.dart';
 
+import '../../../screens/personalization/controllers/address_controller.dart';
 import '../../controller/bookings/booking_order_controller.dart';
+import '../../controller/product/checkout_controller.dart';
+import '../../controller/product/order_controller.dart';
 import '../checkout/widgets/billing_address_section.dart';
 import '../checkout/widgets/billing_payment_section.dart';
 
@@ -32,6 +35,7 @@ class BookingCheckOutScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
+
   _BookingCheckOutScreenState createState() => _BookingCheckOutScreenState();
 }
 
@@ -61,6 +65,9 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Get.lazyPut(()=>OrderController());
+    Get.lazyPut(()=>CheckoutController());
+    Get.lazyPut(()=>AddressController());
     // Subtract the discount from the subtotal to get the final total amount
     final discountedSubTotal = subTotal - (subTotal * discount / 100);
     final totalAmount = MyPricingCalculator.calculateTotalPrice(discountedSubTotal, 'US');
@@ -124,11 +131,24 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
               onPressed: subTotal > 0
                   ? () {
                 final controller = Get.put(BookingOrderController());
-                controller.processOrder(totalAmount, widget.pickedDates, widget.pickedTimes);
+
+                controller.processOrder(
+                  totalAmount,
+                  widget.pickedDates,
+                  widget.pickedTimes,
+                  context, // Pass context here for GoRouter navigation
+                );
               }
-                  : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
-              child: Text('Checkout \$$totalAmount',style: TextStyle(color: MyColors.primaryColor),),
+                  : () => MyLoaders.warningSnackBar(
+                  title: 'Empty Cart',
+                  message: 'Add items in the cart to proceed'
+              ),
+              child: Text(
+                'Checkout \$$totalAmount',
+                style: TextStyle(color: MyColors.primaryColor),
+              ),
             ),
+
           ),
         ),
       ),

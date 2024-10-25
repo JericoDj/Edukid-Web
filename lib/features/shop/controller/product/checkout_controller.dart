@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -159,66 +160,59 @@ class   CheckoutController extends GetxController {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const MySectionHeading(title: 'Select Payment Method', showActionButton: false),
-              const SizedBox(height: MySizes.spaceBtwSections),
-
-              // Google Pay Tile
-              MyPaymentTile(
-                paymentMethod: PaymentMethodModel(name: 'GooglePay', image: MyImages.googleLogo),
-                onTap: () {
-                  selectedPaymentMethod.value = PaymentMethodModel(name: 'GooglePay', image: MyImages.googleLogo);
-                  Get.back(); // Return to the previous screen after selecting Google Pay
-                },
-              ),
-              const SizedBox(height: MySizes.spaceBtwItems / 2),
-
-              // Apple Pay Tile
-              MyPaymentTile(
-                paymentMethod: PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay),
-                onTap: () {
-                  selectedPaymentMethod.value = PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay);
-                  Get.back(); // Return to the previous screen after selecting Apple Pay
-                },
-              ),
-              const SizedBox(height: MySizes.spaceBtwItems / 2),
-
-              // Saved Card Tile
-              MyPaymentTile(
-                paymentMethod: PaymentMethodModel(name: 'Saved Card', image: MyImages.masterCard),
-                onTap: () async {
-                  // Code for fetching saved card details from Firebase
-                  Map<String, String?> savedDetails = await _retrieveCustomerDetailsFromFirebase();
-                  if (savedDetails['customerId'] != null && savedDetails['cardId'] != null) {
-                    selectedPaymentMethod.value = PaymentMethodModel(
-                      name: 'Saved Card',
-                      image: MyImages.masterCard,
-                      nonce: savedDetails['customerId'],
-                    );
-                    Get.back(); // Return to the previous screen after selecting saved card
-                  } else {
-                    Get.snackbar('Error', 'No saved customer details found.', snackPosition: SnackPosition.BOTTOM);
-                  }
-                },
-              ),
-              const SizedBox(height: MySizes.spaceBtwItems / 2),
-
-              // Add Credit/Debit Card Tile (Web-based Payment)
-              MyPaymentTile(
-                paymentMethod: PaymentMethodModel(name: 'Add Credit/Debit Card', image: MyImages.maya),
-                onTap: () {
-                  openPaymentPage(); // Open the payment page using the web SDK
-                  Get.back(); // Return to the previous screen after selecting Credit/Debit Card
-                },
-              ),
-              const SizedBox(height: MySizes.spaceBtwSections),
+              //
+              // // Google Pay Tile
+              // const SizedBox(height: MySizes.spaceBtwItems / 2),
+              //
+              // // Apple Pay Tile
+              // MyPaymentTile(
+              //   paymentMethod: PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay),
+              //   onTap: () {
+              //     selectedPaymentMethod.value = PaymentMethodModel(name: 'ApplePay', image: MyImages.applePay);
+              //     Get.back(); // Return to the previous screen after selecting Apple Pay
+              //   },
+              // ),
+              // const SizedBox(height: MySizes.spaceBtwItems / 2),
+              //
+              // // Saved Card Tile
+              // MyPaymentTile(
+              //   paymentMethod: PaymentMethodModel(name: 'Saved Card', image: MyImages.masterCard),
+              //   onTap: () async {
+              //     // Code for fetching saved card details from Firebase
+              //     Map<String, String?> savedDetails = await _retrieveCustomerDetailsFromFirebase();
+              //     if (savedDetails['customerId'] != null && savedDetails['cardId'] != null) {
+              //       selectedPaymentMethod.value = PaymentMethodModel(
+              //         name: 'Saved Card',
+              //         image: MyImages.masterCard,
+              //         nonce: savedDetails['customerId'],
+              //       );
+              //       Get.back(); // Return to the previous screen after selecting saved card
+              //     } else {
+              //       Get.snackbar('Error', 'No saved customer details found.', snackPosition: SnackPosition.BOTTOM);
+              //     }
+              //   },
+              // ),
+              // const SizedBox(height: MySizes.spaceBtwItems / 2),
+              //
+              // // Add Credit/Debit Card Tile (Web-based Payment)
+              // MyPaymentTile(
+              //   paymentMethod: PaymentMethodModel(name: 'Add Credit/Debit Card', image: MyImages.maya),
+              //   onTap: () {
+              //     openPaymentPage(); // Open the payment page using the web SDK
+              //     Get.back(); // Return to the previous screen after selecting Credit/Debit Card
+              //   },
+              // ),
+              // const SizedBox(height: MySizes.spaceBtwSections),
 
               // Add PayPal Payment Tile
               MyPaymentTile(
                 paymentMethod: PaymentMethodModel(name: 'PayPal', image: MyImages.maya), // PayPal Image
                 onTap: () {
                   selectPayPal();  // Just mark PayPal as selected
-                  Get.back();  // Return to the previous screen
+                  context.pop();  // Use GoRouter's context.pop() to go back
                 },
-              ),
+              )
+
             ],
           ),
         ),
