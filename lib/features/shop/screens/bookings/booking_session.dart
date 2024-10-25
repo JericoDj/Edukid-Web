@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:webedukid/common/data/repositories.authentication/authentication_repository.dart';
@@ -59,7 +60,6 @@ class BookingSessionScreen extends StatelessWidget {
                               lastDay: DateTime.utc(2025, 12, 31),
                               focusedDay: controller.focusedDate.value,
                               onDaySelected: (selectedDay, focusedDay) {
-                                // Ensure only future dates can be selected
                                 if (selectedDay.isAfter(DateTime.now())) {
                                   controller.updateChosenDate(_normalizeDate(selectedDay));
                                 } else {
@@ -69,11 +69,8 @@ class BookingSessionScreen extends StatelessWidget {
                               calendarBuilders: CalendarBuilders(
                                 defaultBuilder: (context, date, focusedDay) {
                                   Color dayColor;
-
-                                  // If the date is in the past (including today), disable it
-                                  if (date.isBefore(DateTime.now()) ||
-                                      date.isAtSameMomentAs(DateTime.now())) {
-                                    dayColor = Colors.grey.withOpacity(0.5); // Gray out past dates
+                                  if (date.isBefore(DateTime.now()) || date.isAtSameMomentAs(DateTime.now())) {
+                                    dayColor = Colors.grey.withOpacity(0.5);
                                   } else {
                                     dayColor = controller.getDayColor(date);
                                   }
@@ -112,7 +109,6 @@ class BookingSessionScreen extends StatelessWidget {
                           }),
                         ),
                       ),
-
                       SizedBox(width: 16.0),
                       // Timeslots with border
                       Expanded(
@@ -127,7 +123,6 @@ class BookingSessionScreen extends StatelessWidget {
                             final normalizedDate = _normalizeDate(controller.focusedDate.value);
                             final timeSlotsForDay = controller.getTimeSlotsForDate(normalizedDate);
 
-                            // Check if the selected date is in the list of booked dates
                             if (controller.isDateBooked(normalizedDate)) {
                               return Center(
                                 child: Text(
@@ -142,14 +137,12 @@ class BookingSessionScreen extends StatelessWidget {
                               );
                             }
 
-                            // If no time slots are available for the selected date
                             if (timeSlotsForDay.isEmpty) {
                               return Center(
                                 child: Text("Please Select a Date"),
                               );
                             }
 
-                            // Otherwise, show the available time slots
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -221,9 +214,8 @@ class BookingSessionScreen extends StatelessWidget {
                                   IconButton(
                                     icon: Icon(Icons.delete, color: Colors.red),
                                     onPressed: () {
-                                      // Functionality for deleting the selected date and time slot
                                       controller.selectedTimeSlots.remove(date);
-                                      controller.focusedDate.refresh(); // Refresh the focused date to update the calendar view
+                                      controller.focusedDate.refresh();
                                     },
                                   ),
                                 ],
@@ -234,7 +226,6 @@ class BookingSessionScreen extends StatelessWidget {
                       );
                     }
                   }),
-
                   SizedBox(height: 16.0),
                   Center(
                     child: SizedBox(
@@ -246,18 +237,19 @@ class BookingSessionScreen extends StatelessWidget {
                             Get.snackbar("Error", "Please select at least one date and time.");
                             return;
                           }
-                          // Handle authentication before proceeding
+
                           if (AuthenticationRepository.instance.authUser == null) {
-                            Get.to(() => const LoginScreen()); // Redirect to login if not authenticated
+                            context.go('/login');
                             return;
                           }
-                          // If authenticated, proceed to BookingCheckOutScreen
-                          Get.to(
-                            BookingCheckOutScreen(
-                              pickedDates: controller.getSelectedDates(),
-                              pickedTimes: controller.selectedTimeSlots.values.toList(),
-                              price: controller.pricePerSession.value,
-                            ),
+
+                          context.go(
+                            '/bookingCheckout',
+                            extra: {
+                              'pickedDates': controller.getSelectedDates(),
+                              'pickedTimes': controller.selectedTimeSlots.values.toList(),
+                              'price': controller.pricePerSession.value,
+                            },
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -268,7 +260,7 @@ class BookingSessionScreen extends StatelessWidget {
                         ),
                         child: Text(
                           'Book a Session \$${controller.pricePerSession.value}',
-                          style: TextStyle(color: Colors.white, fontSize: 16.0),
+                          style: const TextStyle(color: Colors.white, fontSize: 16.0),
                         ),
                       ),
                     ),

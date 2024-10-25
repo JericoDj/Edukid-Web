@@ -71,7 +71,6 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     return DefaultTabController(
       length: categories.length,
       child: Scaffold(
-        appBar: CustomAppBar(currentScreen: 'Store',),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

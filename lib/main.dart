@@ -2,13 +2,25 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart'; // Import GetX
 import 'package:get_storage/get_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/myapp.dart';
 import 'package:webedukid/utils/local_storage/storage_utility.dart';
 
 
-import 'common/data/repositories.authentication/authentication_repository.dart'; // Import your repository
+import 'common/data/repositories.authentication/authentication_repository.dart';
+import 'features/screens/gamesscreen/games screen.dart';
+import 'features/screens/homescreen/HomeScreen.dart';
+import 'features/shop/screens/bookings/bookings.dart';
+import 'features/shop/screens/order/order.dart'; // Import your repository
 
 void main() async {
+
+
+
+
+
+
+
   WidgetsFlutterBinding.ensureInitialized();
   await MyStorageUtility.init('your_bucket_name');
   await GetStorage.init();
@@ -25,8 +37,6 @@ void main() async {
       measurementId: 'G-5DDFG7W15J',
     ),
   ).then((FirebaseApp value) {
-    // Register your AuthenticationRepository using GetX
-    Get.put(AuthenticationRepository());
   }).catchError((error) {
     print("Firebase initialization error: $error");
   });

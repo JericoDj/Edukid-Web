@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 
 class GamesScreen extends StatelessWidget {
@@ -8,11 +9,6 @@ class GamesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Games',),
-        titleTextStyle: TextStyle(color: MyColors.white),
-        backgroundColor: MyColors.primaryColor,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

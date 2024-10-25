@@ -9,7 +9,6 @@ import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/helpers/cloud_helper_functions.dart';
 import '../../controllers/address_controller.dart';
 import 'add_new_address.dart';
-
 class UserAddressScreen extends StatelessWidget {
   const UserAddressScreen({Key? key}) : super(key: key);
 
@@ -27,7 +26,6 @@ class UserAddressScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 Text(
                   'Addresses',
                   style: Theme.of(context).textTheme.headlineSmall,
@@ -39,11 +37,8 @@ class UserAddressScreen extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       body: Stack(
-
-
         children: [
           // Center the AppBar title and back button
-
           Align(
             alignment: Alignment.topCenter, // Align to the top center
             child: Padding(
@@ -73,12 +68,10 @@ class UserAddressScreen extends StatelessWidget {
                           }
 
                           return ListView.builder(
-
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(), // Disable internal scrolling
                             itemCount: addresses.length,
                             itemBuilder: (__, index) => MySingleAddress(
-
                               address: addresses[index],
                               onTap: () => controller.selectAddress(addresses[index]),
                             ),
@@ -91,7 +84,7 @@ class UserAddressScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Center the floating action button at the bottom
+          // Use Stack properly to position the floating action button at the bottom center
           Positioned(
             bottom: 16.0, // Position from the bottom
             left: 0,
@@ -109,3 +102,4 @@ class UserAddressScreen extends StatelessWidget {
     );
   }
 }
+
