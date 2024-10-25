@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../utils/constants/colors.dart';
@@ -92,7 +93,7 @@ class MyLoginForm extends StatelessWidget {
                   const Spacer(),
                   TextButton(
                     onPressed: () =>
-                        Get.to(() => const ForgetPasswordScreen()),
+                        context.go('/forgotPassword'),
                     child: const Text("Forgot Password", style: TextStyle(fontSize: 12)), // Smaller text size
                   ),
                 ],
@@ -121,7 +122,7 @@ class MyLoginForm extends StatelessWidget {
               width: 150,
               height: 40, // Reduced button height
               child: OutlinedButton(
-                onPressed: () => Get.to(() => const SignUpScreen()),
+                onPressed: () => context.go('/register'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                 ),

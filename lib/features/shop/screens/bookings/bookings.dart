@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/all_user_bookings_list.dart';
 import 'package:webedukid/features/shop/screens/bookings/widget/booking_tabs.dart';
 import 'package:webedukid/utils/constants/colors.dart';
@@ -14,7 +15,10 @@ import '../../../bookings/status/ongoing.dart';
 import '../../../bookings/status/processing.dart';
 import '../../../bookings/status/rescheduled.dart';
 import '../../../bookings/status/scheduled.dart';
+import '../../../screens/personalization/controllers/address_controller.dart';
 import '../../controller/bookings/booking_order_controller.dart';
+import '../../controller/product/checkout_controller.dart';
+import '../../controller/product/order_controller.dart';
 import '../../models/booking_orders_model.dart';
 import 'calendar_controller.dart'; // Import the new CalendarController
 
@@ -44,7 +48,14 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Get.lazyPut(()=>OrderController());
+    Get.lazyPut(()=>CheckoutController());
+    Get.lazyPut(()=>BookingOrderController());
+    Get.lazyPut(()=>AddressController());
+
     return Scaffold(
+
+
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(MySizes.defaultspace),

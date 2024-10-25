@@ -49,9 +49,9 @@ class SettingsScreen extends StatelessWidget {
 
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 300), // Smooth animation
-      right: isOpen ? 0 : -400, // Adjust this value based on your drawer width
+      right: isOpen ? 0 : -300, // Adjust this value based on your drawer width
       top: 0,
-      bottom: 0,
+      bottom: 50,
       width: 400, // Width of your drawer
       child: Material(
         color: Colors.white,

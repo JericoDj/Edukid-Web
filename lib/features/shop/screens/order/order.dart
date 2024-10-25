@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:webedukid/custom_app_bar.dart';
 import 'view_material.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
@@ -29,7 +30,6 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyColors.primaryColor,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -48,6 +48,7 @@ class _OrderScreenState extends State<OrderScreen> {
           ],
         ),
       ),
+
       body: Column(
         children: [
           SizedBox(height: MySizes.spaceBtwItems),

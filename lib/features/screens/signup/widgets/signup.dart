@@ -20,14 +20,6 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = MyHelperFunctions.isDarkMode(context);
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.to (() =>  LoginScreen());
-          },
-        ),
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(MySizes.defaultspace),
