@@ -37,6 +37,7 @@ class MyHomeCategories extends StatelessWidget {
             shrinkWrap: true,
             itemCount: categoryController.featuredCategories.length,
             scrollDirection: Axis.horizontal,
+
             itemBuilder: (_, index) {
               final category = categoryController.featuredCategories[index];
 

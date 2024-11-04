@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/features/shop/screens/checkout/checkout.dart';
 import 'package:webedukid/features/shop/models/product_model.dart';
 import 'package:webedukid/features/shop/controller/category_controller.dart';
@@ -61,18 +62,23 @@ class NavigationController extends GetxController {
     });
   }
 
-  // Method to navigate to the checkout screen
-  void goToCheckoutScreen() {
+  void goToCheckoutScreen(BuildContext context) {
     clearSelectedCategory();
-    Get.to(() => CheckOutScreen());  // Navigate to the CheckoutScreen
+    // Assuming you have a route defined for the CheckoutScreen
+    context.go('/checkout');  // Change '/checkout' to the actual route path
   }
 
+
   // Method to select a category and navigate to SubCategoriesScreen
-  void navigateToSubCategories(CategoryModel category) {
-    _selectedCategory.value = category;  // Set the selected category
-    Get.find<CategoryController>().setSelectedCategory(category);  // Optionally call the category controller
-    navigateTo('subcategories', category: category);  // Navigate to the subcategories screen
+  void navigateToSubCategories(BuildContext context, CategoryModel category) {
+    _selectedCategory.value = category; // Set the selected category
+    // Update the category in the controller, if needed
+    Get.find<CategoryController>().setSelectedCategory(category);
+
+    // Navigate to the subcategories screen with the category id as a parameter
+    context.go('/subcategories/${category.id}');
   }
+
 
   // Method to clear selected category
   void clearSelectedCategory() {

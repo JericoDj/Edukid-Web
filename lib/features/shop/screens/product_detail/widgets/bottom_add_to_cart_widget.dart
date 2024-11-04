@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:iconsax/iconsax.dart';
 
@@ -28,7 +29,7 @@ class MyBottomAddToCart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = CartController.instance;
+        final controller = CartController.instance;
     controller.updateAlreadyAddedProductCount(product);
     final dark = MyHelperFunctions.isDarkMode(context);
 
@@ -84,25 +85,18 @@ class MyBottomAddToCart extends StatelessWidget {
             ),
             SizedBox(width: 20,),
             ElevatedButton(
-
               onPressed: () {
-                // Check authentication before allowing to add to cart
+                // Check if the user is authenticated
                 if (AuthenticationRepository.instance.authUser != null) {
-                  // Use the initialProductCount when adding to the cart
-                  controller.productQuantityInCart.value = controller.initialProductCount.value;
-                  controller.addToCart(product);
+                  // Only add to cart if the quantity is 1 or more
+                  if (controller.initialProductCount.value > 0) {
+                    controller.productQuantityInCart.value = controller.initialProductCount.value;
+                    controller.addToCart(product);
+                  }
                 } else {
                   // Redirect to login screen if not authenticated
-                  Get.to(() => const LoginScreen());
+                  context.go('/login');
                 }
-
-              onPressed: controller.initialProductCount.value < 1
-                  ? null
-                  : () {
-                // Use the initialProductCount when adding to the cart
-                controller.productQuantityInCart.value =
-                    controller.initialProductCount.value;
-};
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(MySizes.md),
@@ -111,6 +105,7 @@ class MyBottomAddToCart extends StatelessWidget {
               ),
               child: const Text('Add to Cart'),
             )
+
           ],
         ),
       ),

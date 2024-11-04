@@ -107,3 +107,5 @@ class ProductController extends GetxController {
     return stock > 0 ? 'In Stock': 'Out of Stock';
   }
 }
+
+

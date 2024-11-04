@@ -1,28 +1,47 @@
-import 'package:get/get.dart';
-import '../../../../utils/constants/enums.dart';
-import '../../models/booking_orders_model.dart';
-import '../../controller/bookings/booking_order_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../../../utils/constants/enums.dart';
+import '../../controller/bookings/booking_order_controller.dart';
+import '../../models/booking_orders_model.dart';
 
 class CalendarController extends GetxController {
-  static CalendarController get instance => Get.find();
-
-  // Observable list of bookings for the calendar
-  final RxList<BookingOrderModel> calendarBookings = <BookingOrderModel>[].obs;
+  // Initialize calendarBookings as an empty observable list
+  RxList<BookingOrderModel> calendarBookings = <BookingOrderModel>[].obs;
 
   // Observable for the focused date
   final Rx<DateTime> focusedDate = DateTime.now().obs;
 
   // Observable for the selected date
-  final Rx<DateTime> selectedDate = DateTime.now().obs; // Add this line
+  final Rx<DateTime> selectedDate = DateTime.now().obs;
 
-  // Fetch bookings specifically for the calendar view
   Future<void> fetchCalendarBookings() async {
     try {
       final fetchedBookings = await BookingOrderController.instance.fetchUserBookings();
-      calendarBookings.assignAll(fetchedBookings);
+      if (fetchedBookings != null) {
+        calendarBookings.assignAll(fetchedBookings);
+      } else {
+        _showErrorSnackbar('No bookings found.');
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch bookings for calendar: $e');
+      _showErrorSnackbar('Failed to fetch bookings for calendar: $e');
+    }
+  }
+
+  // Private method to safely show snackbar with proper context
+  void _showErrorSnackbar(String message) {
+    // Ensure there's a valid context and no other snackbar is currently open
+    if (Get.context != null && !Get.isSnackbarOpen) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+    } else {
+      // Fallback log for debugging if the snackbar couldn't be shown
+      print('Snackbar not shown due to missing context or an open snackbar.');
     }
   }
 
@@ -60,24 +79,5 @@ class CalendarController extends GetxController {
   // Helper method to normalize date (remove time part)
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
-  }
-
-  // Get time slots for a particular date
-  List<TimeOfDay> getTimeSlotsForDate(DateTime date) {
-    // Logic to fetch and return the available time slots for the given date
-    final bookingForDate = calendarBookings.firstWhereOrNull(
-          (booking) => booking.pickedDateTime.any(
-            (picked) => _normalizeDate(picked.pickedDate) == date,
-      ),
-    );
-
-    if (bookingForDate == null) {
-      return [];
-    }
-
-    return bookingForDate.pickedDateTime
-        .where((picked) => _normalizeDate(picked.pickedDate) == date)
-        .map((picked) => TimeOfDay.fromDateTime(picked.pickedTime))
-        .toList();
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:webedukid/features/shop/controller/product/checkout_controller.dart';
 import 'package:webedukid/features/shop/screens/checkout/widgets/billing_address_section.dart';
 import 'package:webedukid/features/shop/screens/checkout/widgets/billing_amount_section.dart';
 import 'package:webedukid/features/shop/screens/checkout/widgets/billing_payment_section.dart';
@@ -14,6 +15,7 @@ import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/helpers/helper_functions.dart';
 import '../../../../utils/helpers/pricing_calculator.dart';
+import '../../../screens/personalization/controllers/address_controller.dart';
 import '../../cart/widgets/my_cart_items_listview.dart';
 import '../../controller/product/cart_controller.dart';
 import '../../controller/product/order_controller.dart';
@@ -26,6 +28,7 @@ class CheckOutScreen extends StatefulWidget {
 }
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
+
   final cartController = CartController.instance;
   final orderController = Get.put(OrderController());
   double subTotal = 0.0;
@@ -33,6 +36,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
   @override
   void initState() {
+
     super.initState();
     subTotal = cartController.totalCartPrice.value;
   }
@@ -46,6 +50,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
     final totalAmount = MyPricingCalculator.calculateTotalPrice(subTotal - (subTotal * (discount / 100)), 'US');
     final dark = MyHelperFunctions.isDarkMode(context);
 
@@ -105,7 +111,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
             padding: EdgeInsets.all(MySizes.defaultspace),
             child: ElevatedButton(
               onPressed: subTotal > 0
-                  ? () => orderController.processOrder(totalAmount)
+                  ? () => orderController.processOrder(context, totalAmount)
                   : () => MyLoaders.warningSnackBar(title: 'Empty Cart', message: 'Add items in the cart to proceed'),
 
               child: Text('Checkout \$$totalAmount'),

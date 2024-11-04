@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/features/screens/navigation_controller.dart'; // Import the navigation controller
 import '../../../../common/widgets/appbar/tabbar.dart';
@@ -104,9 +105,16 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             showBorder: true,
                             brand: brand,
                             onTap: () {
-                              // Navigate using the navigationController to the Brand Products page
-                              navigationController.navigateTo('brandProducts', brand: brand);
+                              // Convert the brand name to a URL-friendly format
+                              final brandNameUrl = brand.name.replaceAll(' ', '-');
+
+                              // Navigate to the BrandProducts page with both brandId and brand name in the URL
+                              context.go(
+                                '/brandProducts/${brand.id}/$brandNameUrl',
+                                extra: brand, // Pass the complete brand model as extra
+                              );
                             },
+
                           );
                         },
                       ),
@@ -178,11 +186,16 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                       // Navigate to ProductDetailScreen when the product is pressed
                       return GestureDetector(
                         onTap: () {
-                          // Create the ProductModel from the query snapshot
-                          final selectedProduct = ProductModel.fromQuerySnapshot(product);
+                          // Convert product snapshot to ProductModel
+                          final productModel = ProductModel.fromQuerySnapshot(product);
 
-                          // Use the NavigationController to navigate to ProductDetailScreen
-                          navigationController.navigateTo('productDetail', product: selectedProduct);
+                          // Convert product title to a URL-friendly format
+                          final productNameUrl = productModel.title.replaceAll(' ', '-');
+
+                          context.go(
+                            '/productDetail/${productModel.id}/$productNameUrl',
+                            extra: productModel, // Pass full product model as extra
+                          );
                         },
                         child: Container(
                           decoration: BoxDecoration(

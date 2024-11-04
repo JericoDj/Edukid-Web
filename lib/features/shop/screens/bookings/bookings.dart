@@ -31,13 +31,20 @@ class BookingsScreen extends StatefulWidget {
 
 class _BookingsScreenState extends State<BookingsScreen> {
   int _selectedIndex = 0;
-  final CalendarController _calendarController =
-  Get.put(CalendarController());
+  final CalendarController _calendarController = Get.put(CalendarController());
+  bool isLoading = true; // Add a loading state variable
 
   @override
   void initState() {
     super.initState();
-    _calendarController.fetchCalendarBookings(); // Fetch bookings for the calendar view
+    _loadData(); // Call a function to load data and update the loading state
+  }
+
+  Future<void> _loadData() async {
+    await _calendarController.fetchCalendarBookings(); // Fetch bookings for the calendar view
+    setState(() {
+      isLoading = false; // Set isLoading to false once data is loaded
+    });
   }
 
   void _onTabSelected(int index) {
@@ -48,14 +55,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(()=>OrderController());
-    Get.lazyPut(()=>CheckoutController());
-    Get.lazyPut(()=>BookingOrderController());
-    Get.lazyPut(()=>AddressController());
+
+    Get.lazyPut(() => OrderController());
+    Get.lazyPut(() => CheckoutController());
+    Get.lazyPut(() => BookingOrderController());
+    Get.lazyPut(() => AddressController());
 
     return Scaffold(
-
-
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(MySizes.defaultspace),
@@ -82,8 +88,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              // can you put here a color of guide for the calendar. orange for processing,
-
+              // Color guide for the calendar (e.g., orange for processing)
               const SizedBox(height: 10),
               Stack(
                 children: [
@@ -110,8 +115,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         Get.to(() => AllBookingsScreen());
                       },
                       style: ButtonStyle(
-                        foregroundColor:
-                        WidgetStateProperty.all(MyColors.primaryColor),
+                        foregroundColor: MaterialStateProperty.all(MyColors.primaryColor),
                       ),
                       child: Text(
                         'View All Bookings',
@@ -156,15 +160,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
           ),
         ),
         onDaySelected: (selectedDay, focusedDay) {
-          // Print the selected day to the console
           print('Selected Date: ${DateFormat.yMMMMd().format(selectedDay)}');
-          _calendarController.focusedDate.value =
-              focusedDay; // Update focused date
-          _calendarController.selectedDate.value =
-              selectedDay; // Update selected date
+          _calendarController.focusedDate.value = focusedDay;
+          _calendarController.selectedDate.value = selectedDay;
         },
-        selectedDayPredicate: (day) => isSameDay(
-            day, _calendarController.selectedDate.value), // Highlight the selected day
+        selectedDayPredicate: (day) => isSameDay(day, _calendarController.selectedDate.value),
         eventLoader: (date) {
           return _calendarController.calendarBookings
               .where((booking) => booking.pickedDateTime.any(
@@ -173,9 +173,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         },
         calendarBuilders: CalendarBuilders(
           defaultBuilder: (context, date, focusedDay) {
-            // Get the color for the specific date
             Color dayColor = _calendarController.getDayColor(_normalizeDate(date));
-
             return Container(
               decoration: BoxDecoration(
                 color: dayColor,
@@ -187,7 +185,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 style: TextStyle(
                   color: dayColor == Colors.yellow || dayColor == Colors.white
                       ? Colors.black
-                      : Colors.white, // Adjust text color based on background
+                      : Colors.white,
                 ),
               ),
             );
@@ -209,13 +207,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
       ),
     );
   }
+
   Widget _buildBookingDetails() {
     return Container(
-      width: double.infinity, // Adjust the width based on your UI needs
+      width: double.infinity,
       padding: const EdgeInsets.all(8.0),
       child: Obx(() {
         DateTime selectedDate = _calendarController.selectedDate.value;
-        // Normalize the selected date to match the dates from the bookings
         List<BookingOrderModel> bookingsForSelectedDate = _calendarController.calendarBookings
             .where((booking) => booking.pickedDateTime
             .any((picked) => isSameDay(picked.pickedDate, selectedDate)))
@@ -269,11 +267,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
       case 5:
         return const CancelledBookingsScreen();
       default:
-        return const ProcessingBookingsScreen(); // Default to processing if index is out of range
+        return const ProcessingBookingsScreen();
     }
   }
 
-  // Helper method to normalize date (remove time part)
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }

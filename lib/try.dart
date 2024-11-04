@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
-  runApp(tryApp());
+  runApp(TryApp());
 }
 
 // Static user representation
-tryUser? currentUser;
+TryUser? currentUser;
 
-class tryUser {
+class TryUser {
   final String name;
-  tryUser({required this.name});
+  TryUser({required this.name});
 }
 
-class tryApp extends StatelessWidget {
-  tryApp({Key? key}) : super(key: key);
+class TryApp extends StatelessWidget {
+  TryApp({Key? key}) : super(key: key);
 
   // Define the GoRouter
   final GoRouter _router = GoRouter(
@@ -63,39 +63,64 @@ class AppShell extends StatefulWidget {
 
 // AppShell state
 class _AppShellState extends State<AppShell> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // To control the drawer
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Assign the scaffold key
       appBar: AppBar(
         title: Text('Flutter Web App'),
+        backgroundColor: Colors.blue, // Set AppBar color to blue
+        iconTheme: IconThemeData(color: Colors.white), // Set icon color to white
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu_book), // Use any icon you prefer
+            onPressed: () {
+              _scaffoldKey.currentState!.openDrawer(); // Open the drawer
+            },
+          ),
+        ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              child: Text('Menu'),
-            ),
-            currentUser == null
-                ? ListTile(
-              leading: Icon(Icons.login),
-              title: Text('Login'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                context.go('/login');
-              },
-            )
-                : ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () {
-                setState(() {
-                  currentUser = null;
-                });
-                Navigator.pop(context); // Close the drawer
-                context.go('/');
-              },
-            ),
-          ],
+      drawer: Container(
+        margin: EdgeInsets.only(top: kToolbarHeight), // Ensure Drawer starts below the AppBar
+        child: Drawer(
+          child: ListView(
+            children: [
+              DrawerHeader(
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+              ),
+              currentUser == null
+                  ? ListTile(
+                leading: Icon(Icons.login),
+                title: Text('Login'),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  context.go('/login');
+                },
+              )
+                  : ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
+                onTap: () {
+                  setState(() {
+                    currentUser = null;
+                  });
+                  Navigator.pop(context); // Close the drawer
+                  context.go('/');
+                },
+              ),
+            ],
+          ),
         ),
       ),
       body: widget.child,
@@ -129,8 +154,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
 
   void _login() {
+    if (_usernameController.text.trim().isEmpty) {
+      // Simple validation to prevent empty usernames
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a username')),
+      );
+      return;
+    }
+
     setState(() {
-      currentUser = tryUser(name: _usernameController.text);
+      currentUser = TryUser(name: _usernameController.text.trim());
     });
     context.go('/'); // Navigate back to home after login
   }
@@ -142,17 +175,22 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Center the form vertically
           children: [
             TextField(
               controller: _usernameController,
               decoration: InputDecoration(
                 labelText: 'Enter Username',
+                border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               child: Text('Login'),
               onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
             ),
           ],
         ),

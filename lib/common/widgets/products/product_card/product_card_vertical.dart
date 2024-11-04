@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/common/widgets/products/product_card/product_card_add_to_cart_button.dart';
 import '../../../../features/shop/controller/product/cart_controller.dart';
 import '../../../../features/shop/controller/product/product_controller.dart';
@@ -33,9 +34,16 @@ class MyProductCardVertical extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        final navigationController = Get.find<NavigationController>();
-        navigationController.navigateTo('productDetail', product: product);
+        // Format the product title for URL
+        final productNameUrl = product.title.replaceAll(' ', '-');
+
+        // Navigate to the ProductDetailScreen with ID and name in the path, passing product as extra
+        context.go(
+          '/productDetail/${product.id}/$productNameUrl',
+          extra: product, // Pass the complete product model as extra
+        );
       },
+
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(1),

@@ -30,7 +30,7 @@ class MyBrandShowCase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Get.to(() => BrandProducts(brand: brand)),
+      onTap: () => Get.to(() => BrandProducts(brand: brand, brandId: '', brandName: '',)),
       /// holder of the item
       child: MyRoundedContainer(
         width: 10,

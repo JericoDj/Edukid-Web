@@ -6,6 +6,7 @@ import '../models/category_model.dart';
 import '../models/product_model.dart';
 
 class CategoryController extends GetxController {
+  final RxList<CategoryModel> categories = <CategoryModel>[].obs;
   // Singleton instance
   static CategoryController get instance => Get.find();
 

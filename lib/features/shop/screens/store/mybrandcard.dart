@@ -18,7 +18,7 @@ class MyBrandCard extends StatelessWidget {
   });
 
 
-  final BrandModel brand;
+  final BrandModel? brand;
   final bool showBorder;
   final void Function()? onTap;
 
@@ -41,7 +41,7 @@ class MyBrandCard extends StatelessWidget {
               child: MyCircularImage(
                 isNetworkImage: true,
 
-                image: brand.image,
+                image: brand!.image,
                 backgroundColor: Colors.transparent,
               ),
                          ),
@@ -53,11 +53,11 @@ class MyBrandCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                    MyBrandTitleText(
-                    title: brand.name,
+                    title: brand!.name,
                     brandTextSize: TextSizes.small,
                   ),
                   Text(
-                    '${brand.productsCount ?? 0} products',
+                    '${brand!.productsCount ?? 0} products',
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.labelMedium,
                   ),

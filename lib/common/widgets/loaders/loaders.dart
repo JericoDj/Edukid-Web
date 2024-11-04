@@ -1,44 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
 
-
 import '../../../utils/constants/colors.dart';
-import 'package:flutter/material.dart';
-
 import '../../../utils/helpers/helper_functions.dart';
 
 class MyLoaders {
-  static hideSnackBar() =>
+  static void hideSnackBar() {
+    if (Get.context != null) {
       ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
-
-  static customToast({required message}) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        elevation: 0,
-        duration: const Duration(seconds: 3),
-        backgroundColor: Colors.transparent,
-        content: Container(
-          padding: const EdgeInsets.all(12.0),
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            color: MyHelperFunctions.isDarkMode(Get.context!)
-                ? MyColors.darkerGrey.withOpacity(0.9)
-                : MyColors.grey.withOpacity(0.9),
-          ),
-          // BoxDecoration
-          child: Center(
-              child: Text(message,
-                  style: Theme.of(Get.context!).textTheme.labelLarge)),
-        ), // Container
-      ), // SnackBar
-    );
+    }
   }
 
-  static successSnackBar({required title, message = '', duration = 3}) {
+  static void customToast({required String message}) {
+    if (Get.context != null) {
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          elevation: 0,
+          duration: const Duration(seconds: 3),
+          backgroundColor: Colors.transparent,
+          content: Container(
+            padding: const EdgeInsets.all(12.0),
+            margin: const EdgeInsets.symmetric(horizontal: 30),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              color: MyHelperFunctions.isDarkMode(Get.context!)
+                  ? MyColors.darkerGrey.withOpacity(0.9)
+                  : MyColors.grey.withOpacity(0.9),
+            ),
+            child: Center(
+              child: Text(
+                message,
+                style: Theme.of(Get.context!).textTheme.labelLarge,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  static void successSnackBar({
+    required String title,
+    String message = '',
+    int duration = 3,
+  }) {
     Get.snackbar(
       title,
       message,
@@ -53,7 +59,7 @@ class MyLoaders {
     );
   }
 
-  static warningSnackBar({required title, message = ''}) {
+  static void warningSnackBar({required String title, String message = ''}) {
     Get.snackbar(
       title,
       message,
@@ -68,7 +74,7 @@ class MyLoaders {
     );
   }
 
-  static errorSnackBar({required title, message = ''}) {
+  static void errorSnackBar({required String title, String message = ''}) {
     Get.snackbar(
       title,
       message,

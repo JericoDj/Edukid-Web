@@ -15,17 +15,16 @@ class BrandModel {
     required this.isFeatured,
   });
 
-  /// Empty helper function
-  /// Empty constructor for clean code
+  /// Empty helper function for clean code
   static BrandModel empty() => BrandModel(
-        id: '',
-        name: '',
-        image: '',
-        productsCount: 0,
-        isFeatured: false,
-      );
+    id: '',
+    name: '',
+    image: '',
+    productsCount: 0,
+    isFeatured: false,
+  );
 
-  /// Convert model to Json structure
+  /// Convert model to JSON structure
   Map<String, dynamic> toJson() {
     return {
       'Id': id,
@@ -36,30 +35,27 @@ class BrandModel {
     };
   }
 
-  /// Map Json oriented document snapshot from Firebase to UserModel
-  factory BrandModel.fromJson(Map<String, dynamic> document) {
-    final data = document;
+  /// Map JSON-oriented data to BrandModel
+  factory BrandModel.fromJson(Map<String, dynamic> data) {
     if (data.isEmpty) return BrandModel.empty();
     return BrandModel(
       id: data['Id'] ?? '',
       name: data['Name'] ?? '',
       image: data['Image'] ?? '',
       isFeatured: data['IsFeatured'] ?? false,
-      productsCount: int.parse((data['ProductsCount'] ?? 0).toString()),
+      productsCount: int.tryParse(data['ProductsCount'].toString()) ?? 0,
     );
   }
 
-  /// Map Json oriented document snapshot from Firebase to UserModel
+  /// Map document snapshot from Firebase to BrandModel
   factory BrandModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> document) {
-    if (document.data() != null) {
-      final data = document.data()!;
-
-// Map JSON Record to the Model
+    final data = document.data();
+    if (data != null) {
       return BrandModel(
         id: document.id,
         name: data['Name'] ?? '',
         image: data['Image'] ?? '',
-        productsCount: data['ProductsCount'] ?? '',
+        productsCount: int.tryParse(data['ProductsCount'].toString()) ?? 0,
         isFeatured: data['IsFeatured'] ?? false,
       );
     } else {

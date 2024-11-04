@@ -14,6 +14,7 @@ import '../../../../common/widgets/products/favorite_icon/favorite_icon.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/sizes.dart';
+import '../../controller/product/product_controller.dart';
 import '../../models/product_model.dart';
 import '../product_reviews/product_reviews.dart';
 
@@ -24,6 +25,7 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Get.lazyPut(()=>ProductController());
     return Center(
       child: Scaffold(
 

@@ -157,31 +157,31 @@ class CartController extends GetxController {
     return false;
   }
 
-  // Method to add one more of an item in the cart (This will now respect the 1 item limit)
+  // Adds one to the existing quantity
   void addOneToCart(CartItemModel item) {
-    MyLoaders.customToast(message: 'You can only purchase 1 copy of this eBook.');
+    final index = cartItems.indexWhere((cartItem) => cartItem.productId == item.productId);
+    if (index != -1) {
+      cartItems[index].quantity += 1;
+      cartItems.refresh();
+    }
   }
-
   // Method to remove one quantity of an item from the cart
-  void removeOneFromCart(CartItemModel item) {
-    int index = cartItems.indexWhere(
-          (cartItem) =>
-      cartItem.productId == item.productId &&
-          cartItem.variationId == item.variationId &&
-          mapEquals(cartItem.selectedVariation, item.selectedVariation),
-    );
 
-    if (index >= 0) {
+
+  // Removes one from the existing quantity, removes the item if quantity reaches zero
+  void removeOneFromCart(CartItemModel item) {
+    final index = cartItems.indexWhere((cartItem) => cartItem.productId == item.productId);
+    if (index != -1) {
       if (cartItems[index].quantity > 1) {
         cartItems[index].quantity -= 1;
       } else {
-        removeFromCartDialog(index);
-        return; // Return to prevent updating the cart after dialog
+        cartItems.removeAt(index);
       }
+      cartItems.refresh();
     }
-
-    updateCart();
   }
+
+
 
   // Show a dialog to confirm removal of an item from the cart
   void removeFromCartDialog(int index) {

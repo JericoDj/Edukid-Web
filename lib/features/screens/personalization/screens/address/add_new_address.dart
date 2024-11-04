@@ -1,12 +1,11 @@
-
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../../common/widgets/appbar.dart';
 import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/validators/validation.dart';
 import '../../controllers/address_controller.dart';
-
 
 class AddNewAddressScreen extends StatelessWidget {
   const AddNewAddressScreen({Key? key}) : super(key: key);
@@ -14,10 +13,10 @@ class AddNewAddressScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = AddressController.instance;
+
     return Scaffold(
       appBar: const MyAppBar(
-        showBackArrow: true,
-        title: Text('Add new Address',textAlign: TextAlign.start),
+        title: Text('Add new Address', textAlign: TextAlign.center, ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -61,7 +60,6 @@ class AddNewAddressScreen extends StatelessWidget {
                       child: TextFormField(
                         controller: controller.postalCode,
                         validator: (value) => MyValidator.validateEmptyText('Postal Code', value),
-
                         decoration: const InputDecoration(
                           prefixIcon: Icon(Iconsax.code),
                           labelText: 'Postal Code',
@@ -108,7 +106,9 @@ class AddNewAddressScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {  controller.addNewAddress();},
+                    onPressed: () {
+                      controller.addNewAddress(context);
+                    },
                     child: Text('Save'),
                   ),
                 ),

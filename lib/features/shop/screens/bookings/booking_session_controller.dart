@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:webedukid/utils/constants/colors.dart';
-
 class BookingController extends GetxController {
   var focusedDate = DateTime.now().obs;
   var chosenDate = DateTime.now().obs;
@@ -13,7 +12,7 @@ class BookingController extends GetxController {
   var dateSpecificTimeSlots = <DateTime, List<TimeOfDay>>{}.obs;
   var pricePerSession = 1.0.obs;
   var bookedDates = <DateTime>[].obs;
-  var loading = true.obs; // Add this to track loading state
+  var loading = true.obs;
 
   @override
   void onInit() {
@@ -30,27 +29,22 @@ class BookingController extends GetxController {
         return;
       }
 
-      // Fetch all documents under the user's 'Bookings' subcollection
       final result = await FirebaseFirestore.instance
           .collection('Users')
           .doc(userId)
           .collection('Bookings')
           .get();
 
-      print('Total documents found in Bookings for user $userId: ${result.docs.length}');
-
-      // Extract dates from 'pickedDateTime'
       final dates = result.docs.expand((doc) {
         final data = doc.data();
         final pickedDateTimeList = data['pickedDateTime'];
 
-        // Ensure it's a list and iterate over each item in the list
         if (pickedDateTimeList != null && pickedDateTimeList is List) {
           return pickedDateTimeList.map((item) {
             final pickedDate = item['pickedDate'];
             if (pickedDate != null && pickedDate is Timestamp) {
               final date = pickedDate.toDate();
-              return DateTime(date.year, date.month, date.day);
+              return _normalizeDate(date);
             }
             return null;
           }).whereType<DateTime>();
@@ -60,16 +54,11 @@ class BookingController extends GetxController {
 
       bookedDates.assignAll(dates);
 
-      // Print the fetched dates for verification
       print('Fetched bookings for user $userId: ${bookedDates.length} dates');
-      for (var date in bookedDates) {
-        print('Booked date: ${DateFormat.yMMMMd().format(date)}');
-      }
-
     } catch (e) {
       print('Error fetching booked dates: $e');
     } finally {
-      loading.value = false; // Set loading to false after data is fetched
+      loading.value = false;
     }
   }
 
@@ -81,7 +70,6 @@ class BookingController extends GetxController {
       if (refocusFlag.value) {
         selectedTimeSlots.remove(date);
         dateSpecificTimeSlots.remove(date);
-
         focusedDate.value = DateTime.now();
         refocusFlag.value = false;
         chosenDate.value = DateTime(1900);
@@ -156,7 +144,7 @@ class BookingController extends GetxController {
   }
 
   bool isDateBooked(DateTime date) {
-    return bookedDates.contains(date);
+    return bookedDates.contains(_normalizeDate(date));
   }
 
   DateTime _normalizeDate(DateTime date) {

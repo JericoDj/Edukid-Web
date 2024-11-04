@@ -36,7 +36,7 @@ class AddressController extends GetxController {
     try {
       final addresses = await addressRepository.fetchUserAddresses();
       selectedAddress.value = addresses.firstWhere(
-            (element) => element.selectedAddress,
+        (element) => element.selectedAddress,
         orElse: () => AddressModel.empty(),
       );
       return addresses;
@@ -48,14 +48,11 @@ class AddressController extends GetxController {
       return [];
     }
   }
-  Future<void> selectAddress(BuildContext context, AddressModel newSelectedAddress) async {
+
+  Future<void> selectAddress(
+      BuildContext context, AddressModel newSelectedAddress) async {
     try {
       // Show Loader Dialog
-      showDialog(
-        context: context, // Use the context passed as an argument
-        barrierDismissible: false,
-        builder: (_) => MyCircularLoader(),
-      );
 
       // Clear the "selected" field
       if (selectedAddress.value.id.isNotEmpty) {
@@ -76,15 +73,10 @@ class AddressController extends GetxController {
       );
 
       // Close the loader
-      Navigator.pop(context);
     } catch (e) {
-      MyLoaders.errorSnackBar(
-        title: 'Error in Selection',
-        message: e.toString(),
-      );
+
     }
   }
-
 
   /// Show Modal Bottom Sheet at Checkout
   Future<dynamic> selectNewAddressPopup(BuildContext context) {
@@ -129,13 +121,8 @@ class AddressController extends GetxController {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (context != null) {
-                        context.push('/addNewAddress'); // Ensure context is non-null
-                      } else {
-                        print("Context is null, cannot navigate.");
-                      }
-                    });
+                    context.go(
+                        '/addNewAddress');
                   },
                   child: const Text('Add new address'),
                 ),
@@ -148,24 +135,15 @@ class AddressController extends GetxController {
   }
 
   /// Add new Address
-  Future<void> addNewAddress() async {
-    try {
-      // Start Loading
-      MyFullScreenLoader.openLoadingDialog(
-        'Storing Address...',
-        MyImages.loaders,
-      );
 
-      // Check Internet Connectivity
-      final isConnected = await NetworkManager.instance.isConnected();
-      if (!isConnected) {
-        MyFullScreenLoader.stopLoading();
-        return;
-      }
+
+  Future<void> addNewAddress(BuildContext context) async {
+    try {
+
 
       // Form Validation
       if (!addressFormKey.currentState!.validate()) {
-        MyFullScreenLoader.stopLoading();
+        // Exit if the form is not valid
         return;
       }
 
@@ -182,38 +160,21 @@ class AddressController extends GetxController {
         selectedAddress: true,
       );
 
+      // Attempt to save the address
       final id = await addressRepository.addAddress(address);
-
-      // Update Selected Address Status
       address.id = id;
-      await selectAddress(Get.context!, address);
 
-
-
-      // Remove Loader
-      MyFullScreenLoader.stopLoading();
-
-      // Show Success Message
-      MyLoaders.successSnackBar(
-        title: 'Congratulations',
-        message: 'Your address has been saved successfully.',
-      );
-
-      // Refresh Addresses Data
-      refreshData.toggle();
+      // Select the address
+      await selectAddress(context, address);
 
       // Reset fields
+      refreshData.toggle();
       resetFormFields();
 
-      // Redirect or close screen
-      Navigator.of(Get.context!).pop();
+      // Directly navigate to '/address' after successful action
+      context.go('/userAddress');
     } catch (e) {
-      // Remove Loader
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(
-        title: 'Error',
-        message: e.toString(),
-      );
+      // No snack bars or error messages, simply ignore errors
     }
   }
 

@@ -15,6 +15,25 @@ class ProductRepository extends GetxController {
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+
+  Future<ProductModel> getProductById(String productId) async {
+    try {
+      final doc = await _db.collection('Products').doc(productId).get();
+      if (doc.exists) {
+        return ProductModel.fromSnapshot(doc);
+      } else {
+        throw Exception("Product not found");
+      }
+    } on FirebaseException catch (e) {
+      throw MyFirebaseException(e.code).message;
+    } on PlatformException catch (e) {
+      throw MyPlatformException(e.code).message;
+    } catch (e) {
+      throw 'Something went wrong. Please try again';
+    }
+  }
+
+
   Future<List<ProductModel>> getAllFeaturedProducts() async {
     try {
       final snapshot = await _db
@@ -48,21 +67,31 @@ class ProductRepository extends GetxController {
     }
   }
 
-  Future<List<ProductModel>> fetchProductsByQuery(Query query) async {
+  Future<List<ProductModel>> fetchProductsByQuery([Query? query]) async {
     try {
-      final querySnapshot = await query.get();
-      final List<ProductModel> productList = querySnapshot.docs
+      print("Running fetchProductsByQuery with query: $query"); // Debug statement
+      // Set query to Products collection if not provided
+      final productQuery = query ?? _db.collection('Products');
+      final querySnapshot = await productQuery.get();
+
+      // Print the number of documents retrieved
+      print("Number of products fetched: ${querySnapshot.docs.length}");
+
+      return querySnapshot.docs
           .map((doc) => ProductModel.fromQuerySnapshot(doc))
           .toList();
-      return productList;
     } on FirebaseException catch (e) {
+      print("FirebaseException: ${e.message}"); // Debug statement
       throw MyFirebaseException(e.code).message;
     } on PlatformException catch (e) {
+      print("PlatformException: ${e.message}"); // Debug statement
       throw MyPlatformException(e.code).message;
     } catch (e) {
+      print("Unknown error: $e"); // Debug statement
       throw 'Something went wrong. Please try again';
     }
   }
+
 
   Future<List<ProductModel>> getFavoriteProducts(List<String> productIds) async {
     try {
@@ -76,6 +105,7 @@ class ProductRepository extends GetxController {
       throw 'Something went wrong. Please try again';
     }
   }
+
 
 
 

@@ -22,7 +22,7 @@ class AddressRepository extends GetxController {
           .get();
       return result.docs
           .map((documentSnapshot) =>
-              AddressModel.fromDocumentSnapshot(documentSnapshot))
+          AddressModel.fromDocumentSnapshot(documentSnapshot))
           .toList();
     } catch (e) {
       throw 'Something went wrong while fetching Address Information. Try again later';
@@ -47,14 +47,25 @@ class AddressRepository extends GetxController {
   /// Store new user order
   Future<String> addAddress(AddressModel address) async {
     try {
-      final userId = AuthenticationRepository.instance.authUser!.uid;
+      final userId = AuthenticationRepository.instance.authUser?.uid;
+
+      // Ensure userId is not null before proceeding
+      if (userId == null) {
+        throw 'User ID is null. User might not be authenticated.';
+      }
+
+      // Add address to the Firestore collection
       final currentAddress = await _db
           .collection('Users')
           .doc(userId)
           .collection('Addresses')
           .add(address.toJson());
+
       return currentAddress.id;
-    } catch (e) {}
-    throw 'Something went wrong while saving Address Information. Try again later';
+    } catch (e) {
+      // Log the error for debugging
+      print('Error adding address: $e');
+      throw 'Something went wrong while saving Address Information. Try again later';
+    }
   }
 }

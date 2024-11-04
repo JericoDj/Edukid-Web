@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/features/screens/personalization/screens/address/widgets/single_address.dart';
 
 import '../../../../../common/widgets/appbar.dart';
@@ -9,6 +11,7 @@ import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/helpers/cloud_helper_functions.dart';
 import '../../controllers/address_controller.dart';
 import 'add_new_address.dart';
+
 class UserAddressScreen extends StatelessWidget {
   const UserAddressScreen({Key? key}) : super(key: key);
 
@@ -92,7 +95,7 @@ class UserAddressScreen extends StatelessWidget {
             child: Center(
               child: FloatingActionButton(
                 backgroundColor: MyColors.primaryColor,
-                onPressed: () => Get.to(() => const AddNewAddressScreen()),
+                onPressed: () => context.go('/addAddress'), // Replace with your actual route
                 child: const Icon(Iconsax.add, color: MyColors.white),
               ),
             ),
@@ -102,4 +105,3 @@ class UserAddressScreen extends StatelessWidget {
     );
   }
 }
-

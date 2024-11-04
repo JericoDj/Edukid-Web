@@ -60,7 +60,7 @@ class CartScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(28.0),
                 ),
               ),
-              onPressed: () => navigationController.goToCheckoutScreen(),  // Navigate to Checkout
+              onPressed: () => navigationController.goToCheckoutScreen(context),  // Navigate to Checkout
               child: Obx(
                     () => Text(
                   'Check Out \$${controller.totalCartPrice.value}',  // Display total price

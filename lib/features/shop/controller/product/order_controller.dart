@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 
@@ -18,7 +18,6 @@ import '../../../../common/data/repositories.authentication/product/order_reposi
 import '../../../../common/success_screen/sucess_screen.dart';
 import '../../../../common/widgets/loaders/loaders.dart';
 import '../../../../common/data/repositories.authentication/authentication_repository.dart';
-import '../../../../navigation_Bar.dart';
 import '../../../../utils/constants/enums.dart';
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/popups/full_screen_loader.dart';
@@ -50,7 +49,6 @@ class OrderController extends GetxController {
           .get();
 
       return orders.docs.map((doc) => OrderModel.fromSnapshot(doc)).toList();
-
     } catch (e) {
       MyLoaders.warningSnackBar(title: 'Error', message: e.toString());
       return [];
@@ -58,30 +56,24 @@ class OrderController extends GetxController {
   }
 
   /// Processes the order using PayPal or card payment
-  /// Processes the order using PayPal or card payment
-  void processOrder(double totalAmount) async {
+  void processOrder(BuildContext context, double totalAmount) async {
     try {
-      // Start Loader
-      MyFullScreenLoader.openLoadingDialog('Processing your order', MyImages.loaders);
-
-      // Get user authentication ID
       final userId = AuthenticationRepository.instance.authUser?.uid;
       if (userId == null || userId.isEmpty) {
         return;
       }
 
-      // Retrieve the selected payment method
       final selectedPaymentMethod = checkoutController.selectedPaymentMethod.value;
 
       // Bypass payment if totalAmount is 0 and save the order directly
       if (totalAmount == 0) {
-        _saveOrderAndClearCart(userId, totalAmount);
+        _saveOrderAndClearCart(context, userId, totalAmount);
         return;
       }
 
       // Proceed with PayPal or card payment
       if (selectedPaymentMethod.name == 'PayPal') {
-        _processPayPalPayment(totalAmount);
+        _processPayPalPayment(context, totalAmount);
         return;
       }
 
@@ -94,28 +86,19 @@ class OrderController extends GetxController {
         bool paymentSuccess = await _chargeCustomer(savedCustomerId, savedCardId, totalAmount);
 
         if (paymentSuccess) {
-          // Payment was successful, proceed to save the order and clear cart
-          _saveOrderAndClearCart(userId, totalAmount);
-        } else {
-          MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'There was an error processing your payment.');
+          _saveOrderAndClearCart(context, userId, totalAmount);
         }
-      } else {
-        // Handle the case where no saved customer or card ID is available
-        MyLoaders.errorSnackBar(title: 'Payment Error', message: 'No saved customer or card information found.');
       }
     } catch (e) {
       MyLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
       print("Exception during order processing: $e");
-    } finally {
-      MyFullScreenLoader.stopLoading();
     }
   }
 
-
   /// PayPal payment process for mobile and web
-  void _processPayPalPayment(double totalAmount) {
+  void _processPayPalPayment(BuildContext context, double totalAmount) {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      Navigator.of(Get.context!).push(MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context) => PaypalCheckoutView(
           sandboxMode: true,
           clientId: "Your PayPal Client ID",
@@ -136,7 +119,7 @@ class OrderController extends GetxController {
           ],
           note: "Contact us for any questions on your order.",
           onSuccess: (Map params) async {
-            _handlePayPalSuccess(totalAmount);
+            _handlePayPalSuccess(context, totalAmount);
           },
           onError: (error) {
             _handlePayPalError();
@@ -147,12 +130,12 @@ class OrderController extends GetxController {
         ),
       ));
     } else if (kIsWeb) {
-      _processPayPalPaymentWeb(totalAmount);
+      _processPayPalPaymentWeb(context, totalAmount);
     }
   }
 
   /// PayPal payment for web
-  void _processPayPalPaymentWeb(double totalAmount) async {
+  void _processPayPalPaymentWeb(BuildContext context, double totalAmount) async {
     final String createOrderEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/create_order";
 
     try {
@@ -174,7 +157,7 @@ class OrderController extends GetxController {
           Timer.periodic(Duration(seconds: 1), (timer) async {
             if (popupWindow != null && popupWindow.closed!) {
               timer.cancel();
-              await _checkOrderStatus(orderID, totalAmount);  // Pass totalAmount
+              await _checkOrderStatus(context, orderID, totalAmount);
             }
           });
         } else {
@@ -192,7 +175,7 @@ class OrderController extends GetxController {
   }
 
   /// Check the status of PayPal order
-  Future<void> _checkOrderStatus(String orderID, double totalAmount) async {
+  Future<void> _checkOrderStatus(BuildContext context, String orderID, double totalAmount) async {
     final String statusEndpoint = "https://us-central1-edukid-60f55.cloudfunctions.net/api/order_status/$orderID";
 
     try {
@@ -202,8 +185,7 @@ class OrderController extends GetxController {
         final statusData = jsonDecode(response.body);
 
         if (statusData['success'] == true && statusData['status'] == 'APPROVED') {
-          // Payment was successful, save the order
-          _saveOrderAndClearCart(AuthenticationRepository.instance.authUser!.uid, totalAmount);
+          _saveOrderAndClearCart(context, AuthenticationRepository.instance.authUser!.uid, totalAmount);
           MyLoaders.successSnackBar(title: 'Payment Success', message: 'Your payment was successful!');
         } else {
           MyLoaders.errorSnackBar(title: 'Payment Failed', message: 'Payment was not successful.');
@@ -218,85 +200,7 @@ class OrderController extends GetxController {
     }
   }
 
-  /// Retrieve saved customer ID from Firestore
-  Future<String?> _retrieveSavedCustomerId() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('paymentInfo')
-          .doc('customerDetails')
-          .get();
-
-      if (docSnapshot.exists && docSnapshot.data() != null) {
-        return docSnapshot.get('customerId');
-      } else {
-        print("No saved customer ID found.");
-        return null;
-      }
-    } else {
-      print("User not authenticated.");
-      return null;
-    }
-  }
-
-  /// Retrieve saved card ID from Firestore
-  Future<String?> _retrieveSavedCardId() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('paymentInfo')
-          .doc('customerDetails')
-          .get();
-
-      if (docSnapshot.exists && docSnapshot.data() != null) {
-        return docSnapshot.get('cardId');
-      } else {
-        print("No saved card ID found.");
-        return null;
-      }
-    } else {
-      print("User not authenticated.");
-      return null;
-    }
-  }
-
-  /// Charge the customer using saved details
-  Future<bool> _chargeCustomer(String customerId, String cardId, double amount) async {
-    try {
-      final Uuid uuid = Uuid();
-
-      final response = await http.post(
-        Uri.parse('http://localhost:3000/charge-customer'),
-        headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
-        body: jsonEncode(<String, dynamic>{
-          'customerId': customerId,
-          'cardId': cardId,
-          'amount': (amount * 100).round(), // Convert to cents
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print('Payment successful: ${response.body}');
-        return true;
-      } else {
-        print('Payment failed with status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Error charging customer: $e');
-      return false;
-    }
-  }
-
-  /// Saves the order in Firestore and clears the cart
-  Future<void> _saveOrderAndClearCart(String userId, double totalAmount) async {
+  Future<void> _saveOrderAndClearCart(BuildContext context, String userId, double totalAmount) async {
     final order = OrderModel(
       id: UniqueKeyGenerator.generateUniqueKey(),
       userId: userId,
@@ -305,7 +209,7 @@ class OrderController extends GetxController {
       orderDate: DateTime.now(),
       paymentMethod: checkoutController.selectedPaymentMethod.value.name,
       address: addressController.selectedAddress.value,
-      deliveryDate: DateTime.now(), // Adjust the delivery date as per requirement
+      deliveryDate: DateTime.now(),
       items: cartController.cartItems.toList(),
     );
 
@@ -313,18 +217,21 @@ class OrderController extends GetxController {
     cartController.clearCart();
 
     // Navigate to success screen
-    Get.offAll(() => SuccessScreen(
-      image: MyImages.accountGIF,
-      title: 'Payment Success!',
-      subtitle: 'Your item will be shipped soon!',
-      onPressed: () => Get.offAll(() => NavigationBarMenu()),
-    ));
+    context.go(
+      '/success',
+      extra: SuccessScreen(
+        image: MyImages.accountGIF,
+        title: 'Payment Success!',
+        subtitle: 'Your item will be shipped soon!',
+        onPressed: () => context.go('/home'),
+      ),
+    );
   }
 
   /// Handle PayPal payment success
-  void _handlePayPalSuccess(double totalAmount) async {
-    _saveOrderAndClearCart(AuthenticationRepository.instance.authUser!.uid, totalAmount);
-    Navigator.pop(Get.context!);
+  void _handlePayPalSuccess(BuildContext context, double totalAmount) async {
+    _saveOrderAndClearCart(context, AuthenticationRepository.instance.authUser!.uid, totalAmount);
+    Navigator.pop(context);
   }
 
   /// Handle PayPal payment error
@@ -339,5 +246,81 @@ class OrderController extends GetxController {
     Get.snackbar("Payment Cancelled", "You cancelled the PayPal payment.", snackPosition: SnackPosition.BOTTOM);
     MyFullScreenLoader.stopLoading();
     Navigator.pop(Get.context!);
+  }
+}
+/// Retrieve saved customer ID from Firestore
+Future<String?> _retrieveSavedCustomerId() async {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('paymentInfo')
+        .doc('customerDetails')
+        .get();
+
+    if (docSnapshot.exists && docSnapshot.data() != null) {
+      return docSnapshot.get('customerId');
+    } else {
+      print("No saved customer ID found.");
+      return null;
+    }
+  } else {
+    print("User not authenticated.");
+    return null;
+  }
+}
+
+/// Retrieve saved card ID from Firestore
+Future<String?> _retrieveSavedCardId() async {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .collection('paymentInfo')
+        .doc('customerDetails')
+        .get();
+
+    if (docSnapshot.exists && docSnapshot.data() != null) {
+      return docSnapshot.get('cardId');
+    } else {
+      print("No saved card ID found.");
+      return null;
+    }
+  } else {
+    print("User not authenticated.");
+    return null;
+  }
+}
+
+/// Charge the customer using saved details
+Future<bool> _chargeCustomer(String customerId, String cardId, double amount) async {
+  try {
+    final Uuid uuid = Uuid();
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/charge-customer'),
+      headers: <String, String>{'Content-Type': 'application/json; charset=UTF-8'},
+      body: jsonEncode(<String, dynamic>{
+        'customerId': customerId,
+        'cardId': cardId,
+        'amount': (amount * 100).round(), // Convert to cents
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Payment successful: ${response.body}');
+      return true;
+    } else {
+      print('Payment failed with status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      return false;
+    }
+  } catch (e) {
+    print('Error charging customer: $e');
+    return false;
   }
 }

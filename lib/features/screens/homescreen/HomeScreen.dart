@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
+
 import 'package:webedukid/custom_app_bar.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/home_categories.dart';
 import 'package:webedukid/features/screens/homescreen/widgets/promo_slider.dart';
 import 'package:webedukid/features/shop/screens/bookings/booking_session.dart';
-import 'package:go_router/go_router.dart'; // Import GoRouter
 
 import '../../../common/widgets/customShapes/containers/primary_header_container.dart';
 import '../../../common/widgets/layouts/grid_layout.dart';
@@ -14,20 +15,20 @@ import '../../../common/widgets/shimmer/vertical_product_shimmer.dart';
 import '../../../common/widgets/texts/section_heading.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/sizes.dart';
-import '../../shop/controller/product/product_controller.dart';  // Import ProductController
-import '../navigation_controller.dart'; // Import the NavigationController
-import '../../shop/models/product_model.dart'; // Import ProductModel
+import '../../shop/controller/product/product_controller.dart';
+import '../navigation_controller.dart';
+import '../../shop/models/product_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final NavigationController navigationController = Get.find(); // Get the NavigationController
-    final ProductController controller = Get.put(ProductController()); // Initialize the ProductController
+    final NavigationController navigationController = Get.find();
+    final ProductController controller = Get.put(ProductController());
 
-    // Ensure the selected category is cleared when returning to the HomeScreen
-    navigationController.clearSelectedCategory(); // Clear the selection
+    // Clear the selected category when returning to the HomeScreen
+    navigationController.clearSelectedCategory();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -58,7 +59,7 @@ class HomeScreen extends StatelessWidget {
             Obx(() {
               final selectedCategory = navigationController.selectedCategory;
               if (selectedCategory == null) {
-                return _buildBodyContent(navigationController, controller, context); // Pass context
+                return _buildBodyContent(navigationController, controller, context);
               } else {
                 return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   future: FirebaseFirestore.instance
@@ -96,10 +97,14 @@ class HomeScreen extends StatelessWidget {
                         ),
                         itemBuilder: (context, index) {
                           final product = products[index];
+                          final productNameUrl = product.title.replaceAll(' ', '-');
 
                           return GestureDetector(
                             onTap: () {
-                              navigationController.navigateTo('productDetail', product: product);
+                              context.go(
+                                '/productDetail/${product.id}/$productNameUrl',
+                                extra: product,
+                              );
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -110,7 +115,7 @@ class HomeScreen extends StatelessWidget {
                                     color: Colors.black12,
                                     offset: Offset(0, 2),
                                     blurRadius: 4,
-                                  )
+                                  ),
                                 ],
                                 color: Colors.white,
                               ),
@@ -181,14 +186,13 @@ class HomeScreen extends StatelessWidget {
         children: [
           MyPromoSlider(),
           SizedBox(height: MySizes.spaceBtwSections),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 width: 200,
                 child: ElevatedButton(
-                  onPressed: () => context.go('/bookSession'), // Using context.go() for GoRouter
+                  onPressed: () => context.go('/bookSession'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: MyColors.primaryColor,
                     shape: RoundedRectangleBorder(
@@ -201,20 +205,17 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: MySizes.spaceBtwSections),
-
           MySectionHeading(
             title: 'Worksheets',
             buttonTitle: 'View All',
             onPressed: () {
-              navigationController.navigateTo('allProducts');
+              context.go('/allProducts');
             },
           ),
-
           Obx(() {
             if (controller.isLoading.value) {
               return const MyVerticalProductShimmer();
             }
-
             return MyGridLayoutWidget(
               mainAxisExtent: 260,
               itemCount: controller.featuredProducts.length,

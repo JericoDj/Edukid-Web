@@ -79,7 +79,7 @@ class _BookingCheckOutScreenState extends State<BookingCheckOutScreen> {
         width: 650,
         child: Scaffold(
           appBar: MyAppBar(
-            showBackArrow: true,
+            showBackArrow: false,
             title: Text(
               'Booking Review',
               style: Theme.of(context).textTheme.headlineSmall,

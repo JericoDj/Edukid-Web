@@ -95,8 +95,8 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         MySettingsMenuTile(
                           icon: Icons.discount,
-                          title: 'My Coupons',
-                          subTitle: 'List of all coupons',
+                          title: 'My Coup of all coupoons',
+                          subTitle: 'Listns',
                           onTap: onCoupon,
                         ),
                         MySettingsMenuTile(
