@@ -19,33 +19,40 @@ class ForgetPasswordScreen extends StatelessWidget {
         appBar: AppBar(),
         body:  Padding(
           padding: const EdgeInsets.all(MySizes.defaultspace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: Align(
+            alignment: Alignment.topCenter,
+
+            child: Container(
+              width: 600,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
 
-              /// Headings
-              Text(MyTexts.forgetPasswordTitle, style: Theme.of(context).textTheme.headlineMedium),
-              const SizedBox(height:  MySizes.spaceBtwItems),
-              Text(MyTexts.forgetPasswordSubTitle, style: Theme.of(context).textTheme.labelMedium),
-              const SizedBox(height:  MySizes.spaceBtwItems * 2),
+                  /// Headings
+                  Text(MyTexts.forgetPasswordTitle, style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height:  MySizes.spaceBtwItems),
+                  Text(MyTexts.forgetPasswordSubTitle, style: Theme.of(context).textTheme.labelMedium),
+                  const SizedBox(height:  MySizes.spaceBtwItems * 2),
 
-              /// Text fields
-              Form(
-                key: controller.forgetPasswordFormKey,
-                child: TextFormField(
-                  controller: controller.email,
-                  validator: MyValidator.validateEmail,
-                  decoration: const InputDecoration(labelText: MyTexts.email, prefixIcon: Icon(Iconsax.direct_right)),
-                ),
+                  /// Text fields
+                  Form(
+                    key: controller.forgetPasswordFormKey,
+                    child: TextFormField(
+                      controller: controller.email,
+                      validator: MyValidator.validateEmail,
+                      decoration: const InputDecoration(labelText: MyTexts.email, prefixIcon: Icon(Iconsax.direct_right)),
+                    ),
+                  ),
+                  const SizedBox(height:  MySizes.spaceBtwItems),
+
+                  /// Submit Button
+                  SizedBox(width: double.infinity,child: ElevatedButton(onPressed: () => controller.sendPasswordResetEmail(context), child: const Text("Submit"),))
+
+
+                ],
               ),
-              const SizedBox(height:  MySizes.spaceBtwItems),
-
-              /// Submit Button
-              SizedBox(width: double.infinity,child: ElevatedButton(onPressed: () => controller.sendPasswordResetEmail(), child: const Text("Submit"),))
-
-
-            ],
+            ),
           ),
         )
     );

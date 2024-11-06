@@ -23,28 +23,34 @@ class SignUpScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(MySizes.defaultspace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Title
-              Text(MyTexts.signUpTitle, style: Theme.of(context).textTheme.headlineMedium),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              width: 800,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Title
+                  Text(MyTexts.signUpTitle, style: Theme.of(context).textTheme.headlineMedium),
 
-              const SizedBox(height: MySizes.spaceBtwItems),
+                  const SizedBox(height: MySizes.spaceBtwItems),
 
-              /// Sign Up Form/checkbox and Privacy/create account button
-              const SignUpForm(),
-
-
-              const SizedBox(height: MySizes.spaceBtwItems,),
-
-              /// Divider
-              const MyFormDivider(dividerText: "Or Sign In with",),
-
-              const SizedBox(height: MySizes.spaceBtwItems,),
+                  /// Sign Up Form/checkbox and Privacy/create account button
+                  const SignUpForm(),
 
 
-              const MySocialButtons(),
-            ],
+                  const SizedBox(height: MySizes.spaceBtwItems,),
+
+                  /// Divider
+                  const MyFormDivider(dividerText: "Or Sign In with",),
+
+                  const SizedBox(height: MySizes.spaceBtwItems,),
+
+
+                  const MySocialButtons(),
+                ],
+              ),
+            ),
           ),
         ),
       ),

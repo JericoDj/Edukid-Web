@@ -2,10 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../common/data/repositories.authentication/authentication_repository.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../authentication/controllers/signup/verify_email_controller.dart';
-import '../../../authentication/login/login.dart';
 
 class VerifyEmailScreen extends StatelessWidget {
   const VerifyEmailScreen({super.key, this.email});
@@ -15,26 +13,15 @@ class VerifyEmailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(VerifyEmailController());
+
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {
-              AuthenticationRepository.instance.logout(context); // Pass context here
-              Get.to(() => const LoginScreen());
-            },
-            icon: const Icon(CupertinoIcons.clear),
-          ),
-        ],
-        title: const Text('Verify Email'),
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              /// Image
+              // Image
               Image.asset(
                 'assets/images/animations/mailSent.gif',
                 height: 200.0,
@@ -43,7 +30,7 @@ class VerifyEmailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20.0),
 
-              /// Title & Subtitle
+              // Title & Subtitle
               const Text(
                 'Verify Your Email',
                 style: TextStyle(
@@ -53,7 +40,7 @@ class VerifyEmailScreen extends StatelessWidget {
               ),
               const SizedBox(height: MySizes.spaceBtwItems),
               Text(
-                email ?? '',
+                email ?? 'No email provided', // Display a default message if email is null
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 12.0),
               ),
@@ -65,11 +52,11 @@ class VerifyEmailScreen extends StatelessWidget {
               ),
               const SizedBox(height: MySizes.spaceBtwItems),
 
-              /// Buttons
+              // Buttons
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.checkEmailVerificationStatus(context), // Pass context here
+                  onPressed: () => controller.checkEmailVerificationStatus(context), // Call controller with context
                   child: const Text("Continue"),
                 ),
               ),
@@ -77,7 +64,7 @@ class VerifyEmailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: () => controller.sendEmailVerification(),
+                  onPressed: () => controller.sendEmailVerification(), // Resend verification email
                   child: const Text("Resend Email"),
                 ),
               ),

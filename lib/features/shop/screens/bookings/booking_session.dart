@@ -18,14 +18,12 @@ class BookingSessionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        // Show a loading indicator while fetching data
         if (controller.loading.value) {
           return Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        // Once data is loaded, display the calendar
         return SingleChildScrollView(
           child: Align(
             alignment: Alignment.topCenter,
@@ -61,20 +59,14 @@ class BookingSessionScreen extends StatelessWidget {
                               focusedDay: controller.focusedDate.value,
                               onDaySelected: (selectedDay, focusedDay) {
                                 if (selectedDay.isAfter(DateTime.now())) {
-                                  controller.updateChosenDate(_normalizeDate(selectedDay));
+                                  controller.updateChosenDate(controller.normalizeDate(selectedDay));
                                 } else {
                                   Get.snackbar("Invalid Date", "You cannot select today's date or past dates.");
                                 }
                               },
                               calendarBuilders: CalendarBuilders(
                                 defaultBuilder: (context, date, focusedDay) {
-                                  Color dayColor;
-                                  if (date.isBefore(DateTime.now()) || date.isAtSameMomentAs(DateTime.now())) {
-                                    dayColor = Colors.grey.withOpacity(0.5);
-                                  } else {
-                                    dayColor = controller.getDayColor(date);
-                                  }
-
+                                  Color dayColor = controller.getDayColor(date);
                                   return Container(
                                     decoration: BoxDecoration(
                                       color: dayColor,
@@ -84,7 +76,7 @@ class BookingSessionScreen extends StatelessWidget {
                                     child: Text(
                                       '${date.day}',
                                       style: TextStyle(
-                                        color: dayColor == Colors.yellow || dayColor == Colors.white
+                                        color: dayColor == Colors.blue || dayColor == Colors.white
                                             ? Colors.black
                                             : Colors.white,
                                       ),
@@ -120,7 +112,7 @@ class BookingSessionScreen extends StatelessWidget {
                           ),
                           padding: EdgeInsets.all(8.0),
                           child: Obx(() {
-                            final normalizedDate = _normalizeDate(controller.focusedDate.value);
+                            final normalizedDate = controller.normalizeDate(controller.focusedDate.value);
                             final timeSlotsForDay = controller.getTimeSlotsForDate(normalizedDate);
 
                             if (controller.isDateBooked(normalizedDate)) {
@@ -239,15 +231,9 @@ class BookingSessionScreen extends StatelessWidget {
                           }
 
                           if (AuthenticationRepository.instance.authUser == null) {
-                            debugPrint("User is not authenticated, redirecting to login.");
                             context.go('/login');
                             return;
                           }
-
-                          debugPrint("Navigating to bookingCheckout with:");
-                          debugPrint("Picked Dates: ${controller.getSelectedDates()}");
-                          debugPrint("Picked Times: ${controller.selectedTimeSlots.values.toList()}");
-                          debugPrint("Price: ${controller.pricePerSession.value}");
 
                           context.go(
                             '/bookingCheckout',
@@ -268,8 +254,7 @@ class BookingSessionScreen extends StatelessWidget {
                           'Book a Session \$${controller.pricePerSession.value}',
                           style: const TextStyle(color: Colors.white, fontSize: 16.0),
                         ),
-                      )
-
+                      ),
                     ),
                   ),
                 ],
@@ -279,9 +264,5 @@ class BookingSessionScreen extends StatelessWidget {
         );
       }),
     );
-  }
-
-  DateTime _normalizeDate(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
   }
 }

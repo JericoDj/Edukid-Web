@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:webedukid/custom_app_bar.dart';
-import 'package:webedukid/features/shop/screens/bookings/widget/all_user_bookings_list.dart';
-import 'package:webedukid/features/shop/screens/bookings/widget/booking_tabs.dart';
 import 'package:webedukid/utils/constants/colors.dart';
 import 'package:webedukid/utils/constants/sizes.dart';
 
@@ -17,10 +14,14 @@ import '../../../bookings/status/rescheduled.dart';
 import '../../../bookings/status/scheduled.dart';
 import '../../../screens/personalization/controllers/address_controller.dart';
 import '../../controller/bookings/booking_order_controller.dart';
+import '../../controller/product/cart_controller.dart';
 import '../../controller/product/checkout_controller.dart';
 import '../../controller/product/order_controller.dart';
+import '../../controller/product/variation_controller.dart';
 import '../../models/booking_orders_model.dart';
-import 'calendar_controller.dart'; // Import the new CalendarController
+import 'calendar_controller.dart';
+import 'widget/booking_tabs.dart';
+import 'widget/all_user_bookings_list.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({Key? key}) : super(key: key);
@@ -32,19 +33,17 @@ class BookingsScreen extends StatefulWidget {
 class _BookingsScreenState extends State<BookingsScreen> {
   int _selectedIndex = 0;
   final CalendarController _calendarController = Get.put(CalendarController());
-  bool isLoading = true; // Add a loading state variable
 
   @override
   void initState() {
     super.initState();
-    _loadData(); // Call a function to load data and update the loading state
-  }
-
-  Future<void> _loadData() async {
-    await _calendarController.fetchCalendarBookings(); // Fetch bookings for the calendar view
-    setState(() {
-      isLoading = false; // Set isLoading to false once data is loaded
-    });
+    // Lazy-load dependencies
+    Get.lazyPut(() => CartController());
+    Get.lazyPut(() => VariationController());
+    Get.lazyPut(() => OrderController());
+    Get.lazyPut(() => CheckoutController());
+    Get.lazyPut(() => BookingOrderController());
+    Get.lazyPut(() => AddressController());
   }
 
   void _onTabSelected(int index) {
@@ -55,81 +54,84 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    Get.lazyPut(() => OrderController());
-    Get.lazyPut(() => CheckoutController());
-    Get.lazyPut(() => BookingOrderController());
-    Get.lazyPut(() => AddressController());
-
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(MySizes.defaultspace),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Calendar with booking dates and colors
-                  Obx(() {
-                    if (_calendarController.calendarBookings.isEmpty) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    return _buildBookingCalendar();
-                  }),
-                  const SizedBox(width: 20),
-                  // Display booking details on the right using a Container
-                  Container(
-                    width: 500, // Set a fixed width for the details container
-                    padding: const EdgeInsets.all(8.0),
-                    child: _buildBookingDetails(),
+      body: FutureBuilder<void>(
+        future: _calendarController.fetchCalendarBookings(), // Load calendar data
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Display loading spinner while waiting for data
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            // Handle error
+            return Center(child: Text('Failed to load data. Please try again.'));
+          } else {
+            // Data loaded successfully, show the main content
+            return _buildMainContent();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(MySizes.defaultspace),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Obx(() {
+                  return _buildBookingCalendar();
+                }),
+                const SizedBox(width: 20),
+                Container(
+                  width: 500,
+                  padding: const EdgeInsets.all(8.0),
+                  child: _buildBookingDetails(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Stack(
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: MyTabBookingBar(
+                    tabs: [
+                      TabData(label: 'Processing', icon: Icons.access_alarm),
+                      TabData(label: 'Scheduled', icon: Icons.schedule),
+                      TabData(label: 'Ongoing', icon: Icons.timer),
+                      TabData(label: 'Completed', icon: Icons.check),
+                      TabData(label: 'Rescheduled', icon: Icons.refresh),
+                      TabData(label: 'Cancelled', icon: Icons.cancel),
+                    ],
+                    onTabSelected: _onTabSelected,
+                    selectedIndex: _selectedIndex,
                   ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              // Color guide for the calendar (e.g., orange for processing)
-              const SizedBox(height: 10),
-              Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: MyTabBookingBar(
-                      tabs: [
-                        TabData(label: 'Processing', icon: Icons.access_alarm),
-                        TabData(label: 'Scheduled', icon: Icons.schedule),
-                        TabData(label: 'Ongoing', icon: Icons.timer),
-                        TabData(label: 'Completed', icon: Icons.check),
-                        TabData(label: 'Rescheduled', icon: Icons.refresh),
-                        TabData(label: 'Cancelled', icon: Icons.cancel),
-                      ],
-                      onTabSelected: _onTabSelected,
-                      selectedIndex: _selectedIndex,
+                ),
+                Positioned(
+                  right: 0,
+                  child: TextButton(
+                    onPressed: () {
+                      Get.to(() => AllBookingsScreen());
+                    },
+                    style: ButtonStyle(
+                      foregroundColor: MaterialStateProperty.all(MyColors.primaryColor),
+                    ),
+                    child: Text(
+                      'View All Bookings',
+                      style: TextStyle(color: MyColors.primaryColor),
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    child: TextButton(
-                      onPressed: () {
-                        // Navigate to view all bookings
-                        Get.to(() => AllBookingsScreen());
-                      },
-                      style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.all(MyColors.primaryColor),
-                      ),
-                      child: Text(
-                        'View All Bookings',
-                        style: TextStyle(color: MyColors.primaryColor),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              // Display the content based on the selected tab
-              _getScreenForSelectedIndex(_selectedIndex),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _getScreenForSelectedIndex(_selectedIndex),
+          ],
         ),
       ),
     );
@@ -137,7 +139,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   Widget _buildBookingCalendar() {
     return Container(
-      width: 350, // Set a specific width for the calendar
+      width: 350,
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         border: Border.all(color: MyColors.primaryColor, width: 2.0),
@@ -160,15 +162,15 @@ class _BookingsScreenState extends State<BookingsScreen> {
           ),
         ),
         onDaySelected: (selectedDay, focusedDay) {
-          print('Selected Date: ${DateFormat.yMMMMd().format(selectedDay)}');
           _calendarController.focusedDate.value = focusedDay;
           _calendarController.selectedDate.value = selectedDay;
         },
-        selectedDayPredicate: (day) => isSameDay(day, _calendarController.selectedDate.value),
+        selectedDayPredicate: (day) =>
+            isSameDay(day, _calendarController.selectedDate.value),
         eventLoader: (date) {
           return _calendarController.calendarBookings
-              .where((booking) => booking.pickedDateTime.any(
-                  (picked) => picked.pickedDate == date))
+              .where((booking) => booking.pickedDateTime
+              .any((picked) => picked.pickedDate == date))
               .toList();
         },
         calendarBuilders: CalendarBuilders(
@@ -214,7 +216,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
       padding: const EdgeInsets.all(8.0),
       child: Obx(() {
         DateTime selectedDate = _calendarController.selectedDate.value;
-        List<BookingOrderModel> bookingsForSelectedDate = _calendarController.calendarBookings
+        List<BookingOrderModel> bookingsForSelectedDate = _calendarController
+            .calendarBookings
             .where((booking) => booking.pickedDateTime
             .any((picked) => isSameDay(picked.pickedDate, selectedDate)))
             .toList();

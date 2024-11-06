@@ -6,8 +6,9 @@ class RestartWidget extends StatefulWidget {
   const RestartWidget({Key? key, required this.child}) : super(key: key);
 
   static void restartApp(BuildContext context) {
-    final _RestartWidgetState? state = context.findAncestorStateOfType<_RestartWidgetState>();
-    state?.restartApp();
+    final _RestartWidgetState state =
+    context.findAncestorStateOfType<_RestartWidgetState>()!;
+    state.restartApp();
   }
 
   @override
@@ -19,7 +20,7 @@ class _RestartWidgetState extends State<RestartWidget> {
 
   void restartApp() {
     setState(() {
-      key = UniqueKey(); // Rebuilds the widget tree with a new unique key
+      key = UniqueKey(); // Generates a new key to rebuild the app from scratch
     });
   }
 

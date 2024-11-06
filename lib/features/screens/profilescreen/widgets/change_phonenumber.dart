@@ -12,6 +12,7 @@ class ChangePhoneNumberDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(UpdatePhoneNumberController());
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -45,8 +46,7 @@ class ChangePhoneNumberDialog extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.updatePhoneNumber();
-                    Get.back(result: {'phoneNumber': controller.phoneNumber.text});
+                    controller.updatePhoneNumber(context); // Pass the context here
                   },
                   child: const Text('Save'),
                 ),

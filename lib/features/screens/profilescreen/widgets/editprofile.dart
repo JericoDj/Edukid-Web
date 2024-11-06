@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:flutter/services.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/change_profile_picture.dart';
 import 'package:webedukid/features/screens/profilescreen/widgets/profile_menu.dart';
 
@@ -14,16 +14,15 @@ import '../../../personalization/controllers/user_controller.dart';
 import 'change_birthday.dart';
 import 'change_gender.dart';
 import 'change_name.dart';
-import 'change_phonenumber.dart'; // Import for Clipboard
+import 'change_phonenumber.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({Key? key}) : super(key: key);
 
-  // Function to show a custom toast at the top of the screen
   void _showTopSnackBar(BuildContext context, String message) {
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
-        top: 50.0, // Position the banner at the top of the screen
+        top: 50.0,
         left: 0,
         right: 0,
         child: Material(
@@ -58,26 +57,22 @@ class EditProfileScreen extends StatelessWidget {
       ),
     );
 
-    // Insert the overlay entry into the Overlay
     Overlay.of(context)?.insert(overlayEntry);
 
-    // Remove the overlay after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       overlayEntry.remove();
     });
   }
 
-  // Function to copy text to clipboard and show a custom toast
   void _copyToClipboard(BuildContext context, String value) {
-    Clipboard.setData(ClipboardData(text: value)); // Copy to clipboard
-    _showTopSnackBar(context, 'Copied to clipboard!'); // Show top toast
+    Clipboard.setData(ClipboardData(text: value));
+    _showTopSnackBar(context, 'Copied to clipboard!');
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = UserController.instance;
 
-    // Function to get the latest full name from UserController
     String getLatestFullName() {
       return "${controller.user.value.firstName} ${controller.user.value.lastName}";
     }
@@ -86,23 +81,20 @@ class EditProfileScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       body: Center(
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(30.0), // Rounded edges for the container
+          borderRadius: BorderRadius.circular(30.0),
           child: Container(
             color: MyColors.white,
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(MySizes.spaceBtwItems),
+                padding: const EdgeInsets.fromLTRB(30, 10, 30, 20),
                 child: Column(
                   children: [
-                    /// Profile Picture
                     Obx(() {
                       final networkImage = controller.user.value.profilePicture;
                       final image = networkImage.isNotEmpty ? networkImage : MyImages.accountGIF;
-                      print("Network Image: $networkImage");
 
                       return Column(
                         children: [
-                          // Display the profile picture or shimmer effect while uploading
                           controller.imageUploading.value
                               ? const MyShimmerEffect(
                             width: 100,
@@ -115,32 +107,33 @@ class EditProfileScreen extends StatelessWidget {
                             width: 100,
                             height: 100,
                           ),
-
-                          // TextButton for changing the profile picture
                           TextButton(
-
                             onPressed: () async {
-                              var picture = await Get.dialog(
-                                const ChangeProfilePictureDialog(), // Open the ChangeProfilePictureDialog
+                              var picture = await showDialog(
+                                context: context,
+                                builder: (context) => const ChangeProfilePictureDialog(),
                               );
                               if (picture != null) {
-                                await controller.uploadUserProfilePicture(); // Upload the selected profile picture
+                                await controller.uploadUserProfilePicture(context);
                               }
                             },
-                            child: const Text('Change Profile Picture',style: TextStyle(color: MyColors.primaryColor),),
+                            child: const Text(
+                              'Change Profile Picture',
+                              style: TextStyle(color: MyColors.primaryColor),
+                            ),
                           ),
                         ],
                       );
                     }),
-
 
                     // Name Field with Popup Dialog
                     Obx(() => MyProfileMenu(
                       title: 'Name',
                       value: getLatestFullName(),
                       onPressed: () async {
-                        var result = await Get.dialog(
-                          const ChangeNameDialog(), // Use a dialog to open ChangeName screen
+                        var result = await showDialog(
+                          context: context,
+                          builder: (context) => const ChangeNameDialog(),
                         );
                         if (result != null) {
                           // Handle result if needed
@@ -153,8 +146,9 @@ class EditProfileScreen extends StatelessWidget {
                       title: 'Phone Number',
                       value: controller.user.value.phoneNumber,
                       onPressed: () async {
-                        var result = await Get.dialog(
-                          const ChangePhoneNumberDialog(), // Use a dialog to open ChangePhoneNumber screen
+                        var result = await showDialog(
+                          context: context,
+                          builder: (context) => const ChangePhoneNumberDialog(),
                         );
                         if (result != null) {
                           // Handle result if needed
@@ -167,8 +161,9 @@ class EditProfileScreen extends StatelessWidget {
                       title: 'Gender',
                       value: controller.user.value.gender,
                       onPressed: () async {
-                        var result = await Get.dialog(
-                          const ChangeGenderDialog(), // Use a dialog to open ChangeGender screen
+                        var result = await showDialog(
+                          context: context,
+                          builder: (context) => const ChangeGenderDialog(),
                         );
                         if (result != null) {
                           // Handle result if needed
@@ -181,8 +176,9 @@ class EditProfileScreen extends StatelessWidget {
                       title: 'Birthday',
                       value: controller.user.value.birthday,
                       onPressed: () async {
-                        var result = await Get.dialog(
-                          const ChangeBirthdayDialog(), // Use a dialog to open ChangeBirthday screen
+                        var result = await showDialog(
+                          context: context,
+                          builder: (context) => const ChangeBirthdayDialog(),
                         );
                         if (result != null) {
                           // Handle result if needed
@@ -196,7 +192,7 @@ class EditProfileScreen extends StatelessWidget {
                       value: controller.user.value.username,
                       icon: Iconsax.copy,
                       onPressed: () {
-                        _copyToClipboard(context, controller.user.value.username); // Copy Username to clipboard
+                        _copyToClipboard(context, controller.user.value.username);
                       },
                     ),
 
@@ -210,7 +206,7 @@ class EditProfileScreen extends StatelessWidget {
                       value: controller.user.value.id,
                       icon: Iconsax.copy,
                       onPressed: () {
-                        _copyToClipboard(context, controller.user.value.id); // Copy UserID to clipboard
+                        _copyToClipboard(context, controller.user.value.id);
                       },
                     ),
 
@@ -220,7 +216,7 @@ class EditProfileScreen extends StatelessWidget {
                       value: controller.user.value.email,
                       icon: Iconsax.copy,
                       onPressed: () {
-                        _copyToClipboard(context, controller.user.value.email); // Copy Email to clipboard
+                        _copyToClipboard(context, controller.user.value.email);
                       },
                     ),
 

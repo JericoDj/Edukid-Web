@@ -21,12 +21,9 @@ class VerifyEmailController extends GetxController {
   Future<void> sendEmailVerification() async {
     try {
       await AuthenticationRepository.instance.sendEmailVerification();
-      MyLoaders.successSnackBar(
-        title: 'Email Sent',
-        message: 'Please check your inbox and verify your email.',
-      );
+
     } catch (e) {
-      MyLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+
     }
   }
 

@@ -1,11 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webedukid/features/screens/signup/widgets/verifyemailscreen.dart';
 
 import '../../../../common/data/repositories.authentication/user_repository.dart';
 import '../../../../common/widgets/loaders/loaders.dart';
-
 import '../../../../common/data/repositories.authentication/authentication_repository.dart';
 import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/network manager/network_manager.dart';
@@ -27,36 +26,20 @@ class SignupController extends GetxController {
   final phoneNumber = TextEditingController();
   GlobalKey<FormState> signupFormKey = GlobalKey<FormState>();
 
-  void signup() async {
+  void signup(BuildContext context) async {
     try {
-      if (!privacyPolicy.value) {
-        MyLoaders.warningSnackBar(
-          title: 'Accept Privacy Policy',
-          message: 'In order to create an account, you must read and accept the Privacy Policy & Terms of Use',
-        );
-        return;
-      }
-
-      MyFullScreenLoader.openLoadingDialog(
-          'We are processing your information...', MyImages.loaders);
-
-      final isConnected = await NetworkManager.instance.isConnected();
-      if (!isConnected) {
-        MyFullScreenLoader.stopLoading();
-        return;
-      }
-
       if (!signupFormKey.currentState!.validate()) {
-        MyFullScreenLoader.stopLoading();
         return;
       }
-// register user in firestore
+
+      // Register user in Firestore
       final userCredential = await AuthenticationRepository.instance
           .registerWithEmailAndPassword(
         email.text.trim(),
         password.text.trim(),
       );
-// save authenticated user data in fire store
+
+      // Save authenticated user data in Firestore
       final newUser = UserModel(
         id: userCredential.user!.uid,
         firstName: firstName.text.trim(),
@@ -67,25 +50,22 @@ class SignupController extends GetxController {
         profilePicture: '',
       );
 
-
       final userRepository = Get.put(UserRepository());
       await userRepository.saveUserRecord(newUser);
 
-
-      // remove loader
-      MyFullScreenLoader.stopLoading();
-
-
-      // show success message
-      MyLoaders.successSnackBar(
-        title: 'Congratulations',
-        message: 'Your account has been created! Verify email to continue.',
+      // Navigate to the Verify Email Screen using context.go()
+      // In the signup() method of SignupController
+      context.go(
+        '/success',
+        extra: {
+          'image': MyImages.accountGIF,
+          'title': 'Account Created Successfully!',
+          'subtitle': 'Welcome! Your account has been created.',
+        },
       );
 
-      Get.to(() => VerifyEmailScreen(email: email.text.trim()));
     } catch (e) {
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(title: 'Oh Snap!', message: e.toString());
+      // Handle error
     }
   }
 }

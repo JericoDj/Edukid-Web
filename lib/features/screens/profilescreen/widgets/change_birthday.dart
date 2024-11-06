@@ -29,9 +29,9 @@ class ChangeBirthdayDialog extends StatelessWidget {
               ),
               const SizedBox(height: MySizes.spaceBtwSections),
 
-              // Use Obx to observe changes to the birthday observable
+              // Display birthday and trigger date picker
               Obx(() => TextFormField(
-                initialValue: controller.birthday.value, // Use initialValue instead of controller
+                controller: TextEditingController(text: controller.birthday.value),
                 readOnly: true,
                 onTap: () => controller.selectBirthday(context),
                 decoration: const InputDecoration(
@@ -44,8 +44,7 @@ class ChangeBirthdayDialog extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.updateBirthday();
-                    Get.back(result: {'birthday': controller.birthday.value});
+                    controller.updateBirthday(context); // Pass context here
                   },
                   child: const Text('Save'),
                 ),

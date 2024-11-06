@@ -13,6 +13,7 @@ class ChangeProfilePictureDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<UserController>(); // Get the UserController
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
@@ -43,30 +44,15 @@ class ChangeProfilePictureDialog extends StatelessWidget {
                 );
               }),
               const SizedBox(height: 16.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => controller.pickImageFromGallery(), // Pick from gallery
-                    icon: const Icon(Iconsax.image),
-                    label: const Text('Gallery'),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => controller.pickImageFromCamera(), // Pick from camera
-                    icon: const Icon(Iconsax.camera),
-                    label: const Text('Camera'),
-                  ),
-                ],
-              ),
+
               const SizedBox(height: 16.0),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await controller.uploadUserProfilePicture(); // Upload the selected image
-                    Get.back(result: true); // Close the dialog and return success
+                    await controller.uploadUserProfilePicture(context); // Upload the selected image
                   },
-                  child: const Text('Save'),
+                  child: const Text('Choose a Profile Picture'),
                 ),
               ),
             ],

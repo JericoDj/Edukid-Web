@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 import 'package:webedukid/utils/constants/colors.dart';
+
 class BookingController extends GetxController {
   var focusedDate = DateTime.now().obs;
   var chosenDate = DateTime.now().obs;
@@ -44,7 +44,7 @@ class BookingController extends GetxController {
             final pickedDate = item['pickedDate'];
             if (pickedDate != null && pickedDate is Timestamp) {
               final date = pickedDate.toDate();
-              return _normalizeDate(date);
+              return normalizeDate(date);
             }
             return null;
           }).whereType<DateTime>();
@@ -53,7 +53,6 @@ class BookingController extends GetxController {
       }).toList();
 
       bookedDates.assignAll(dates);
-
       print('Fetched bookings for user $userId: ${bookedDates.length} dates');
     } catch (e) {
       print('Error fetching booked dates: $e');
@@ -63,7 +62,7 @@ class BookingController extends GetxController {
   }
 
   void updateChosenDate(DateTime date) {
-    date = _normalizeDate(date);
+    date = normalizeDate(date);
 
     if (_isSameDate(chosenDate.value, date) &&
         selectedTimeSlots.containsKey(date)) {
@@ -110,7 +109,7 @@ class BookingController extends GetxController {
   }
 
   void selectTimeSlot(TimeOfDay timeSlot) {
-    DateTime date = _normalizeDate(focusedDate.value);
+    DateTime date = normalizeDate(focusedDate.value);
     if (chosenDate.value == date) {
       selectedTimeSlots[date] = timeSlot;
       focusedDate.refresh();
@@ -126,9 +125,9 @@ class BookingController extends GetxController {
   }
 
   Color getDayColor(DateTime date) {
-    final normalizedDate = _normalizeDate(date);
+    final normalizedDate = normalizeDate(date);
     if (isDateBooked(normalizedDate)) {
-      return Colors.blue; // Color for booked dates
+      return Colors.blue; // Booked date color
     }
     if (_isSameDate(normalizedDate, focusedDate.value)) {
       if (selectedTimeSlots.containsKey(normalizedDate)) {
@@ -144,10 +143,10 @@ class BookingController extends GetxController {
   }
 
   bool isDateBooked(DateTime date) {
-    return bookedDates.contains(_normalizeDate(date));
+    return bookedDates.contains(normalizeDate(date));
   }
 
-  DateTime _normalizeDate(DateTime date) {
+  DateTime normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
 

@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/data/repositories.authentication/user_repository.dart';
-import '../../../../common/widgets/loaders/loaders.dart';
-import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/network manager/network_manager.dart';
-import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../personalization/controllers/user_controller.dart';
 
 class UpdateNameController extends GetxController {
@@ -28,18 +25,20 @@ class UpdateNameController extends GetxController {
     lastName.text = userController.user.value.lastName;
   }
 
-  Future<void> updateUserName() async {
+  Future<void> updateUserName(BuildContext context) async { // Added BuildContext parameter
     try {
-      MyFullScreenLoader.openLoadingDialog('We are updating your information...', MyImages.loaders);
-
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
-        MyFullScreenLoader.stopLoading();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No internet connection.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
         return;
       }
 
       if (!updateUserNameFormKey.currentState!.validate()) {
-        MyFullScreenLoader.stopLoading();
         return;
       }
 
@@ -55,22 +54,26 @@ class UpdateNameController extends GetxController {
         user?.lastName = lastName.text.trim();
       });
 
-      Get.back();
-      MyLoaders.successSnackBar(
-        title: 'Congratulations',
-        message: 'Your Name has been updated.',
+      Navigator.of(context).pop(); // Close dialog
+      ScaffoldMessenger.of(context).showSnackBar( // Show success snackbar
+        SnackBar(
+          content: Text('Your Name has been updated.'),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(
-        title: 'Oh Snap!',
-        message: e.toString(),
+      ScaffoldMessenger.of(context).showSnackBar( // Show error snackbar
+        SnackBar(
+          content: Text('Oh Snap! ${e.toString()}'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
 
   /// Additional methods for delete account warning, uploading profile image, etc.
-  uploadUserProfilePicture() async {
+  Future<void> uploadUserProfilePicture() async {
     // Your implementation for uploading profile image
   }
 }

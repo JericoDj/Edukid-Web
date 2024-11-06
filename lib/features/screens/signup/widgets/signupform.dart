@@ -147,7 +147,7 @@ class SignUpForm extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () { if (controller.signupFormKey.currentState?.validate() ?? false){
-                  controller.signup();}},
+                  controller.signup(context);}},
                 child: const Text("Create Account"),
               ))
         ]));

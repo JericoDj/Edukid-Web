@@ -23,7 +23,7 @@ class ChangeGenderDialog extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 400),
-        child: SingleChildScrollView( // Add this to make the dialog scrollable
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(MySizes.defaultspace),
             child: Column(
@@ -53,8 +53,7 @@ class ChangeGenderDialog extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      controller.updateGender();
-                      Get.back(result: {'gender': controller.gender.value});
+                      controller.updateGender(context); // Pass context here
                     },
                     child: const Text('Save'),
                   ),

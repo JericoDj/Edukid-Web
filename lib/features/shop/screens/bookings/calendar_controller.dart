@@ -6,19 +6,20 @@ import '../../controller/bookings/booking_order_controller.dart';
 import '../../models/booking_orders_model.dart';
 
 class CalendarController extends GetxController {
-  // Initialize calendarBookings as an empty observable list
+  // Observable list to hold booking data for the calendar
   RxList<BookingOrderModel> calendarBookings = <BookingOrderModel>[].obs;
 
-  // Observable for the focused date
+  // Observable for currently focused date in the calendar
   final Rx<DateTime> focusedDate = DateTime.now().obs;
 
-  // Observable for the selected date
+  // Observable for currently selected date in the calendar
   final Rx<DateTime> selectedDate = DateTime.now().obs;
 
+  /// Fetch bookings for the calendar and populate `calendarBookings`
   Future<void> fetchCalendarBookings() async {
     try {
       final fetchedBookings = await BookingOrderController.instance.fetchUserBookings();
-      if (fetchedBookings != null) {
+      if (fetchedBookings != null && fetchedBookings.isNotEmpty) {
         calendarBookings.assignAll(fetchedBookings);
       } else {
         _showErrorSnackbar('No bookings found.');
@@ -28,9 +29,8 @@ class CalendarController extends GetxController {
     }
   }
 
-  // Private method to safely show snackbar with proper context
+  /// Display an error message as a snackbar
   void _showErrorSnackbar(String message) {
-    // Ensure there's a valid context and no other snackbar is currently open
     if (Get.context != null && !Get.isSnackbarOpen) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         Get.snackbar(
@@ -40,12 +40,11 @@ class CalendarController extends GetxController {
         );
       });
     } else {
-      // Fallback log for debugging if the snackbar couldn't be shown
       print('Snackbar not shown due to missing context or an open snackbar.');
     }
   }
 
-  // Determine the color for each date based on booking status
+  /// Get color for a specific day on the calendar based on booking status
   Color getDayColor(DateTime date) {
     final List<BookingOrderModel> bookingsForDate = calendarBookings
         .where((booking) => booking.pickedDateTime
@@ -56,7 +55,7 @@ class CalendarController extends GetxController {
       return Colors.white; // Default color for dates without bookings
     }
 
-    // Prioritize color based on the booking status
+    // Determine color based on the highest-priority booking status for that date
     BookingOrderModel booking = bookingsForDate.first;
     switch (booking.status) {
       case OrderStatus.processing:
@@ -76,7 +75,7 @@ class CalendarController extends GetxController {
     }
   }
 
-  // Helper method to normalize date (remove time part)
+  /// Normalize the date by removing the time component
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }

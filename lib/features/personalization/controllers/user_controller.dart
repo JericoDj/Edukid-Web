@@ -19,6 +19,8 @@ import '../../models/user_model.dart';
 import 'package:flutter/foundation.dart'; // For platform detection (kIsWeb)
 
 class UserController extends GetxController {
+
+  bool get isUserLoggedIn => user.value.id.isNotEmpty;
   static UserController get instance => Get.find();
 
   final profileLoading = false.obs;
@@ -42,6 +44,19 @@ class UserController extends GetxController {
     try {
       profileLoading.value = true;
       final fetchedUser = await userRepository.fetchUserDetails();
+      user(fetchedUser);
+    } catch (e) {
+      user(UserModel.empty());
+    } finally {
+      profileLoading.value = false;
+    }
+  }
+
+  /// Fetch user profile based on user ID
+  Future<void> fetchUserProfile(String userId) async {
+    try {
+      profileLoading.value = true;
+      final fetchedUser = await userRepository.fetchUserDetailsById(userId); // This method should be implemented in your repository
       user(fetchedUser);
     } catch (e) {
       user(UserModel.empty());
@@ -103,53 +118,24 @@ class UserController extends GetxController {
     }
   }
 
-  /// Pick an image from the gallery and upload
-  Future<void> pickImageFromGallery() async {
-    try {
-      final XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        await _uploadToFirebaseStorage(File(image.path));
-      }
-    } catch (e) {
-      MyLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Failed to pick image from gallery',
-      );
-    }
-  }
 
-  /// Pick an image from the camera and upload
-  Future<void> pickImageFromCamera() async {
-    try {
-      final XFile? image = await ImagePicker().pickImage(source: ImageSource.camera);
-      if (image != null) {
-        await _uploadToFirebaseStorage(File(image.path));
-      }
-    } catch (e) {
-      MyLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Failed to pick image from camera',
-      );
-    }
-  }
 
   /// Upload profile picture to Firebase Storage
-  Future<void> uploadUserProfilePicture() async {
+  Future<void> uploadUserProfilePicture(BuildContext context) async {
     try {
-      MyFullScreenLoader.openLoadingDialog('We are updating your profile picture...', MyImages.loaders);
       imageUploading.value = true;
 
+      // Check for internet connection
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
-        MyFullScreenLoader.stopLoading();
-        MyLoaders.errorSnackBar(
-          title: 'No Internet Connection',
-          message: 'Please check your network connection.',
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No Internet Connection. Please check your network and try again.')),
         );
         return;
       }
 
       if (kIsWeb) {
+        // Web-specific file picking and uploading
         final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
         uploadInput.accept = 'image/*'; // Accept only images
         uploadInput.click();
@@ -164,12 +150,13 @@ class UserController extends GetxController {
               final Uint8List? imageData = reader.result as Uint8List?;
               if (imageData != null) {
                 final imageUrl = await _uploadToFirebaseStorage(imageData, file.name);
-                await _updateProfilePictureUrl(imageUrl);
+                await _updateProfilePictureUrl(context, imageUrl);
               }
             });
           }
         });
       } else {
+        // Mobile file picking and uploading
         final XFile? image = await ImagePicker().pickImage(
           source: ImageSource.gallery,
           imageQuality: 70,
@@ -179,20 +166,16 @@ class UserController extends GetxController {
 
         if (image != null) {
           final imageUrl = await _uploadToFirebaseStorage(File(image.path));
-          await _updateProfilePictureUrl(imageUrl);
+          await _updateProfilePictureUrl(context, imageUrl);
         } else {
-          MyFullScreenLoader.stopLoading();
-          MyLoaders.warningSnackBar(
-            title: 'Cancelled',
-            message: 'Profile picture update cancelled.',
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Profile picture update cancelled.')),
           );
         }
       }
     } catch (e) {
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(
-        title: 'Error Uploading Image',
-        message: 'Failed to upload profile picture. Error: $e',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error Uploading Image: $e')),
       );
     } finally {
       imageUploading.value = false;
@@ -200,7 +183,7 @@ class UserController extends GetxController {
     }
   }
 
-  /// Helper method to upload to Firebase Storage
+  /// Helper method to upload image to Firebase Storage
   Future<String> _uploadToFirebaseStorage(dynamic imageFile, [String? fileName]) async {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -222,26 +205,22 @@ class UserController extends GetxController {
   }
 
   /// Update profile picture URL in Firestore
-  Future<void> _updateProfilePictureUrl(String imageUrl) async {
+  Future<void> _updateProfilePictureUrl(BuildContext context, String imageUrl) async {
     try {
       await userRepository.updateSingleField({'ProfilePicture': imageUrl});
-      user.update((user) {
-        user?.profilePicture = imageUrl;
-      });
-      MyFullScreenLoader.stopLoading();
-      Get.back(); // Close the dialog
-      MyLoaders.successSnackBar(
-        title: 'Profile Picture Updated',
-        message: 'Your profile picture has been successfully updated!',
+      user.update((user) => user?.profilePicture = imageUrl);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile picture updated successfully!')),
       );
     } catch (e) {
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Failed to update profile picture URL. Error: $e',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update profile picture URL. Error: $e')),
       );
     }
   }
+
+
 
   /// Show a dialog to confirm account deletion
   void deleteAccountWarningPopup() {

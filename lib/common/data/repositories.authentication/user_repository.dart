@@ -13,13 +13,11 @@ import '../../../utils/exception/my_format_exception.dart';
 import '../../../utils/exception/my_platform_exception.dart';
 import 'authentication_repository.dart';
 
-/// Repository class for user-related operations.
 class UserRepository extends GetxController {
   static UserRepository get instance => Get.find();
-
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// Function to save user data to Firestore.
+  /// Save user data to Firestore.
   Future<void> saveUserRecord(UserModel user) async {
     try {
       await _db.collection("Users").doc(user.id).set(user.toJson());
@@ -34,7 +32,51 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to fetch user details based on user ID.
+  /// Check if the user document exists in Firestore.
+  Future<bool> userDocumentExists(String userId) async {
+    try {
+      final doc = await _db.collection("Users").doc(userId).get();
+      return doc.exists;
+    } catch (e) {
+      print('Error checking user document existence: $e');
+      return false;
+    }
+  }
+
+  /// Create a new user document in Firestore with the provided details.
+  Future<void> createUserDocument({
+    required String id,
+    required String email,
+    String? displayName,
+    String? photoURL,
+  }) async {
+    try {
+      await _db.collection("Users").doc(id).set({
+        'Email': email,
+        'DisplayName': displayName ?? '',
+        'PhotoURL': photoURL ?? '',
+        'CreatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error creating user document: $e');
+    }
+  }
+
+  /// Fetch user details by ID.
+  Future<UserModel> fetchUserDetailsById(String userId) async {
+    try {
+      final doc = await _db.collection('Users').doc(userId).get();
+      if (doc.exists) {
+        return UserModel.fromSnapshot(doc); // Ensure UserModel has a fromSnapshot method
+      } else {
+        throw Exception("User not found");
+      }
+    } catch (e) {
+      throw Exception("Error fetching user details: $e");
+    }
+  }
+
+  /// Fetch user details based on the currently authenticated user.
   Future<UserModel> fetchUserDetails() async {
     try {
       final documentSnapshot = await _db
@@ -57,10 +99,9 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to fetch user credentials by email.
+  /// Fetch user credentials by email.
   Future<UserCredential?> fetchUserCredentialsByEmail(String email) async {
     try {
-      // Check if user with the provided email exists
       final querySnapshot = await _db
           .collection("Users")
           .where('email', isEqualTo: email)
@@ -68,17 +109,15 @@ class UserRepository extends GetxController {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Email exists, now fetch the user credentials
-        final userId = querySnapshot.docs.first.id;
-        final user = await _db.collection("Users").doc(userId).get();
+        final user = querySnapshot.docs.first;
+        final emailCredential = EmailAuthProvider.credential(
+          email: user['email'],
+          password: user['password'],
+        );
 
-        // Use the fetched email and password to create user credentials
-        final emailCredential = EmailAuthProvider.credential(email: user['email'], password: user['password']);
-
-        // Use the obtained credentials to sign in
         return await FirebaseAuth.instance.signInWithCredential(emailCredential);
       } else {
-        return null; // User not found with the provided email
+        return null;
       }
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
@@ -91,7 +130,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to get email from Firestore.
+  /// Check if an email exists in Firestore.
   Future<String?> getEmailFromFirestore(String email) async {
     try {
       final querySnapshot = await _db
@@ -103,7 +142,7 @@ class UserRepository extends GetxController {
       if (querySnapshot.docs.isNotEmpty) {
         return email;
       } else {
-        return null; // Email not found in Firestore
+        return null;
       }
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
@@ -116,7 +155,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to fetch user details by email.
+  /// Fetch user details by email.
   Future<UserModel?> fetchUserDetailsByEmail(String email) async {
     try {
       final querySnapshot = await _db
@@ -126,11 +165,10 @@ class UserRepository extends GetxController {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        final userId = querySnapshot.docs.first.id;
-        final user = await _db.collection("Users").doc(userId).get();
-        return UserModel.fromSnapshot(user);
+        final userDoc = querySnapshot.docs.first;
+        return UserModel.fromSnapshot(userDoc);
       } else {
-        return null; // User not found with the provided email
+        return null;
       }
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
@@ -143,7 +181,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to update user data in Firestore.
+  /// Update user data in Firestore.
   Future<void> updateUserDetails(UserModel updatedUser) async {
     try {
       await _db.collection("Users").doc(updatedUser.id).update(updatedUser.toJson());
@@ -158,10 +196,24 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to update any fields in specific Users Collection.
+  /// Update a single field in Firestore for the authenticated user, creating the document if it doesn't exist.
   Future<void> updateSingleField(Map<String, dynamic> json) async {
     try {
-      await _db.collection("Users").doc(AuthenticationRepository.instance.authUser?.uid).update(json);
+      final userId = AuthenticationRepository.instance.authUser?.uid;
+      if (userId == null) {
+        throw Exception("No authenticated user found.");
+      }
+
+      final userDocRef = _db.collection("Users").doc(userId);
+      final userDocSnapshot = await userDocRef.get();
+
+      if (userDocSnapshot.exists) {
+        // Update existing document if it exists
+        await userDocRef.update(json);
+      } else {
+        // Create a new document if it doesn't exist
+        await userDocRef.set(json);
+      }
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
     } on FormatException catch (_) {
@@ -173,7 +225,8 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Function to remove user data from Firestore.
+
+  /// Remove user data from Firestore.
   Future<void> removeUserRecord(String userId) async {
     try {
       await _db.collection("Users").doc(userId).delete();
@@ -188,7 +241,7 @@ class UserRepository extends GetxController {
     }
   }
 
-  /// Upload any Image
+  /// Upload an image to Firebase Storage.
   Future<String> uploadImage(String path, XFile image) async {
     try {
       final ref = FirebaseStorage.instance.ref(path).child(image.name);

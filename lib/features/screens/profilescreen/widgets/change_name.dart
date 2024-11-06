@@ -62,12 +62,9 @@ class ChangeNameDialog extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.updateUserName(); // Perform update
+                    controller.updateUserName(context); // Perform update
                     // Pass the updated name back to the previous screen
-                    Get.back(result: {
-                      'firstName': controller.firstName.text,
-                      'lastName': controller.lastName.text
-                    });
+
                   },
                   child: const Text('Save'),
                 ),

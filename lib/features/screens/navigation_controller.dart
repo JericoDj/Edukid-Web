@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:webedukid/features/shop/screens/checkout/checkout.dart';
 import 'package:webedukid/features/shop/models/product_model.dart';
 import 'package:webedukid/features/shop/controller/category_controller.dart';
+import '../../common/data/repositories.authentication/bookings/booking_order_repository.dart';
+import '../shop/models/booking_orders_model.dart';
 import '../shop/models/category_model.dart';
 import '../shop/models/brand_model.dart'; // Add BrandModel import
 
@@ -19,6 +21,7 @@ class NavigationController extends GetxController {
 
   // Store selected category for subcategory navigation
   Rx<CategoryModel?> _selectedCategory = Rx<CategoryModel?>(null);
+  RxList<BookingOrderModel> userBookings = <BookingOrderModel>[].obs;
 
   // Getter for selected category
   CategoryModel? get selectedCategory => _selectedCategory.value;
@@ -66,6 +69,16 @@ class NavigationController extends GetxController {
     clearSelectedCategory();
     // Assuming you have a route defined for the CheckoutScreen
     context.go('/checkout');  // Change '/checkout' to the actual route path
+  }
+
+  // Method to fetch user bookings
+  Future<void> fetchUserBookings() async {
+    try {
+      final bookings = await BookingOrderRepository.instance.fetchUserBookings();
+      userBookings.assignAll(bookings); // Assign fetched bookings to observable list
+    } catch (e) {
+      print('Error fetching bookings: $e');
+    }
   }
 
 

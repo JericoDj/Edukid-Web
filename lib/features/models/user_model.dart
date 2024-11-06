@@ -33,10 +33,10 @@ class UserModel {
   String get formattedPhoneNo => MyFormatter.formatPhoneNumber(phoneNumber);
 
   /// Static function to split full name into first and last name.
-  static List<String> nameParts(fullName) => fullName.split(" ");
+  static List<String> nameParts(String fullName) => fullName.split(" ");
 
   /// Static function to generate a username from the full name.
-  static String generateUsername(fullName) {
+  static String generateUsername(String fullName) {
     List<String> nameParts = fullName.split(" ");
     String firstName = nameParts[0].toLowerCase();
     String lastName = nameParts.length > 1 ? nameParts[1].toLowerCase() : "";

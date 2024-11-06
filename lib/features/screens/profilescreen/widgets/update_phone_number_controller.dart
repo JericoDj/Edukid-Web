@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../common/data/repositories.authentication/user_repository.dart';
-import '../../../../common/widgets/loaders/loaders.dart';
-import '../../../../utils/constants/image_strings.dart';
 import '../../../../utils/network manager/network_manager.dart';
-import '../../../../utils/popups/full_screen_loader.dart';
 import '../../../personalization/controllers/user_controller.dart';
 
 class UpdatePhoneNumberController extends GetxController {
@@ -22,38 +19,44 @@ class UpdatePhoneNumberController extends GetxController {
     super.onInit();
   }
 
-  Future<void> updatePhoneNumber() async {
+  Future<void> updatePhoneNumber(BuildContext context) async {
     try {
-      MyFullScreenLoader.openLoadingDialog('Updating your phone number...', MyImages.loaders);
-
       final isConnected = await NetworkManager.instance.isConnected();
       if (!isConnected) {
-        MyFullScreenLoader.stopLoading();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No internet connection.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
         return;
       }
 
       if (!updatePhoneNumberFormKey.currentState!.validate()) {
-        MyFullScreenLoader.stopLoading();
         return;
       }
 
       Map<String, dynamic> data = {'PhoneNumber': phoneNumber.text.trim()};
       await userRepository.updateSingleField(data);
 
+      // Update the userController's reactive user model
       userController.user.update((user) {
         user?.phoneNumber = phoneNumber.text.trim();
       });
 
-      Get.back();
-      MyLoaders.successSnackBar(
-        title: 'Success',
-        message: 'Your phone number has been updated.',
+      Navigator.of(context).pop(true); // Close the dialog with a success result
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Your phone number has been updated.'),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
-      MyFullScreenLoader.stopLoading();
-      MyLoaders.errorSnackBar(
-        title: 'Error',
-        message: e.toString(),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.redAccent,
+        ),
       );
     }
   }
