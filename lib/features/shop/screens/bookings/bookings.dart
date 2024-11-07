@@ -58,17 +58,12 @@ class _BookingsScreenState extends State<BookingsScreen> {
       body: FutureBuilder<void>(
         future: _calendarController.fetchCalendarBookings(), // Load calendar data
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Display loading spinner while waiting for data
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            // Handle error
-            return Center(child: Text('Failed to load data. Please try again.'));
-          } else {
+
+
             // Data loaded successfully, show the main content
             return _buildMainContent();
           }
-        },
+        ,
       ),
     );
   }

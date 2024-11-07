@@ -69,6 +69,7 @@ dependencies:
   flutter_html_iframe: ^3.0.0-beta.2
   syncfusion_flutter_pdfviewer: ^27.1.55
   go_router: ^14.3.0
+  collection: ^1.16.0
 
 
 

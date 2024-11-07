@@ -30,27 +30,32 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     final dark = MyHelperFunctions.isDarkMode(context);
     final previousScreenController = Get.put(PreviousScreenController());
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        leading: showBackArrow
-            ? IconButton(
-          onPressed: () {
-            // Update UI on back press
-            previousScreenController.updateUIWithData('');
-            Get.back();
-          },
-          icon: Icon(Iconsax.arrow_left,
-              color: dark ? MyColors.transparent : MyColors.dark),
-              )
-            : leadingIcon != null
-                ? IconButton(
-                    onPressed: leadingOnPressed, icon: Icon(leadingIcon!))
-                : null,
-        title: title,
-        actions: actions,
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+
+        padding: const EdgeInsets.symmetric(horizontal: MySizes.md),
+        child: AppBar(
+
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          leading: showBackArrow
+              ? IconButton(
+            onPressed: () {
+              // Update UI on back press
+              previousScreenController.updateUIWithData('');
+              Get.back();
+            },
+            icon: Icon(Iconsax.arrow_left,
+                color: dark ? MyColors.transparent : MyColors.dark),
+                )
+              : leadingIcon != null
+                  ? IconButton(
+                      onPressed: leadingOnPressed, icon: Icon(leadingIcon!))
+                  : null,
+          title: title,
+          actions: actions,
+        ),
       ),
     );
   }

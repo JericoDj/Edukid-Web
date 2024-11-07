@@ -20,6 +20,11 @@ class BookingController extends GetxController {
     fetchUserBookedDates();
   }
 
+  void clearBookings() {
+    bookedDates.clear();
+    selectedTimeSlots.clear(); // Optional: Clear any selected timeslots as well
+  }
+
   Future<void> fetchUserBookedDates() async {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -59,6 +64,17 @@ class BookingController extends GetxController {
     } finally {
       loading.value = false;
     }
+  }
+
+  // New method to fetch bookings (alias for `fetchUserBookedDates`)
+  Future<void> fetchBookingsFromFirebase() async {
+    await fetchUserBookedDates();
+  }
+
+  // New method to get bookings for a specific date
+  List<DateTime> getBookingsForDate(DateTime date) {
+    final normalizedDate = normalizeDate(date);
+    return bookedDates.where((bookedDate) => _isSameDate(bookedDate, normalizedDate)).toList();
   }
 
   void updateChosenDate(DateTime date) {

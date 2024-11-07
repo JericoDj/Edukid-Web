@@ -108,12 +108,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               // Convert the brand name to a URL-friendly format
                               final brandNameUrl = brand.name.replaceAll(' ', '-');
 
-                              // Navigate to the BrandProducts page with both brandId and brand name in the URL
+                              // Navigate to the BrandProducts page with brandId and brandNameUrl in the URL,
+                              // and pass the complete brand model as extra data
                               context.go(
                                 '/brandProducts/${brand.id}/$brandNameUrl',
-                                extra: brand, // Pass the complete brand model as extra
+                                extra: brand, // Pass the full BrandModel as extra
                               );
                             },
+
 
                           );
                         },

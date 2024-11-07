@@ -23,6 +23,9 @@ class BrandProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Print brandId and brandName to the console
+    print('Building BrandProducts with brandId: $brandId and brandName: $brandName');
+
     final controller = BrandController.instance;
 
     return Scaffold(
@@ -34,22 +37,8 @@ class BrandProducts extends StatelessWidget {
         child: Column(
           children: [
             // Display Brand Details
-            if (brand != null)
-              MyBrandCard(showBorder: true, brand: brand!)
-            else
-              FutureBuilder<BrandModel>(
-                future: controller.getBrandById(brandId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError || !snapshot.hasData) {
-                    return Center(child: Text("Error loading brand details"));
-                  } else {
-                    final brandData = snapshot.data!;
-                    return MyBrandCard(showBorder: true, brand: brandData);
-                  }
-                },
-              ),
+            MyBrandCard(showBorder: true, brand: brand),
+
             SizedBox(height: MySizes.spaceBtwSections),
 
             // Fetch and Display Brand Products

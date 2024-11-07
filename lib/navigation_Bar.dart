@@ -17,6 +17,13 @@ class NavigationBarMenu extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class NavigationBarMenuState extends State<NavigationBarMenu> {
+  final NavigationController navigationController = Get.find();
+
+  void navigateToHome(BuildContext context) {
+    navigationController.clearSelectedCategory(); // Clear selected category
+    context.go('/home'); // Navigate to home
+  }
+
   final MyDrawerController drawerController = Get.put(MyDrawerController());
   final NavigationController navController = Get.put(NavigationController()); // Initialize NavigationController
   final AuthenticationRepository authRepo = Get.find<AuthenticationRepository>();
@@ -55,7 +62,7 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () => context.go('/home'),
+            onTap: () => navigateToHome(context), // Use the method
             child: Image.asset('assets/EdukidLogo.jpg', height: 50),
           ),
           const SizedBox(width: 16),
@@ -98,7 +105,9 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
         ),
       ),
       onPressed: () {
-        if (screenKey == '/bookings') {
+        if (screenKey == '/home') {
+          navigateToHome(context); // Call navigateToHome for the home button
+        } else if (screenKey == '/bookings') {
           // Check if the user is logged in
           if (AuthenticationRepository.instance.authUser != null) {
             // Fetch bookings before navigating
@@ -113,4 +122,5 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
         }
       },
     );
-  }}
+  }
+}

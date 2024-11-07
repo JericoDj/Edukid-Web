@@ -7,9 +7,7 @@ import '../../../../utils/constants/colors.dart';
 import '../../navigation_controller.dart';
 
 class MyHomeCategories extends StatelessWidget {
-  const MyHomeCategories({
-    super.key,
-  });
+  const MyHomeCategories({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +29,13 @@ class MyHomeCategories extends StatelessWidget {
             ),
           );
         }
+
         return SizedBox(
           height: 80,
           child: ListView.builder(
             shrinkWrap: true,
             itemCount: categoryController.featuredCategories.length,
             scrollDirection: Axis.horizontal,
-
             itemBuilder: (_, index) {
               final category = categoryController.featuredCategories[index];
 
@@ -46,8 +44,8 @@ class MyHomeCategories extends StatelessWidget {
                 title: category.name,
                 backgroundColor: MyColors.white,
                 onTap: () {
-                  // Send a signal to the HomeScreen via the NavigationController
-                  navigationController.selectedCategory = category;
+                  // Update the selected category using `.value`
+                  navigationController.selectedCategory.value = category;
                 },
               );
             },

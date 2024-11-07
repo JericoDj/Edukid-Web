@@ -5,11 +5,13 @@
   import 'package:webedukid/about_us.dart';
   import 'package:webedukid/common/widgets/appbar/myAppBarController.dart';
   import 'package:webedukid/features/screens/personalization/controllers/address_controller.dart';
+import 'package:webedukid/features/screens/personalization/screens/address/add_new_address.dart';
+import 'package:webedukid/features/shop/controller/brand_controller.dart';
+import 'package:webedukid/features/shop/controller/category_controller.dart';
   import 'package:webedukid/features/shop/controller/product/checkout_controller.dart';
   import 'package:webedukid/features/shop/controller/product/variation_controller.dart';
   import 'package:webedukid/utils/constants/image_strings.dart';
 import 'package:webedukid/utils/network%20manager/network_manager.dart';
-  import 'app.dart';
   import 'common/data/repositories.authentication/authentication_repository.dart';
 import 'common/data/repositories.authentication/bookings/booking_order_repository.dart';
 import 'common/success_screen/sucess_screen.dart';
@@ -34,7 +36,8 @@ import 'common/success_screen/sucess_screen.dart';
   import 'features/shop/screens/all_products/all_products.dart';
   import 'features/shop/screens/booking_checkout/booking_checkout.dart';
   import 'features/shop/screens/bookings/booking_session.dart';
-  import 'features/shop/screens/bookings/bookings.dart';
+  import 'features/shop/screens/bookings/booking_session_controller.dart';
+import 'features/shop/screens/bookings/bookings.dart';
   import 'features/shop/screens/brands/brand_products.dart';
   import 'features/shop/screens/checkout/checkout.dart';
   import 'features/shop/screens/coupons/coupons_screen.dart';
@@ -58,10 +61,13 @@ import 'common/success_screen/sucess_screen.dart';
     @override
     Widget build(BuildContext context) {
       Get.lazyPut(()=>ProductController());
+      Get.lazyPut(()=>CategoryController());
+      Get.lazyPut(()=>BookingController());
 
       Get.lazyPut(()=>AddressController());
       Get.lazyPut(()=>BookingOrderRepository());
       Get.lazyPut(()=>AuthenticationRepository());
+      Get.lazyPut(()=>BrandController());
 
       Get.lazyPut(()=>NetworkManager());
       Get.lazyPut(()=>VariationController());
@@ -74,7 +80,7 @@ import 'common/success_screen/sucess_screen.dart';
 
       // GoRouter setup
       final GoRouter router = GoRouter(
-        initialLocation: '/games',
+        initialLocation: '/home',
         routes: [
           ShellRoute(
             builder: (context, state, child) {
@@ -135,7 +141,13 @@ import 'common/success_screen/sucess_screen.dart';
               );
             },
             routes: [
-              GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+              GoRoute(
+                path: '/home',
+                builder: (context, state) {
+                  final categoryName = state.uri.queryParameters['category'];
+                  return HomeScreen(categoryName: categoryName);
+                },
+              ),
               GoRoute(path: '/store', builder: (context, state) => const StoreScreen()),
               GoRoute(path: '/bookings', builder: (context, state) => const BookingsScreen()),
               GoRoute(path: '/order', builder: (context, state) => OrderScreen(isInteractive: true)),
@@ -165,6 +177,8 @@ import 'common/success_screen/sucess_screen.dart';
 
 
               GoRoute(path: '/userAddress', builder: (context, state) => UserAddressScreen()),
+              GoRoute(path: '/addAddress', builder: (context, state) => AddNewAddressScreen()),
+
               GoRoute(
                 path: '/allProducts',
                 builder: (context, state) {
@@ -182,10 +196,20 @@ import 'common/success_screen/sucess_screen.dart';
               GoRoute(path: '/accountPrivacy', builder: (context, state) => AccountPrivacyScreen()),
               GoRoute(path: '/bookSession', builder: (context, state) => BookingSessionScreen()),
               GoRoute(
-                path: '/brandProducts/:brandId/:brandName',
+                path: '/brandProducts/:brandId/:brandNameUrl',
                 builder: (context, state) {
-                  final brand = state.extra as BrandModel? ?? BrandModel.empty();
-                  return BrandProducts(brand: brand, brandId: '', brandName: '',);
+                  // Extract brandId and brandNameUrl from the URL parameters
+                  final brandId = state.pathParameters['brandId']!;
+                  final brandName = state.pathParameters['brandNameUrl']!.replaceAll('-', ' ');
+
+                  // Retrieve the extra data (BrandModel)
+                  final brand = state.extra as BrandModel?;
+
+                  return BrandProducts(
+                    brand: brand,
+                    brandId: brandId,
+                    brandName: brandName,
+                  );
                 },
               ),
               GoRoute(

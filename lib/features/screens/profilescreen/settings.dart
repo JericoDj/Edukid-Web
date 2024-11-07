@@ -9,6 +9,8 @@ import '../../../common/widgets/texts/section_heading.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/sizes.dart';
 import '../../personalization/controllers/user_controller.dart';
+import '../../shop/screens/bookings/booking_session_controller.dart';
+import '../../shop/screens/bookings/calendar_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
   final bool isOpen;
@@ -36,6 +38,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    Get.lazyPut(()=>BookingController());
     final userController = Get.find<UserController>();
 
     return Stack(
@@ -213,7 +217,18 @@ class SettingsScreen extends StatelessWidget {
                                 onPressed: () async {
                                   onClose();
                                   await AuthenticationRepository.instance.logout(context);
+
+                                  // Clear user data
+                                  final userController = Get.find<UserController>();
                                   userController.clearUser();
+
+                                  // Clear booking data
+                                  final bookingController = Get.find<BookingController>();
+                                  bookingController.clearBookings();
+
+                                  // Clear calendar data
+                                  final calendarController = Get.find<CalendarController>();
+                                  calendarController.clearBookings();
                                 },
                                 style: ButtonStyle(
                                   side: MaterialStateProperty.all(
@@ -229,6 +244,7 @@ class SettingsScreen extends StatelessWidget {
                                 child: const Text('Logout', style: TextStyle(color: Colors.teal)),
                               ),
                             ),
+
                             const SizedBox(height: MySizes.spaceBtwSections * 2),
                           ],
                         );

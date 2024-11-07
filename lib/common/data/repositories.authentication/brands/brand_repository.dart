@@ -59,13 +59,15 @@ class BrandRepository extends GetxController {
           .where('categoryId', isEqualTo: categoryId)
           .get();
 
-      List<String> brandIds = brandCategoryQuery.docs.map((doc) => doc['brandId'] as String).toList();
+      List<String> brandIds = brandCategoryQuery.docs.map((
+          doc) => doc['brandId'] as String).toList();
 
       final brandsQuery = await _db.collection('Brands')
           .where(FieldPath.documentId, whereIn: brandIds)
           .get();
 
-      return brandsQuery.docs.map((doc) => BrandModel.fromSnapshot(doc)).toList();
+      return brandsQuery.docs.map((doc) => BrandModel.fromSnapshot(doc))
+          .toList();
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
     } on FormatException catch (_) {
@@ -78,13 +80,25 @@ class BrandRepository extends GetxController {
   }
 
   /// Fetch products for a specific brand
-  Future<List<ProductModel>> getProductsForBrand({required String brandId, int limit = -1}) async {
+  Future<List<ProductModel>> getProductsForBrand(
+      {required String brandId, int limit = -1}) async {
     try {
       final querySnapshot = limit == -1
-          ? await _db.collection('Products').where('BrandId', isEqualTo: brandId).get()
-          : await _db.collection('Products').where('BrandId', isEqualTo: brandId).limit(limit).get();
+          ? await _db.collection('Products').where(
+          'BrandId', isEqualTo: brandId).get()
+          : await _db.collection('Products').where(
+          'BrandId', isEqualTo: brandId).limit(limit).get();
 
-      return querySnapshot.docs.map((doc) => ProductModel.fromSnapshot(doc)).toList();
+      // Convert the snapshots to ProductModel instances
+      final products = querySnapshot.docs.map((doc) =>
+          ProductModel.fromSnapshot(doc)).toList();
+
+      // Print each product's details
+      for (var product in products) {
+        print('Product: ${product.toString()}');
+      }
+
+      return products;
     } on FirebaseException catch (e) {
       throw MyFirebaseException(e.code).message;
     } on PlatformException catch (e) {

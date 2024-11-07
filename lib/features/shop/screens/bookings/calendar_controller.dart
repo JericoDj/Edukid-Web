@@ -79,4 +79,11 @@ class CalendarController extends GetxController {
   DateTime _normalizeDate(DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
+
+  /// Clear all booking data when the user logs out
+  void clearBookings() {
+    calendarBookings.clear();
+    focusedDate.value = DateTime.now();
+    selectedDate.value = DateTime.now();
+  }
 }
