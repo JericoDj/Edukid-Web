@@ -111,7 +111,7 @@ class App extends StatelessWidget {
             GoRoute(path: '/store', builder: (context, state) => const StoreScreen()),
             GoRoute(path: '/bookings', builder: (context, state) => const BookingsScreen()),
             GoRoute(path: '/order', builder: (context, state) => OrderScreen(isInteractive: true)),
-            GoRoute(path: '/games', builder: (context, state) => const GamesScreen()),
+            GoRoute(path: '/games', builder: (context, state) => LevelsScreen()),
             GoRoute(path: '/cart', builder: (context, state) => CartScreen()),
             GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
             GoRoute(path: '/register', builder: (context, state) => SignUpScreen()),
