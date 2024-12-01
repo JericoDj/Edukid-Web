@@ -26,24 +26,20 @@ class MyProductCardVertical extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Get.lazyPut(()=>VariationController());
-    Get.lazyPut(()=>CartController());
+    Get.lazyPut(() => VariationController());
+    Get.lazyPut(() => CartController());
     final controller = ProductController.instance;
     final salePercentage = controller.calculateSalePercentage(product.price, product.salePrice);
     final dark = MyHelperFunctions.isDarkMode(context);
 
     return GestureDetector(
       onTap: () {
-        // Format the product title for URL
         final productNameUrl = product.title.replaceAll(' ', '-');
-
-        // Navigate to the ProductDetailScreen with ID and name in the path, passing product as extra
         context.go(
           '/productDetail/${product.id}/$productNameUrl',
-          extra: product, // Pass the complete product model as extra
+          extra: product,
         );
       },
-
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(1),
@@ -59,62 +55,74 @@ class MyProductCardVertical extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  MyRoundedImage(
-                    imageUrl: product.thumbnail,
-                    height: 150,
-                    applyImageRadius: true,
-                    isNetworkImage: true,
-                    backgroundColor: Colors.transparent,
-                  ),
-                  if (salePercentage != null)
-                    Positioned(
-                      top: 12,
-                      child: MyRoundedContainer(
-                        radius: MySizes.sm,
-                        backgroundColor: MyColors.secondaryColor.withOpacity(0.8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: MySizes.sm,
-                          vertical: MySizes.xs,
-                        ),
-                        child: Text(
-                          '$salePercentage%',
-                          style: Theme.of(context).textTheme.labelLarge!.apply(color: MyColors.black),
+              Flexible(
+                flex: 6,
+                child: Stack(
+                  children: [
+                    MyRoundedImage(
+                      imageUrl: product.thumbnail,
+                      height: 150,
+                      applyImageRadius: true,
+                      isNetworkImage: true,
+                      backgroundColor: Colors.transparent,
+                    ),
+                    if (salePercentage != null)
+                      Positioned(
+                        top: 12,
+                        child: MyRoundedContainer(
+                          radius: MySizes.sm,
+                          backgroundColor: MyColors.secondaryColor.withOpacity(0.8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: MySizes.sm,
+                            vertical: MySizes.xs,
+                          ),
+                          child: Text(
+                            '$salePercentage%',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge!
+                                .apply(color: MyColors.black),
+                          ),
                         ),
                       ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: MyFavoriteIcon(
+                        productId: product.id,
+                      ),
                     ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: MyFavoriteIcon(
-                      productId: product.id,
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: MySizes.sm),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MyProductTitleText(title: product.title, smallSize: true),
-                    SizedBox(height: MySizes.spaceBtwItems / 2),
-                    MyBrandTitleText(title: product.brand!.name, color: Colors.green),
                   ],
                 ),
               ),
-              const Spacer(),
-              Container(
+              Flexible(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: MySizes.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MyProductTitleText(title: product.title, smallSize: true),
+                      SizedBox(height: MySizes.spaceBtwItems / 2),
+                      MyBrandTitleText(title: product.brand!.name, color: Colors.green),
+                    ],
+                  ),
+                ),
+              ),
+              Flexible(
+                flex: 2,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
+                      flex: 2,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (product.productType == ProductType.single.toString() && product.salePrice > 0)
+                          if (product.productType == ProductType.single.toString() &&
+                              product.salePrice > 0)
                             Padding(
-                              padding: EdgeInsets.only(left: MySizes.sm),
+                              padding: const EdgeInsets.only(left: MySizes.sm),
                               child: Text(
                                 product.price.toString(),
                                 style: Theme.of(context).textTheme.labelMedium!.apply(
@@ -123,13 +131,16 @@ class MyProductCardVertical extends StatelessWidget {
                               ),
                             ),
                           Padding(
-                            padding: EdgeInsets.only(left: MySizes.sm),
+                            padding: const EdgeInsets.only(left: MySizes.sm),
                             child: MyProductPriceText(price: controller.getProductPrice(product)),
                           ),
                         ],
                       ),
                     ),
-                    ProductCardAddToCartButton(product: product),
+                    Flexible(
+                      flex: 1,
+                      child: ProductCardAddToCartButton(product: product),
+                    ),
                   ],
                 ),
               ),

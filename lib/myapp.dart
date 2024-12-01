@@ -253,7 +253,7 @@ import 'features/shop/screens/bookings/bookings.dart';
       // Main Application setup
       return GetMaterialApp.router(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'Edukid',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
