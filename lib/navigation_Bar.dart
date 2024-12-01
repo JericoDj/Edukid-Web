@@ -32,66 +32,66 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     final logoHeight = isMobile ? 80.0 : 80.0;
 
     return AppBar(
-      actions: [
-        IconButton(
-          icon: const Icon(Iconsax.shopping_cart, color: Colors.white),
-          onPressed: () => context.go('/cart'),
-        ),
-        IconButton(
-          onPressed: () {
-            drawerController.openDrawer();
-            Scaffold.of(context).openEndDrawer();
-          },
-          icon: const Icon(Iconsax.user, color: Colors.white),
-        ),
-      ],
-      iconTheme: const IconThemeData(color: Colors.white),
-      automaticallyImplyLeading: false,
-      backgroundColor: MyColors.primaryColor,
-      titleSpacing: 0,
-      title: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          GestureDetector(
-            onTap: () => _navigateToHome(context),
-            child: Image.asset(
-              'assets/logos/EdukidLogo.png',
-              height: logoHeight,
-            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Iconsax.shopping_cart, color: Colors.white),
+            onPressed: () => context.go('/cart'),
           ),
-          if (!isMobile) const SizedBox(width: 16),
-          if (!isMobile)
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: _buildNavButtons(context, isMobile),
-              ),
-            ),
-          if (!isMobile)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Dynamically calculate the width based on the screen width
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final containerWidth = screenWidth * 0.3; // Adjust percentage as needed
-                  return Center(
-                    child: SizedBox(
-                      width: containerWidth,
-                      child: MySearchContainer(text: 'Search for Items'),
-                    ),
-                  );
-                },
-              ),
-            ),
-          if (isMobile)
-            IconButton(
-              icon: const Icon(Iconsax.search_favorite, color: Colors.white),
-              onPressed: () => context.go('/search'),
-            ),
+          IconButton(
+            onPressed: () {
+              drawerController.openDrawer();
+              Scaffold.of(context).openEndDrawer();
+            },
+            icon: const Icon(Iconsax.user, color: Colors.white),
+          ),
         ],
-      ),
-      bottom:  PreferredSize(
+        iconTheme: const IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
+        backgroundColor: MyColors.primaryColor,
+        titleSpacing: 0,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => _navigateToHome(context),
+              child: Image.asset(
+                'assets/logos/EdukidLogo.png',
+                height: logoHeight,
+              ),
+            ),
+            if (!isMobile) const SizedBox(width: 16),
+            if (!isMobile)
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: _buildNavButtons(context, isMobile),
+                ),
+              ),
+            if (!isMobile)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Dynamically calculate the width based on the screen width
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final containerWidth = screenWidth * 0.3; // Adjust percentage as needed
+                    return Center(
+                      child: SizedBox(
+                        width: containerWidth,
+                        child: MySearchContainer(text: 'Search for Items'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            if (isMobile)
+              IconButton(
+                icon: const Icon(Iconsax.search_favorite, color: Colors.white),
+                onPressed: () => context.go('/search'),
+              ),
+          ],
+        ),
+        bottom:  PreferredSize(
           preferredSize: dynamicPreferredSize.value,
           child: isMobile
               ? SingleChildScrollView(
@@ -131,45 +131,48 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
 
     return navItems.map((item) {
       final isSelected = _isCurrentScreen(context, item['key'] as String);
+
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: isMobile
-            ? Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+        padding: const EdgeInsets.symmetric(horizontal: 8), // Space between buttons
+        child: GestureDetector(
+          onTap: () => _handleNavigation(context, item['key'] as String),
+          child: isMobile
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                item['icon'] as IconData,
+                color: isSelected ? Colors.yellow : Colors.white,
+                size: 24,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item['label'] as String,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? Colors.yellow : Colors.white,
+                ),
+              ),
+            ],
+          )
+              : TextButton.icon(
+            icon: Icon(
               item['icon'] as IconData,
               color: isSelected ? Colors.yellow : Colors.white,
-              size: 24,
             ),
-            const SizedBox(height: 4),
-            Text(
+            label: Text(
               item['label'] as String,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 16,
                 color: isSelected ? Colors.yellow : Colors.white,
               ),
             ),
-          ],
-        )
-            : TextButton.icon(
-          icon: Icon(
-            item['icon'] as IconData,
-            color: isSelected ? Colors.yellow : Colors.white,
+            onPressed: () => _handleNavigation(context, item['key'] as String),
           ),
-          label: Text(
-            item['label'] as String,
-            style: TextStyle(
-              fontSize: 16,
-              color: isSelected ? Colors.yellow : Colors.white,
-            ),
-          ),
-          onPressed: () => _handleNavigation(context, item['key'] as String),
         ),
       );
     }).toList();
   }
-
   void _handleNavigation(BuildContext context, String screenKey) {
     if (screenKey == '/home') {
       _navigateToHome(context);
@@ -194,3 +197,4 @@ class NavigationBarMenuState extends State<NavigationBarMenu> {
     context.go('/home');
   }
 }
+
